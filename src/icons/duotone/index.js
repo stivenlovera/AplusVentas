@@ -27,7 +27,7 @@ import DiagramProject from "./DiagramProject";
 import LayerGroup from "./LayerGroup";
 import FileCircleQuestion from "./FileCircleQuestion";
 import UserList from "./UserList"; // eslint-disable-next-line import/no-anonymous-default-export
-
+import SettingsIcon from '@mui/icons-material/Settings';
 export default {
   AdminEcommerce,
   ArrowLeftToLine,
@@ -57,5 +57,6 @@ export default {
   BadgeDollar,
   RectangleCirclePlus,
   PersonChalkboard,
-  PersonCircleCheck
+  PersonCircleCheck,
+  SettingsIcon
 };

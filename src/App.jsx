@@ -6,6 +6,9 @@ import { useRoutes } from "react-router-dom";
 import routes from "routes";
 import { createCustomTheme } from "theme";
 import "./i18n";
+import * as React from 'react';
+import Button from '@mui/material/Button';
+import { SnackbarProvider, useSnackbar } from 'notistack';
 
 const App = () => {
   const content = useRoutes(routes());
@@ -18,13 +21,15 @@ const App = () => {
     responsiveFontSizes: settings.responsiveFontSizes
   });
   return <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={theme}>
-        <RTL>
+    <ThemeProvider theme={theme}>
+      <RTL>
+        <SnackbarProvider maxSnack={3}>
           <CssBaseline />
           {content}
-        </RTL>
-      </ThemeProvider>
-    </StyledEngineProvider>;
+        </SnackbarProvider>
+      </RTL>
+    </ThemeProvider>
+  </StyledEngineProvider>;
 };
 
 export default App;

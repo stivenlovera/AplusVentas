@@ -5,7 +5,7 @@ import SearchInput from "components/input-fields/SearchInput";
 import ProductColumnShape from "page-sections/admin-ecommerce/columnShapes/ProductColumnShape";
 import CreateProductModal from "page-sections/admin-ecommerce/CreateProductModal";
 import CustomTable from "page-sections/admin-ecommerce/CustomTable";
-import { productsFakeData } from "page-sections/admin-ecommerce/fakeData";
+import { almacenFake } from "page-sections/admin-ecommerce/fakeData";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { searchByName } from "utils/utils";
@@ -32,9 +32,9 @@ const ProductManagement = () => {
   const [openModal, setOpenModal] = useState(false); // search input
 
   const [searchValue, setSearchValue] = useState("");
-  const [filteredItem, setFilteredItem] = useState(productsFakeData);
+  const [filteredItem, setFilteredItem] = useState(almacenFake);
   useEffect(() => {
-    const result = searchByName(productsFakeData, searchValue);
+    const result = searchByName(almacenFake, searchValue);
     setFilteredItem(result);
   }, [searchValue]);
   return <Box pt={2} pb={4}>
