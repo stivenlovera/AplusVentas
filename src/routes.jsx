@@ -22,7 +22,9 @@ const PaginaInicial = Loadable(lazy(() => import("./pages/pagina-inicial/pagina-
 const Configuracion = Loadable(lazy(() => import("./pages/configuracion-inicial/configuracion/configuracion")));
 
 const LearningManagement = Loadable(lazy(() => import("./pages/dashboards/learning-management"))); // account
-
+const CreateOrdenInicial = Loadable(lazy(() => import("./pages/orden-compra/create-orden-inicial/create-orden-inicial")));
+const Venta = Loadable(lazy(() => import("./pages/venta/lista-ventas/list-venta")));
+const VentaCreate = Loadable(lazy(() => import("./pages/venta/create-venta/create-venta")));
 const Login = Loadable(lazy(() => import("./pages/authentication/login")));
 
 const Error = Loadable(lazy(() => import("./pages/404")));
@@ -98,11 +100,23 @@ const dashboardRoutes = [
   },
   {
     path: "configuracion",
-    element: <Configuracion/>
+    element: <Configuracion />
   },
   {
     path: "configuracion-inicial",
-    element: <PaginaInicial/>
+    element: <PaginaInicial />
+  },
+  {
+    path: "orden-inicial/:id",
+    element: <CreateOrdenInicial />
+  },
+  {
+    path: "venta",
+    element: <Venta />
+  },
+  {
+    path: "venta-create/:id",
+    element: <VentaCreate />
   },
   /* {
     path: "plan-cuentas",

@@ -5,6 +5,9 @@ import { Fragment, useEffect, useState } from "react";
 import Delete from "icons/Delete";
 import CreatePlanCuentaModal from "./create-plan-cuenta-modal";
 import { UseEditarPlanCuenta } from "../hooks/useEditarPlanCuenta";
+import { UseCreatePlanCuenta } from "../hooks/useCreatePlanCuenta";
+import { UseGuardarHijoPlanCuenta } from "../hooks/useGuardarHIjoPlanCuenta";
+import ModalDelete from "components/modal-delete/modal-delete";
 const PlanCuentaColumns = [
     {
         Header: "Codigo",
@@ -55,29 +58,63 @@ const PlanCuentaColumns = [
                 color: row.isSelected ? "white" : "text.disabled"
             };
             const [tipo, setTipo] = useState('');
-            const {openModal, editar, handlerClose, handlerOpen, options } = UseEditarPlanCuenta(row.original.id);
+            const [openModal, setOpenModal] = useState(false);
+            const [openModalDelete, setOpenModalDelete] = useState(false);
+
+            const { editar, apiEditar } = UseEditarPlanCuenta(row.original.nivel, row.original.id);
+            const { create, apiCreate } = UseCreatePlanCuenta(row.original.nivel, row.original.id);
+
+            const handlerOpenHijo = async () => {
+                setTipo('nuevo');
+                const open = await apiCreate();
+                if (open) {
+                    setOpenModal(true)
+                }
+            }
+            const handlerCloseHijo = () => {
+
+            }
+            const handlerOpenEditar = async () => {
+                setTipo('editar');
+                const open = await apiEditar();
+                if (open) {
+                    setOpenModal(true)
+                }
+            }
+            const handlerCloseEditar = () => {
+
+            }
+            const handlerOpenEliminar = async () => {
+                setOpenModalDelete(true)
+            }
+            const handlerCloseEliminar = () => {
+                setOpenModalDelete(false)
+            }
+            useEffect(() => {
+            }, [tipo])
+
             return <Fragment>
                 <IconButton
-                    onClick={() => {
-                        setTipo('hijo')
-                       
-                    }}
+                    onClick={handlerOpenHijo}
                 >
                     <AddCircleIcon sx={{
                         fontSize: 18,
                         color: "text.disabled"
                     }} />
                 </IconButton>
-                <IconButton onClick={handlerOpen}>
+                <IconButton onClick={handlerOpenEditar}>
                     <Edit sx={{
                         fontSize: 18,
                         color: "text.disabled"
                     }} />
                 </IconButton>
-                <IconButton onClick={() => { alert('funcion pendiente') }}>
+                <IconButton onClick={() => { handlerOpenEliminar() }}>
                     <Delete sx={style} />
                 </IconButton>
-                <CreatePlanCuentaModal editPlanCuenta tipo={tipo} open={openModal} data={row.original} onClose={handlerClose} />
+                <CreatePlanCuentaModal editPlanCuenta tipo={tipo} open={openModal} data={tipo == 'editar' ? editar : create} onClose={() => {
+                    setOpenModal(false)
+                }} />
+                <ModalDelete onClose={handlerCloseEliminar} open={openModalDelete} />
             </Fragment >;
         }
     }];

@@ -29,17 +29,17 @@ const ProcesosList = () => {
             <Card sx={{
                 padding: 3
             }}>
-                <H5 mb={3}>Asientos contables</H5>
+                <H5 mb={3}>Asientos frecuentes</H5>
                 <Divider sx={{
                     my: 2
                 }} />
                 <Box mt={2} mb={3}>
                     <Tiny lineHeight={1.8} >
-                        Cree un tipo de proceso para registrar un proceso Ej: venta, compra, prestamos, credito, etc.
+                        Crea un asiento que será utilizado frecuentemente Ej: compra efectivom venta efectivo, etc.
                     </Tiny>
                     <br />
                     <HeadingWrapper justifyContent="space-between" alignItems="center">
-                        <SearchInput bordered={'true'} placeholder="Buscar plan cuenta" onChange={e => setSearchValue(e.target.value)} />
+                        <SearchInput bordered={'true'} placeholder="Buscar asiento frecuentes" onChange={e => setSearchValue(e.target.value)} />
                         <Button
                             variant="contained"
                             endIcon={<Add />}

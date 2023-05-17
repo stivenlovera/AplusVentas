@@ -7,7 +7,7 @@ import CreateProcesoModal from "./create-proceso-modal";
 import { UseEditarProceso } from "../hooks/UseEditarProceso";
 const ProcesoColumns = [
     {
-        Header: "Tipo asiento",
+        Header: "Clasificacion",
         accessor: "nombreTipoAsiento"
     },
     {

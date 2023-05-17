@@ -70,7 +70,7 @@ export const navigations = [
   },
   {
     name: 'Cotizacion',
-    path: '/dashboard/saas',
+    path: '/dashboard/venta',
     icon: duotone.TodoList,
   },
   {

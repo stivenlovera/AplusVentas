@@ -40,9 +40,7 @@ const CreateProveedorModal = ({
         nombreProveedor: '',
         dirrecion: '',
         telefono: '',
-        credito: 0,
-        planCuentaId: 1,
-        moneda: 1
+        contacto: '',
     }
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [context, setContext] = useContext(Context);
@@ -67,9 +65,7 @@ const CreateProveedorModal = ({
         dirrecion: Yup.string().required("Dirrecion es requerido!"),
         id: Yup.number().nullable(),
         telefono: Yup.number('debe de ser un numero').required("Telefono es requerido!"),
-        credito: Yup.number('debe de ser un numero').required("Linea credito es Requiredo"),
-        planCuentaId: Yup.number().required("Linea Plan Cuenta es Requiredo"),
-        moneda: Yup.number('debe de ser un numero').required("Linea Moneda es Requiredo")
+        contacto: Yup.string().required("Persona de contacto es requerido!"),
     });
     const {
         values,
@@ -144,9 +140,7 @@ const CreateProveedorModal = ({
             nombreProveedor: data.data.proveedor.nombreProveedor,
             dirrecion: data.data.proveedor.dirrecion,
             telefono: data.data.proveedor.telefono,
-            credito: data.data.proveedor.credito,
-            planCuentaId: data.data.proveedor.planCuentaId,
-            moneda: data.data.proveedor.moneda,
+            contacto: data.data.proveedor.contacto,
         });
         setPlanCuentas(data.data.planCuentas);
         setMonedas(data.data.monedas);
@@ -203,7 +197,18 @@ const CreateProveedorModal = ({
                             error={Boolean(touched.dirrecion && errors.dirrecion)}
                             helperText={touched.dirrecion && errors.dirrecion} />
                     </Grid>
-
+                    <Grid item sm={12} xs={12}>
+                        <H6 mb={1}>Persona contacto</H6>
+                        <AppTextField
+                            fullWidth
+                            size="small"
+                            name="contacto"
+                            placeholder="Persona contacto"
+                            value={values.contacto}
+                            onChange={handleChange}
+                            error={Boolean(touched.contacto && errors.contacto)}
+                            helperText={touched.contacto && errors.contacto} />
+                    </Grid>
                     <Grid item sm={6} xs={12}>
                         <H6 mb={1}>Telefono</H6>
                         <AppTextField
@@ -224,50 +229,7 @@ const CreateProveedorModal = ({
                             <StyledFormControlLabel value="0" control={<AppRadio />} label="Contado" />
                         </RadioGroup>
                     </Grid> */}
-                    <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Linea de credito</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="credito"
-                            placeholder="Linea de credito"
-                            value={values.credito}
-                            onChange={handleChange}
-                            type={'number'}
-                            error={Boolean(touched.credito && errors.credito)}
-                            helperText={touched.credito && errors.credito} />
-                    </Grid>
-                    <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Crear Plan cuenta en :</H6>
-                        <AppTextField select fullWidth size="small" name="planCuentaId" value={values.planCuentaId} onChange={handleSelectedPlanCuenta} SelectProps={{
-                            native: true,
-                            IconComponent: KeyboardArrowDown
-                        }}>
-                            <React.Fragment>
-                                {
-                                    planCuentas?.map(
-                                        (moneda, i) => <option key={i} value={moneda.id}>{moneda.nombreCuenta}</option>
-                                    )
-                                }
-                            </React.Fragment>
-                        </AppTextField>
 
-                    </Grid>
-                    <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Moneda :</H6>
-                        <AppTextField select fullWidth size="small" name="moneda" value={values.moneda} onChange={handleSelectedChangeMoneda} SelectProps={{
-                            native: true,
-                            IconComponent: KeyboardArrowDown
-                        }}>
-                            <React.Fragment>
-                                {
-                                    monedas?.map(
-                                        (moneda, i) => <option key={i} value={moneda.id}>{moneda.nombreMoneda}</option>
-                                    )
-                                }
-                            </React.Fragment>
-                        </AppTextField>
-                    </Grid>
                 </Grid>
             </Scrollbar>
 

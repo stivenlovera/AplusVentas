@@ -2,7 +2,7 @@ import { format } from "date-fns";
 export const ordenCompraFake = [{
     id: 1,
     codigo: "demo",
-    fecha: "almacen 1",
+    fecha: "almacen",
     estado: "bla bla",
     usuario: '75998955',
     proveedor: 'demo',

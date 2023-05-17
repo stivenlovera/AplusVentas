@@ -28,13 +28,13 @@ const TipoProceso = () => {
         <Card sx={{
             padding: 3
         }}>
-            <H5 mb={3}>Asientos recurrentes</H5>
+            <H5 mb={3}>Clasificación de asientos</H5>
             <Divider sx={{
                 my: 2
             }} />
             <Box mt={2} mb={3}>
                 <Tiny lineHeight={1.8}>
-                    Organize los tipo de asiento recurrentes Ej: compras, ventas, ingreso, egreso. 
+                    Crea la forma en que se agruparán los asientos frecuentes Ej: ingresos, egresos, traspaso, etc.
                 </Tiny>
                 <br />
                 <HeadingWrapper justifyContent="space-between" alignItems="center">
@@ -43,7 +43,7 @@ const TipoProceso = () => {
                         endIcon={<Add />}
                         onClick={handlerOpen}
                     >
-                        {t("Añadir asiento")}
+                        {t("Añadir clasificación")}
                     </Button>
                     
                 </HeadingWrapper>

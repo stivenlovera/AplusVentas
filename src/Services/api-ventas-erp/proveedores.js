@@ -6,8 +6,8 @@ export async function CrearProveedorService() {
 export async function ObtenerProveedorService() {
     return await axios.get(`${process.env.REACT_APP_API}api/proveedor`)
 }
-export async function GuardarProveedorService({ codigoProveedor, nombreProveedor, dirrecion, credito, telefono, planCuentaId, moneda }) {
-    return await axios.post(`${process.env.REACT_APP_API}api/proveedor`, { codigoProveedor, nombreProveedor, dirrecion, credito, telefono, planCuentaId, moneda });
+export async function GuardarProveedorService({ codigoProveedor, nombreProveedor, dirrecion, contacto, telefono, }) {
+    return await axios.post(`${process.env.REACT_APP_API}api/proveedor`, { codigoProveedor, nombreProveedor, dirrecion, contacto, telefono });
 }
 export async function EditarProveedorService(id) {
     return await axios.get(`${process.env.REACT_APP_API}api/proveedor/editar/${id}`);

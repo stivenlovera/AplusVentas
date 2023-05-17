@@ -1,8 +1,5 @@
 import { Box, Button, Card, Divider, Grid } from '@mui/material'
-import IconWrapper from 'components/IconWrapper'
-import FlexBox from 'components/flexbox/FlexBox'
 import SearchInput from 'components/input-fields/SearchInput'
-import ShoppingBasket from 'icons/ShoppingBasket'
 import CustomTable from 'page-sections/admin-ecommerce/CustomTable'
 import { HeadingWrapper } from 'pages/admin-ecommerce/product-management'
 import React, { useEffect, useState } from 'react'
@@ -11,21 +8,50 @@ import PlanCuentaColumns from './components/plan-cuenta-columns'
 import { useTranslation } from 'react-i18next'
 import { H5, Tiny } from 'components/Typography'
 import Add from 'icons/Add'
-import {UseListPlanCuenta} from './hooks/useListarPlanCuenta'
+import { UseListPlanCuenta } from './hooks/useListarPlanCuenta'
 import { Context } from 'contexts/ContextDataTable'
 import { UseCreatePlanCuenta } from './hooks/useCreatePlanCuenta'
+import { searchByNombre } from './utils/utilPlanCuenta'
 
 const PlanCuentasList = () => {
   const {
     t
   } = useTranslation();
-  const { filter, filteredItem, listar, searchValue, setSearchValue } = UseListPlanCuenta();
-  const { create, options, setCreate, openModal, handlerOpen, handlerClose } = UseCreatePlanCuenta();
-  const [actualizarTable, setActualizarTableContext] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [filteredItem, setFilteredItem] = useState([]);
+
+  const [openModal, setOpenModal] = useState(false);
+  const [button, setButton] = useState(false);
+  const { apiListar, lista } = UseListPlanCuenta();
+  const { create, apiCreate } = UseCreatePlanCuenta();
+  const [actualizarTable, setActualizarTableContext] = useState(true);
+
+  const handlerOpenPadre = async () => {
+    setButton(true);
+    const open = await apiCreate();
+    if (open) {
+      setOpenModal(true);
+    } else {
+      setButton(false);
+    }
+  }
+  const handlerCloseHijo = () => {
+    setOpenModal(false);
+    setButton(false);
+  }
+
+  const handlerBuscar = (e) => {
+    setSearchValue(e.target.value);
+  }
+
   useEffect(() => {
-    listar();
+    if (actualizarTable) {
+      apiListar();
+    }
+    setFilteredItem(filteredItem);
     setActualizarTableContext(false);
   }, [searchValue, actualizarTable]);
+
   return (
     <Context.Provider value={[actualizarTable, setActualizarTableContext]}>
       <Card sx={{
@@ -41,17 +67,18 @@ const PlanCuentasList = () => {
           </Tiny>
           <br />
           <HeadingWrapper justifyContent="space-between" alignItems="center">
-            <SearchInput bordered={'true'} placeholder="Buscar plan cuenta" onChange={e => setSearchValue(e.target.value)} />
+            <SearchInput bordered={'true'} placeholder="Buscar plan cuenta" onChange={handlerBuscar} />
             <Button
               variant="contained"
               endIcon={<Add />}
-              onClick={handlerOpen}
+              onClick={handlerOpenPadre}
+              disabled={button}
             >
               {t("Añadir Plan Cuenta")}
             </Button>
           </HeadingWrapper>
-          <CustomTable columnShape={PlanCuentaColumns} data={filteredItem} />
-          <CreatePlanCuentaModal data={create} tipo={'nuevo'} open={openModal} onClose={handlerClose} />
+          <CustomTable columnShape={PlanCuentaColumns} data={lista} />
+          <CreatePlanCuentaModal data={create} tipo={'nuevo'} open={openModal} onClose={handlerCloseHijo} />
         </Box>
       </Card>
     </Context.Provider>

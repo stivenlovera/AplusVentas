@@ -73,10 +73,10 @@ const CreateTipoAsientoModal = ({
             if (editProceso) {
 
             } else {
+                console.log(tipo,'evento a enviar')
                 handlerSubmitGuardar(values)
                 hadlerClose();
                 setContext(true);
-                setContext(true)
             }
         }
     });

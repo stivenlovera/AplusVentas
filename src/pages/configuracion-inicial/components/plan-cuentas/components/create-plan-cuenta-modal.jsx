@@ -7,12 +7,11 @@ import AppTextField from "components/input-fields/AppTextField";
 import Scrollbar from "components/ScrollBar";
 import { H2, H6, Small } from "components/Typography";
 import { useFormik } from "formik";
-
 import { useContext, useEffect, useState } from "react";
 import * as Yup from "yup"; // component props interface
 import { Context } from "contexts/ContextDataTable";
 import { UseGuardarHijoPlanCuenta, UseGuardarPlanCuenta } from "../hooks/useGuardarHIjoPlanCuenta";
-import { UseGuardarPadrePlanCuenta } from "../hooks/useGuardarPadrePlanCuenta";
+import { UseEditarPlanCuenta } from "../hooks/useEditarPlanCuenta";
 
 // styled components
 const StyledAppModal = styled(AppModal)(({
@@ -51,8 +50,10 @@ const CreatePlanCuentaModal = ({
     tipo
 }) => {
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
+    const [button, setButton] = useState(false);
     const [context, setContext] = useContext(Context);
     const [selectedMoneda, setSelectedMoneda] = useState("1");
+
     const handleChangeMoneda = event => {
         setFieldValue('moneda', event.target.value);
         setSelectedMoneda(event.target.value);
@@ -62,7 +63,7 @@ const CreatePlanCuentaModal = ({
         nombreCuenta: Yup.string().required("Nombre es requerido!"),
         moneda: Yup.string().required("Moneda es requerido!"),
         nombreCuenta: Yup.string().required("Nombre es requerido!"),
-        valor: Yup.string().required("valor es requerido"),
+        valor: Yup.number().required("valor es requerido"),
         codigoIdentificador: Yup.string().required("codigo es requerido"),
         id: Yup.number().nullable(),
         nivel: Yup.number().required(),
@@ -83,32 +84,48 @@ const CreatePlanCuentaModal = ({
     } = useFormik({
         initialValues: data,
         validationSchema,
-        //enableReinitialize: true,
         onSubmit: async (values) => {
-            setContext(true);
-            if (editPlanCuenta) {
-                //handlerSubmitModificar()
+            setButton(true)
+            if (tipo == 'editar') {
+               /*  const open = await apiEditar();
+                if (open) {
+                    onClose()
+                    resetForm()
+                    setContext(true);
+                    setButton(false)
+                } else {
+                    setButton(false)
+                } */
             } else {
-                handlerSubmitGuardarPadre();
+                const open = await ApiGuardar();
+                if (open) {
+                    onClose()
+                    resetForm()
+                    setContext(true);
+                    setButton(false)
+                } else {
+                    setButton(false)
+                }
             }
-            onClose()
-            resetForm()
         }
     });
 
     useEffect(() => {
-        console.log(tipo)
+        console.log(data)
         setValues(data);
     }, [data])
 
-    const { handlerSubmitGuardarPadre} = UseGuardarPadrePlanCuenta(values);
-    const { } = UseGuardarHijoPlanCuenta(values);
+    const { ApiGuardar } = UseGuardarHijoPlanCuenta(values);
+
     return <StyledAppModal open={open} handleClose={onClose}>
         <H2 marginBottom={2}>
             {tipo == 'nuevo' || tipo == 'hijo' ? "Añadir Plan cuenta" : "Editar Plan cuenta"}
         </H2>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(w) => {
+            console.log(errors)
+            handleSubmit(w)
+        }}>
             <Scrollbar style={{
                 maxHeight: downXl ? 500 : "auto"
             }}>
@@ -150,6 +167,7 @@ const CreatePlanCuentaModal = ({
                             onChange={handleChange}
                             error={Boolean(touched.valor && errors.valor)}
                             helperText={touched.valor && errors.valor}
+                            type="number"
                         />
                     </Grid>
                     <Grid item sm={8} xs={12}>
@@ -175,7 +193,7 @@ const CreatePlanCuentaModal = ({
                         </AppTextField>
 
                     </Grid>
-                    <Grid item sm={4} xs={12}>
+                    {/* <Grid item sm={4} xs={12}>
                         <H6 mb={1}>Debe</H6>
                         <AppTextField
                             fullWidth
@@ -202,7 +220,7 @@ const CreatePlanCuentaModal = ({
                             helperText={touched.haber && errors.haber}
                             type="number"
                         />
-                    </Grid>
+                    </Grid> */}
                 </Grid>
             </Scrollbar>
             <Grid container>
@@ -211,7 +229,7 @@ const CreatePlanCuentaModal = ({
                         <Button fullWidth variant="outlined" onClick={onClose}>
                             Cancelar
                         </Button>
-                        <Button fullWidth type="submit" variant="contained"  >
+                        <Button fullWidth type="submit" variant="contained" disabled={button} >
                             Guardar
                         </Button>
                     </FlexBox>

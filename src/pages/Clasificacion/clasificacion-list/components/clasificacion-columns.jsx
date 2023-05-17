@@ -1,4 +1,4 @@
-import { Edit } from "@mui/icons-material";
+import { Edit, Style } from "@mui/icons-material";
 import { IconButton, Rating } from "@mui/material";
 import { Fragment, useState } from "react";
 import Delete from "icons/Delete";

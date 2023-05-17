@@ -64,16 +64,12 @@ const CreateProductoModal = ({
         codigoBarra: '',
         nombreProducto: '',
         unidadMedida: '',
-        cantidad: 0,
-        stockActual: 0,
-        stockMinimo: 0,
         precioCompra: 0,
         utilidadMin: 0,
+        stockMinimo: 0,
         PrecioVentaMin: 0,
         utilidadMax: 0,
         PrecioVentaMax: 0,
-        lote: '',
-        fechaVencimiento: '2023-01-01',
         proveedorId: '',
         proveedor: '',
         categoriaId: '',
@@ -93,20 +89,16 @@ const CreateProductoModal = ({
         codigoBarra: Yup.string().min(3, "Es muy corto").required("Codigo barra es requerido!"),
         nombreProducto: Yup.string().min(3, "Es muy corto").required("Nombre es requerido!"),
         unidadMedida: Yup.string().required("Unidad medida es requerido!"),
-        cantidad: Yup.number('debe ser un numero').required("Cantidad es requerido!"),
-        stockActual: Yup.number('debe ser un numero').required("Stock inicial es requerido!"),
-        stockMinimo: Yup.number('debe ser un numero').required("Stock final es requerido!"),
+        stockMinimo: Yup.string().required("Stock minimo requerido!"),
         precioCompra: Yup.number('debe ser un numero').required("Precio compra es requerido!"),
         utilidadMin: Yup.number('debe ser un numero').required("Utilidad max es requerido!"),
         PrecioVentaMin: Yup.number('debe ser un numero').required("Precio venta min es requerido!"),
         utilidadMax: Yup.number('debe ser un numero').required("Utilidad min es requerido!"),
         PrecioVentaMax: Yup.number('debe ser un numero').required("Precio venta max es requerido!"),
-        lote: Yup.string().required("Lote  es requerido!"),
-        fechaVencimiento: Yup.string().required("Fecha vencimiento es requerido!"),
         proveedorId: Yup.string().required("Proveedores es requerido!"),
         proveedor: Yup.string().nullable(),
-        categoriaId: Yup.number().required("Categoria es requerido!"),
-        grupoId: Yup.number().required("Grupo es requerido!"),
+        categoriaId: Yup.number().nullable(),
+        grupoId: Yup.number().nullable(),
         marcaId: Yup.number(),//.required("Marca es requerido!"),
         modeloId: Yup.number(),//.required("Modelo es requerido!"),
         categoria: Yup.string().nullable(),
@@ -283,34 +275,6 @@ const CreateProductoModal = ({
                             helperText={touched.nombreProducto && errors.nombreProducto}
                         />
                     </Grid>
-
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>Cantidad</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="cantidad"
-                            type="number"
-                            placeholder="cantidad"
-                            value={values.cantidad}
-                            onChange={handleChange}
-                            error={Boolean(touched.cantidad && errors.cantidad)}
-                            helperText={touched.cantidad && errors.cantidad}
-                        />
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>Stock actual</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="stockActual"
-                            type="number"
-                            placeholder="Stock actual"
-                            value={values.stockActual} onChange={handleChange}
-                            error={Boolean(touched.stockActual && errors.stockActual)}
-                            helperText={touched.stockActual && errors.stockActual}
-                        />
-                    </Grid>
                     <Grid item sm={4} xs={12}>
                         <H6 mb={1}>Stock minimo</H6>
                         <AppTextField
@@ -324,6 +288,22 @@ const CreateProductoModal = ({
                             error={Boolean(touched.stockMinimo && errors.stockMinimo)}
                             helperText={touched.stockMinimo && errors.stockMinimo}
                         />
+                    </Grid>
+                    <Grid item sm={4} xs={12}>
+                        <H6 mb={1}>Unidad Medida</H6>
+                        <AppTextField
+                            fullWidth
+                            size="small"
+                            name="unidadMedida"
+                            placeholder="Unidad Medida"
+                            value={values.unidadMedida}
+                            onChange={handleChange}
+                            error={Boolean(touched.unidadMedida && errors.unidadMedida)}
+                            helperText={touched.unidadMedida && errors.unidadMedida}
+                        />
+                    </Grid>
+                    <Grid item sm={4} xs={12}>
+
                     </Grid>
                     <Grid item sm={4} xs={12}>
                         <H6 mb={1}>Precio compra</H6>
@@ -429,49 +409,7 @@ const CreateProductoModal = ({
                             helperText={touched.PrecioVentaMax && errors.PrecioVentaMax}
                         />
                     </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>Lote</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="lote"
-                            placeholder="Lote"
-                            value={values.lote}
-                            onChange={handleChange}
-                            error={Boolean(touched.lote && errors.lote)}
-                            helperText={touched.lote && errors.lote}
-                        />
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>Fecha vencimiento</H6>
-                        <DatePicker
-                            value={values.fechaVencimiento}
-                            onChange={newDate => setFieldValue("fechaVencimiento", newDate)}
-                            inputFormat="yyyy-MM-dd"
-                            renderInput={
-                                params => <AppTextField
-                                    fullWidth
-                                    size="small" {...params}
-                                    name="date"
-                                    error={Boolean(touched.fechaVencimiento && errors.fechaVencimiento)}
-                                    helperText={touched.fechaVencimiento && errors.fechaVencimiento}
-                                    sx={{
-                                        mb: 1
-                                    }} />} />
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>Unidad Medida</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="unidadMedida"
-                            placeholder="Unidad Medida"
-                            value={values.unidadMedida}
-                            onChange={handleChange}
-                            error={Boolean(touched.unidadMedida && errors.unidadMedida)}
-                            helperText={touched.unidadMedida && errors.unidadMedida}
-                        />
-                    </Grid>
+
                     <Grid item sm={12} xs={12}>
                         <H6 mb={1}>Proveedor</H6>
                         <Autocomplete
@@ -606,68 +544,66 @@ const CreateProductoModal = ({
                                     />}
                         />
                     </Grid>
-                </Grid>
-                <br />
-                <Grid item xs={12}>
-                    <H6 pb={1}>Imagenes de producto</H6>
-                    <Box sx={{
-                        padding: 1,
-                        borderRadius: "8px",
-                        border: "1px dashed",
-                        borderColor: "text.disabled",
-                        backgroundColor: "grey.100"
-                    }}>
-                        <Grid container spacing={1}>
-                            {imagenes.map((item, i) =>
-                                <Grid item sm={3} xs={4} key={i}>
-                                    <Box sx={{
-                                        minHeight: 140,
-                                        borderRadius: "8px",
-                                        overflow: "hidden",
-                                        position: "relative"
-                                    }}>
-                                        <img src={item} width="100%" height="100%" alt={item} />
-                                        <ImageDeleteWrapper>
-                                            <IconButton
-                                                onClick={() => { onImagenRemove(i) }}
-                                            >
-                                                <DeleteIcon
-                                                    sx={{
-                                                        fontSize: 12,
-                                                        color: "white"
-                                                    }}
-                                                />
-                                            </IconButton>
-                                        </ImageDeleteWrapper>
-                                    </Box>
-                                </Grid>
-                            )}
-                            <Grid item sm={3} xs={4}>
-                                <label htmlFor="image-upload">
-                                    <input type="file" accept="image/*" id="image-upload"
-                                        style={{
-                                            display: "none"
-                                        }}
-                                        onChange={onImagenChange}
-                                    />
-                                    <ImageUploadWrapper textAlign="center">
-                                        <Box>
-                                            <Add color="disabled" />
-                                            <Small fontWeight={600} display="block">
-                                                Choose a file
-                                            </Small>
-                                            <Small fontWeight={600} color="text.disabled">
-                                                or drag it here
-                                            </Small>
+                    <Grid item xs={12}>
+                        <H6 pb={1}>Imagenes de producto</H6>
+                        <Box sx={{
+                            padding: 1,
+                            borderRadius: "8px",
+                            border: "1px dashed",
+                            borderColor: "text.disabled",
+                            backgroundColor: "grey.100"
+                        }}>
+                            <Grid container spacing={1}>
+                                {imagenes.map((item, i) =>
+                                    <Grid item sm={3} xs={4} key={i}>
+                                        <Box sx={{
+                                            minHeight: 140,
+                                            borderRadius: "8px",
+                                            overflow: "hidden",
+                                            position: "relative"
+                                        }}>
+                                            <img src={item} width="100%" height="100%" alt={item} />
+                                            <ImageDeleteWrapper>
+                                                <IconButton
+                                                    onClick={() => { onImagenRemove(i) }}
+                                                >
+                                                    <DeleteIcon
+                                                        sx={{
+                                                            fontSize: 12,
+                                                            color: "white"
+                                                        }}
+                                                    />
+                                                </IconButton>
+                                            </ImageDeleteWrapper>
                                         </Box>
-                                    </ImageUploadWrapper>
-                                </label>
+                                    </Grid>
+                                )}
+                                <Grid item sm={3} xs={4}>
+                                    <label htmlFor="image-upload">
+                                        <input type="file" accept="image/*" id="image-upload"
+                                            style={{
+                                                display: "none"
+                                            }}
+                                            onChange={onImagenChange}
+                                        />
+                                        <ImageUploadWrapper textAlign="center">
+                                            <Box>
+                                                <Add color="disabled" />
+                                                <Small fontWeight={600} display="block">
+                                                    Choose a file
+                                                </Small>
+                                                <Small fontWeight={600} color="text.disabled">
+                                                    or drag it here
+                                                </Small>
+                                            </Box>
+                                        </ImageUploadWrapper>
+                                    </label>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </Box>
+                        </Box>
+                    </Grid>
                 </Grid>
             </Scrollbar>
-
             <Grid container>
                 <Grid item xs={12}>
                     <FlexBox justifyContent="flex-end" gap={2} marginTop={2}>

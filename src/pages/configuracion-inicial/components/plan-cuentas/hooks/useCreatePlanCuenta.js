@@ -1,48 +1,41 @@
 import { CrearPlanCuentaService } from "Services/api-ventas-erp/PlanCuentaService";
+import { useSnackbar } from "notistack";
 import { useState } from "react";
+import { ErrorMesage } from "utils/ErrorAxios";
 
-export const UseCreatePlanCuenta = () => {
-    const [openModal, setOpenModal] = useState(false);
-
+export const UseCreatePlanCuenta = (nivel = 0, padre = 0) => {
+    const { enqueueSnackbar } = useSnackbar();
     const [create, setCreate] = useState({
-        tipo: '',
         id: "",
         codigo: '',
         nombreCuenta: "",
         moneda: '1',
         valor: '1',
         codigoIdentificador: '0',
-        nivel: '0',
+        nivel: 0,
         debe: '0',
         haber: '0',
-        vPlanCuentaId: '0',
+        vPlanCuentaId: padre,
     })
-    const [options, setOptions] = useState([
-        { id: 0, nombreClasificacion: "Seleccione" }
-    ]);
 
-    const ApiCrearPlanCuenta = async () => {
-        const { data } = await CrearPlanCuentaService(0, 0);
-        setCreate({ ...create, codigo: data.data.codigo, nivel: data.data.nivel })
-        setOptions(data.data.clasificaciones);
-    }
-    const handlerOpen = (e) => {
-        setOpenModal(true);
-        ApiCrearPlanCuenta()
-    }
-    const handlerClose = (e) => {
-        setOpenModal(false);
+    const apiCreate = async () => {
+        let status = false;
+        try {
+            const { data } = await CrearPlanCuentaService(nivel,padre);
+            if (data.status == 1) {
+                status = true;
+                setCreate({ ...create, codigo: data.data.codigo, nivel: data.data.nivel })
+            } else {
+                enqueueSnackbar(data.message, { variant: 'error' })
+            }
+        } catch (error) {
+            const message = ErrorMesage(error)
+            enqueueSnackbar(message, { variant: 'error' });
+        }
+        return status;
     }
     return {
-        options,
         create,
-        setCreate,
-        openModal,
-        handlerOpen,
-        handlerClose,
-        data: {
-            create,
-            options
-        }
+        apiCreate,
     }
 }

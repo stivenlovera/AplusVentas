@@ -6,7 +6,6 @@ import React from 'react'
 
 const General = () => {
     return (
-
         <Card sx={{
             padding: 3
         }}>

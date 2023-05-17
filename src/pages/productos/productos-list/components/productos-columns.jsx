@@ -13,18 +13,6 @@ const ProductosColumns = [
         accessor: "nombreProducto"
     },
     {
-        Header: "Cantidad",
-        accessor: "cantidad"
-    },
-    {
-        Header: "Stock actual",
-        accessor: "stockActual"
-    },
-    {
-        Header: "Lote",
-        accessor: "lote"
-    },
-    {
         Header: "Unidad Medida",
         accessor: "unidadMedida"
     },
@@ -35,10 +23,6 @@ const ProductosColumns = [
     {
         Header: "Precio venta max",
         accessor: "precioVentaMax"
-    },
-    {
-        Header: "Fecha vencimiento",
-        accessor: "fechaVencimiento"
     },
     {
         Header: "Acciones",

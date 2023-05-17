@@ -6,7 +6,7 @@ import { UseEditarTipoAsiento } from "../hooks/UseEditarTipoAsiento";
 import CreateTipoAsientoModal from "./create-tipo-asiento-modal";
 const ClasificacionColumns = [
     {
-        Header: "Nombre Tipo Asiento",
+        Header: "Clasificación asiento",
         accessor: "nombreTipoAsiento"
     },
     {
