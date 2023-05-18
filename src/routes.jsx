@@ -25,7 +25,7 @@ const LearningManagement = Loadable(lazy(() => import("./pages/dashboards/learni
 const CreateOrdenInicial = Loadable(lazy(() => import("./pages/orden-compra/create-orden-inicial/create-orden-inicial")));
 const Venta = Loadable(lazy(() => import("./pages/venta/lista-ventas/list-venta")));
 const VentaCreate = Loadable(lazy(() => import("./pages/venta/create-venta/create-venta")));
-const Login = Loadable(lazy(() => import("./pages/authentication/login")));
+const Login = Loadable(lazy(() => import("./pages/login/login")));
 
 const Error = Loadable(lazy(() => import("./pages/404")));
 

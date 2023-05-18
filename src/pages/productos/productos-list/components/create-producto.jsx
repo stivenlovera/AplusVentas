@@ -22,8 +22,8 @@ import * as Yup from "yup"; // component props interface
 const StyledAppModal = styled(AppModal)(({
     theme
 }) => ({
-    maxWidth: 700,
-    minWidth: 300,
+    maxWidth: 1200,
+    minWidth: 600,
     outline: "none",
     padding: "1.5rem"
 }));
