@@ -1,8 +1,8 @@
 
-import { EditarClasificacionService } from "Services/api-ventas-erp/clasificacionService";
+import { EditarClasificacionService } from "Services/api-ventas-erp/categoria";
 import { useState } from "react";
 
-export const UseEditarClasificacion = ( id ) => {
+export const UseEditarClasificacion = (id) => {
     const [openModal, setOpenModal] = useState(false);
 
     const [editar, setEditar] = useState({

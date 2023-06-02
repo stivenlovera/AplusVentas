@@ -1,7 +1,8 @@
 import LoadingScreen from "components/LoadingScreen";
+import { ContextUser } from "contexts/ContextUser";
 import useSettings from "hooks/useSettings";
 import DashboardLayoutV3 from "layouts/layout-v3/DashboardLayout";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
 const Loadable = Component => props => {
@@ -25,38 +26,57 @@ const LearningManagement = Loadable(lazy(() => import("./pages/dashboards/learni
 const CreateOrdenInicial = Loadable(lazy(() => import("./pages/orden-compra/create-orden-inicial/create-orden-inicial")));
 const Venta = Loadable(lazy(() => import("./pages/venta/lista-ventas/list-venta")));
 const VentaCreate = Loadable(lazy(() => import("./pages/venta/create-venta/create-venta")));
+const PermisoList = Loadable(lazy(() => import("./pages/permisos-roles/list-permisos-roles")));
 const Login = Loadable(lazy(() => import("./pages/login/login")));
 
 const Error = Loadable(lazy(() => import("./pages/404")));
 
-const ActiveLayout = () => {
+const ActiveLayout = ({ nombreCompleto }) => {
   const {
     settings
   } = useSettings(); // console.log(settings);
 
-  return (<DashboardLayoutV3 />);
+  const [userContext, setUserContext] = useState(nombreCompleto);
+
+  useEffect(() => {
+    setUserContext(nombreCompleto)
+  }, [nombreCompleto])
+
+  return (
+    <ContextUser.Provider value={[userContext, setUserContext]}>
+      <DashboardLayoutV3 />
+    </ContextUser.Provider>
+  );
 };
 
-const routes = () => {
-  return [...authRoutes, {
-    path: "dashboard",
-    element: <ActiveLayout />,
-    children: dashboardRoutes
-  }, {
-    path: "*",
-    element: <Error />
-  }];
+const routes = (user, token) => {
+  if (token) {
+    console.log('bloquear login')
+  }
+  return [
+    ...authRoutes,
+    {
+      path: "dashboard",
+      element: <ActiveLayout nombreCompleto={`${user.nombre} ${user.apellido}`} />,
+      children: dashboardRoutes,
+    },
+    {
+      path: "*",
+      element: <Error />
+    }];
+
 };
 
 const authRoutes = [
   {
     path: "/",
-    element: <Navigate to="/dashboard" />
+    element: <Navigate to="/login" />
   }, {
     path: "login",
     element: <Login />
   }
 ];
+
 const dashboardRoutes = [
   {
     path: "",
@@ -77,6 +97,10 @@ const dashboardRoutes = [
   {
     path: "usuario-list",
     element: <UsuarioList />
+  },
+  {
+    path: "roles-permisos",
+    element: <PermisoList />
   },
   {
     path: "proveedor-list",

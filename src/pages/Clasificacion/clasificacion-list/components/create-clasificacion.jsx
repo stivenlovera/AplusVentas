@@ -1,22 +1,16 @@
 
-import { Autocomplete, Box, Button, Grid, IconButton, styled, TextField, useMediaQuery } from "@mui/material";
+import { Button, Grid, styled, useMediaQuery } from "@mui/material";
 import AppModal from "components/AppModal";
 import FlexBox from "components/flexbox/FlexBox";
-import FlexRowAlign from "components/flexbox/FlexRowAlign";
 import AppTextField from "components/input-fields/AppTextField";
 import Scrollbar from "components/ScrollBar";
 import { H2, H6, Small } from "components/Typography";
 import { Context } from "contexts/ContextDataTable";
 import { useFormik } from "formik";
-import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import * as Yup from "yup"; // component props interface
-import { UseGuardarClasificacion } from "../hooks/UseGuardarClasificacion";
-import { ResetTvRounded } from "@mui/icons-material";
-import { UseUpdateClasificacion } from "../hooks/UseUpdateClasificacion";
-import { useSnackbar } from "notistack";
-
-
+import { Request } from "utils/http";
 // styled components
 const StyledAppModal = styled(AppModal)(({
     theme
@@ -32,18 +26,16 @@ const CreateClasificacionModal = ({
     data,
     onClose,
     editClasificacion,
-    tipo,
-    id,
-    options
+    hijo
 }) => {
+    const { categoriaId, nombre } = data;
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [context, setContext] = useContext(Context);
 
     const validationSchema = Yup.object().shape({
         id: Yup.number().nullable(),
-        nombreClasificacion: Yup.string().min(3, "Es muy corto").required("Nombre es requerido!"),
-        clasificacionId: Yup.number().nullable(),
-        nombreClasificacionPadre: Yup.string().nullable(),
+        nombre: Yup.string().min(3, "Es muy corto").required("Nombre es requerido!"),
+        categoriaId: Yup.number().nullable()
     });
 
     const {
@@ -58,39 +50,107 @@ const CreateClasificacionModal = ({
     } = useFormik({
         initialValues: data,
         validationSchema,
-        onSubmit: values => {
-            console.log('forms', values)
-            console.log('change option', value)
-
+        onSubmit: async (values) => {
             if (editClasificacion) {
-                console.log('edicion')
-                handlerSubmitModificar()
-                setContext(true);
+                await onUpdate(values);
             } else {
-                console.log('nuevo')
-                handlerSubmitGuardar();
-                setContext(true);
+                if (hijo) {
+                    await onStoreHijo(values);
+                } else {
+                    let newValue = {
+                        categoriaId: 0,
+                        nombre: values.nombre
+                    }
+                    console.log('nuevo', newValue);
+                    await onStore(newValue);
+                }
             }
             onClose()
             resetForm()
         }
     });
-    const { handlerSubmitGuardar } = UseGuardarClasificacion(values);
-    const { handlerSubmitModificar } = UseUpdateClasificacion(values);
-    const [value, setValue] = useState(null);
-    const [inputValue, setInputValue] = useState('');
+    const identificarTipo = () => {
+        if (editClasificacion) {
+            return "Editar Clasificacion";
+        } else {
+            if (hijo) {
+                return `Añadir SubClasificacion de ${data.nombre.trim()}`;
+            } else {
+                return "Añadir Clasificacion"
+            }
+        }
+    }
+    /*METODOS */
+
+    /*API */
+    const onStore = async (values) => {
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/categoria/InsertarHijo`,
+            initialValues: [],
+            method: 'post',
+            showError: true,
+            showSuccess: false,
+            values: values
+        });
+        if (!!status) {
+            setContext(true);
+            onClose();
+        }
+    }
+    const onUpdate = async (values) => {
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/categoria`,
+            initialValues: [],
+            method: 'put',
+            showError: true,
+            showSuccess: false,
+            values: values
+        });
+        if (!!status) {
+            setContext(true);
+            onClose();
+        }
+    }
+    const onStoreHijo = async (values) => {
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/categoria/InsertarHijo`,
+            initialValues: [],
+            method: 'post',
+            showError: true,
+            showSuccess: false,
+            values: values
+        });
+        if (!!status) {
+            setContext(true);
+            onClose();
+        }
+    }
 
     useEffect(() => {
-        setValue({
-            id: data.id,
-            nombreClasificacion: data.nombreClasificacionPadre
-        });
-        setValues(data);
+        if (editClasificacion) {
+            setValues({
+                categoriaId: categoriaId,
+                nombre: nombre.trim()
+            });
+        } else {
+            if (hijo) {
+                setValues({
+                    categoriaId: categoriaId,
+                    nombre: ''
+                });
+            } else {
+                setValues({
+                    categoriaId: categoriaId,
+                    nombre: ''
+                });
+            }
+        }
+
     }, [data])
 
     return <StyledAppModal open={open} handleClose={onClose}>
         <H2 marginBottom={2}>
-            {editClasificacion && data ? "Editar Clasificacion" : "Añadir Clasificacion"}
+            {identificarTipo()}
         </H2>
 
         <form onSubmit={handleSubmit}>
@@ -99,56 +159,16 @@ const CreateClasificacionModal = ({
             }}>
                 <Grid container spacing={2}>
                     <Grid item sm={12} xs={12}>
-                        <H6 mb={1}>Pertenece a</H6>
-                        <Autocomplete
-                            fullWidth
-                            getOptionLabel={(options) => options.nombreClasificacion}
-                            //defaultValue={options[0]}
-                            options={options}
-                            autoSelect={true}
-                            //inputValue={inputValue}
-                            value={value ? value : null}
-                            size="small"
-                            isOptionEqualToValue={(option, value) => {
-                                if (value) {
-                                    return (option.value === value.value)
-                                } else {
-                                    return false;
-                                }
-                            }}
-                            onChange={(event, newValue) => {
-                                if (newValue != null) {
-                                    setValue(newValue);
-                                    setValues({ ...values, clasificacionId: newValue.id, nombreClasificacionPadre: newValue.nombreClasificacion })
-                                    console.log(newValue)
-                                } else {
-                                    setValue(null);
-                                }
-                            }}
-                            onInputChange={(event, newInputValue) => {
-                                setInputValue(newInputValue);
-                            }}
-                            renderInput={
-                                (params) => <TextField
-                                    {...params}
-                                    label="Pertenece a"
-                                    error={Boolean(touched.clasificacionId && errors.clasificacionId)}
-                                    helperText={touched.clasificacionId && errors.clasificacionId}
-                                />
-                            }
-                        />
-                    </Grid>
-                    <Grid item sm={12} xs={12}>
                         <H6 mb={1}>Nombre</H6>
                         <AppTextField
                             fullWidth
                             size="small"
-                            name="nombreClasificacion"
+                            name="nombre"
                             placeholder="Nombre"
-                            value={values.nombreClasificacion}
+                            value={values.nombre}
                             onChange={handleChange}
-                            error={Boolean(touched.nombreClasificacion && errors.nombreClasificacion)}
-                            helperText={touched.nombreClasificacion && errors.nombreClasificacion}
+                            error={Boolean(touched.nombre && errors.nombre)}
+                            helperText={touched.nombre && errors.nombre}
                         />
                     </Grid>
                 </Grid>

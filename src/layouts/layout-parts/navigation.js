@@ -48,6 +48,11 @@ export const navigations = [
     icon: duotone.UserProfile,
   },
   {
+    name: 'Permisos y Roles',
+    path: '/dashboard/roles-permisos',
+    icon: duotone.RuleIcon,
+  },
+  {
     type: 'label',
     label: 'Compras'
   },

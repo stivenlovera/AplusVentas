@@ -12,7 +12,7 @@ import { useFormik } from "formik";
 import Add from "icons/Add";
 import DeleteIcon from "icons/DeleteIcon";
 import { useContext, useLayoutEffect, useState } from "react";
-import { obtenerClasificacionIdService } from "Services/api-ventas-erp/clasificacionService";
+import { obtenerClasificacionIdService } from "Services/api-ventas-erp/categoria";
 import { CrearProductoService, EditarProductoService, GuardarProductoService } from "Services/api-ventas-erp/proveedorService";
 import { fileGetBase64, readUploadedFileAsText } from "utils/convertoToBase64";
 

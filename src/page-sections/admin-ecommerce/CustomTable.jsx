@@ -37,14 +37,14 @@ const CustomTable = props => {
   };
 
   return <Box>
-      <ScrollBar>
-        <Table {...getTableProps()} sx={{
+    <ScrollBar>
+      <Table {...getTableProps()} sx={{
         borderSpacing: "0 1rem",
         borderCollapse: "separate"
       }}>
-          <TableHead>
-            {headerGroups.map(headerGroup => <TableRow {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map(column => <TableCell {...column.getHeaderProps(column.getSortByToggleProps())} sx={{
+        <TableHead>
+          {headerGroups.map(headerGroup => <TableRow {...headerGroup.getHeaderGroupProps()}>
+            {headerGroup.headers.map(column => <TableCell {...column.getHeaderProps(column.getSortByToggleProps())} sx={{
               paddingY: 0,
               fontSize: 12,
               fontWeight: 600,
@@ -57,13 +57,13 @@ const CustomTable = props => {
                 textAlign: "center"
               }
             }}>
-                    {column.render("Header")}
-                  </TableCell>)}
-              </TableRow>)}
-          </TableHead>
+              {column.render("Header")}
+            </TableCell>)}
+          </TableRow>)}
+        </TableHead>
 
-          <TableBody {...getTableBodyProps()}>
-            {page.map(row => {
+        <TableBody {...getTableBodyProps()}>
+          {page.map(row => {
             prepareRow(row);
             return <TableRow {...row.getRowProps()} onClick={rowClick && rowClick(row.original)} sx={{
               backgroundColor: "background.paper",
@@ -80,7 +80,7 @@ const CustomTable = props => {
                 borderBottomRightRadius: "8px"
               }
             }}>
-                  {row.cells.map(cell => {
+              {row.cells.map(cell => {
                 return <TableCell {...cell.getCellProps()} sx={{
                   border: 0,
                   fontSize: 13,
@@ -93,33 +93,33 @@ const CustomTable = props => {
                     paddingRight: "16px"
                   }
                 }}>
-                        {cell.render("Cell")}
-                      </TableCell>;
+                  {cell.render("Cell")}
+                </TableCell>;
               })}
-                </TableRow>;
+            </TableRow>;
           })}
-          </TableBody>
-        </Table>
-      </ScrollBar>
+        </TableBody>
+      </Table>
+    </ScrollBar>
 
-      {!hidePagination && <Stack alignItems="flex-end" marginY={1}>
-          <StyledPagination count={pageOptions.length} shape="rounded" onChange={handleChange} />
-        </Stack>}
+    {!hidePagination && <Stack alignItems="flex-end" marginY={1}>
+      <StyledPagination count={pageOptions.length} shape="rounded" onChange={handleChange} />
+    </Stack>}
 
-      {showFooter && <FlexBetween gap={0.5}>
-          <H5 color="text.secondary" fontSize={13}>
-            Showing 1-12 of 24 result
-          </H5>
-          <ButtonBase disableRipple sx={{
+    {showFooter && <FlexBetween gap={0.5}>
+      <H5 color="text.secondary" fontSize={13}>
+        Showing 1-12 of 24 result
+      </H5>
+      <ButtonBase disableRipple sx={{
         fontSize: 13,
         fontWeight: 600,
         color: "text.secondary"
       }}>
-            See All
-            <ArrowRightAlt />
-          </ButtonBase>
-        </FlexBetween>}
-    </Box>;
+        See All
+        <ArrowRightAlt />
+      </ButtonBase>
+    </FlexBetween>}
+  </Box>;
 };
 
 export default CustomTable;

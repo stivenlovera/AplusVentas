@@ -3,10 +3,11 @@ import AppAvatar from 'components/avatars/AppAvatar';
 import FlexBox from 'components/flexbox/FlexBox';
 import { H6, Small, Tiny } from 'components/Typography';
 import useAuth from 'hooks/useAuth';
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import PopoverLayout from './PopoverLayout'; // styled components
+import { ContextUser } from 'contexts/ContextUser';
 
 const StyledButtonBase = styled(ButtonBase)(({
   theme
@@ -31,6 +32,8 @@ const StyledSmall = styled(Small)(({
 }));
 
 const ProfilePopover = () => {
+  const [userContext, setUserContext] = useContext(ContextUser);
+
   const anchorRef = useRef(null);
   const navigate = useNavigate();
   const {
@@ -49,10 +52,13 @@ const ProfilePopover = () => {
     logout();
     navigate('/login');
   };
+  useEffect(() => {
+    console.log(userContext)
+  }, [userContext])
 
   return <Fragment>
-      <StyledButtonBase disableRipple ref={anchorRef} onClick={() => setOpen(true)}>
-        <Badge overlap="circular" variant="dot" anchorOrigin={{
+    <StyledButtonBase disableRipple ref={anchorRef} onClick={() => setOpen(true)}>
+      <Badge overlap="circular" variant="dot" anchorOrigin={{
         vertical: 'bottom',
         horizontal: 'right'
       }} sx={{
@@ -66,58 +72,58 @@ const ProfilePopover = () => {
           backgroundColor: 'success.main'
         }
       }}>
-          {upSm && <Small mx={1} color="text.secondary">
-              Hi,{' '}
-              <Small fontWeight="600" display="inline">
-                Aaron Cooper
-              </Small>
-            </Small>}
-          <AppAvatar src={user?.avatar || '/static/avatar/001-man.svg'} sx={{
+        {upSm && <Small mx={1} color="text.secondary">
+          Hola,{' '}
+          <Small fontWeight="600" display="inline">
+            {userContext}
+          </Small>
+        </Small>}
+        <AppAvatar src={user?.avatar || '/static/avatar/001-man.svg'} sx={{
           width: 28,
           height: 28
         }} />
-        </Badge>
-      </StyledButtonBase>
+      </Badge>
+    </StyledButtonBase>
 
-      <PopoverLayout hiddenViewButton maxWidth={230} minWidth={200} popoverOpen={open} anchorRef={anchorRef} popoverClose={() => setOpen(false)} title={<FlexBox alignItems="center" gap={1}>
-            <AppAvatar src={user?.avatar || '/static/avatar/001-man.svg'} sx={{
+    <PopoverLayout hiddenViewButton maxWidth={230} minWidth={200} popoverOpen={open} anchorRef={anchorRef} popoverClose={() => setOpen(false)} title={<FlexBox alignItems="center" gap={1}>
+      <AppAvatar src={user?.avatar || '/static/avatar/001-man.svg'} sx={{
         width: 35,
         height: 35
       }} />
 
-            <Box>
-              <H6>{user?.name || 'Aaron Cooper'}</H6>
-              <Tiny display="block" fontWeight={500} color="text.disabled">
-                {user?.email || 'aaron@example.com'}
-              </Tiny>
-            </Box>
-          </FlexBox>}>
-        <Box pt={1}>
-          <StyledSmall onClick={() => handleMenuItem('/dashboard/profile')}>Set Status</StyledSmall>
+      <Box>
+        <H6>{user?.name || 'Aaron Cooper'}</H6>
+        <Tiny display="block" fontWeight={500} color="text.disabled">
+          {user?.email || 'aaron@example.com'}
+        </Tiny>
+      </Box>
+    </FlexBox>}>
+      <Box pt={1}>
+        <StyledSmall onClick={() => handleMenuItem('/dashboard/profile')}>Set Status</StyledSmall>
 
-          <StyledSmall onClick={() => handleMenuItem('/dashboard/profile')}>
-            Profile & Account
-          </StyledSmall>
+        <StyledSmall onClick={() => handleMenuItem('/dashboard/profile')}>
+          Profile & Account
+        </StyledSmall>
 
-          <StyledSmall onClick={() => handleMenuItem('/dashboard/account')}>Settings</StyledSmall>
+        <StyledSmall onClick={() => handleMenuItem('/dashboard/account')}>Settings</StyledSmall>
 
-          <StyledSmall onClick={() => handleMenuItem('/dashboard/team-member')}>
-            Manage Team
-          </StyledSmall>
+        <StyledSmall onClick={() => handleMenuItem('/dashboard/team-member')}>
+          Manage Team
+        </StyledSmall>
 
-          <Divider sx={{
+        <Divider sx={{
           my: 1
         }} />
 
-          <StyledSmall onClick={() => {
+        <StyledSmall onClick={() => {
           handleLogout();
           toast.error('You Logout Successfully');
         }}>
-            Sign Out
-          </StyledSmall>
-        </Box>
-      </PopoverLayout>
-    </Fragment>;
+          Sign Out
+        </StyledSmall>
+      </Box>
+    </PopoverLayout>
+  </Fragment>;
 };
 
 export default ProfilePopover;

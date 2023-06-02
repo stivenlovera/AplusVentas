@@ -9,9 +9,10 @@ import { H5 } from "components/Typography";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AlamacenesColumns from "./components/AlmacenesColumns";
-import CreateAlmacenModal from "./components/CreateAlmacen";
-import { almacenFake } from "./components/fake";
-import { searchByName } from "./components/utils-almacenes";
+import { almacenFake, initialFormAlmacen, searchByAlmacen, searchByName } from "./components/utils-almacenes";
+import { ListaAlmacenService, CreateAlmacenService } from "Services/api-ventas-erp/almacenes";
+import { Request } from "utils/http";
+import ModalAlmacen from "./components/modal-almacen/modal-almacen";
 export const HeadingWrapper = styled(FlexBox)(({
   theme
 }) => ({
@@ -32,14 +33,39 @@ const AlmacenesList = () => {
   const {
     t
   } = useTranslation();
-  const [openModal, setOpenModal] = useState(false); // search input
-
-  const [searchValue, setSearchValue] = useState("");
+  const [openModal, setOpenModal] = useState(false);
+  const [btnCreate, setBtnCreate] = useState(false);
+  const [searchValue, setSearchValue] = useState("");// search input
   const [filteredItem, setFilteredItem] = useState(almacenFake);
+
   useEffect(() => {
-    const result = searchByName(almacenFake, searchValue);
+    const result = searchByAlmacen(almacenFake, searchValue);
     setFilteredItem(result);
   }, [searchValue]);
+
+  /*METODOS */
+  const handlerCloseModal = () => {
+    setBtnCreate(false);
+    setOpenModal(false);
+  }
+  /*API */
+  const onCreate = async () => {
+    setBtnCreate(true);
+    const { data, message, status } = await Request({
+      endPoint: CreateAlmacenService(),
+      initialValues: initialFormAlmacen,
+      method: 'get',
+      showError: true,
+      showSuccess: false
+    });
+    console.log('de response', data, status)
+    if (!!status) {
+      setOpenModal(true);
+    } else {
+      setOpenModal(false);
+      setBtnCreate(false);
+    }
+  }
   return <Box pt={2} pb={4}>
     <HeadingWrapper justifyContent="space-between" alignItems="center">
       <FlexBox gap={0.5} alignItems="center">
@@ -51,14 +77,22 @@ const AlmacenesList = () => {
         <H5>Almacen</H5>
       </FlexBox>
       <SearchInput bordered={'true'} placeholder="Buscar almacenes" onChange={e => setSearchValue(e.target.value)} />
-      <Button variant="contained" endIcon={<Add />} onClick={() => setOpenModal(true)}>
+      <Button
+        variant="contained"
+        endIcon={<Add />}
+        onClick={onCreate} disabled={btnCreate}
+      >
         {t("Añadir Almacen")}
       </Button>
     </HeadingWrapper>
 
-    <CustomTable columnShape={AlamacenesColumns} data={filteredItem} />
+    <CustomTable
+      columnShape={AlamacenesColumns}
+      data={filteredItem} />
 
-    <CreateAlmacenModal open={openModal} onClose={() => setOpenModal(false)} />
+    <ModalAlmacen
+      open={openModal}
+      onClose={handlerCloseModal} />
   </Box>;
 };
 
