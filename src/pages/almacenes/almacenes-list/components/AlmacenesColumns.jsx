@@ -1,23 +1,23 @@
 import { Edit } from "@mui/icons-material";
 import { Box, IconButton, Rating } from "@mui/material";
 import { Fragment, useState } from "react";
-import CreateAlmacenModal from "./CreateAlmacen";
+import ModalAlmacen from "./modal-almacen/modal-almacen";
 const AlamacenesColumns = [
     {
         Header: "Codigo",
-        accessor: "codigo"
+        accessor: "codigoAlmacen"
     },
     {
         Header: "Nombre",
-        accessor: "nombre"
+        accessor: "nombreAlmacen"
     },
     {
         Header: "Dirrecion",
-        accessor: "dirrecion"
+        accessor: "dirrecion",
     },
     {
         Header: "Acciones",
-        accessor: "acciones",
+        accessor: "id",
         Cell: ({
             row
         }) => {
@@ -29,7 +29,7 @@ const AlamacenesColumns = [
                         color: "text.disabled"
                     }} />
                 </IconButton>
-                <CreateAlmacenModal editProduct open={openModal}  data={row.original} onClose={() => setOpenModal(false)} />
+                <ModalAlmacen editProduct open={openModal}  data={row.original} onClose={() => setOpenModal(false)} />
             </Fragment>;
         }
     }];

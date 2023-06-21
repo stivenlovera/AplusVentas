@@ -19,6 +19,8 @@ const ModalDelete = ({
     open,
     data,
     onClose,
+    onSave,
+    disabledButton
 }) => {
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     return (
@@ -42,7 +44,7 @@ const ModalDelete = ({
                             <Button fullWidth variant="outlined" onClick={onClose}>
                                 Cancelar
                             </Button>
-                            <Button color='error' fullWidth type="submit" variant="contained" >
+                            <Button color='error' fullWidth variant="contained" disabled={disabledButton} onClick={onSave} >
                                 Eliminar
                             </Button>
                         </FlexBox>

@@ -1,6 +1,5 @@
 
 import { Autocomplete, Box, Button, Grid, IconButton, styled, TextField, useMediaQuery } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
 import AppModal from "components/AppModal";
 import FlexBox from "components/flexbox/FlexBox";
 import FlexRowAlign from "components/flexbox/FlexRowAlign";
@@ -8,15 +7,13 @@ import AppTextField from "components/input-fields/AppTextField";
 import Scrollbar from "components/ScrollBar";
 import { H2, H6, Small } from "components/Typography";
 import { Context } from "contexts/ContextDataTable";
-import { useFormik } from "formik";
+import { FieldArray, useFormik, FormikProvider, Form } from "formik";
 import Add from "icons/Add";
 import DeleteIcon from "icons/DeleteIcon";
-import { useContext, useLayoutEffect, useState } from "react";
-import { obtenerClasificacionIdService } from "Services/api-ventas-erp/clasificacionService";
-import { CrearProductoService, EditarProductoService, GuardarProductoService } from "Services/api-ventas-erp/proveedorService";
-import { fileGetBase64, readUploadedFileAsText } from "utils/convertoToBase64";
-
+import { useContext, useEffect, useState } from "react";
+import { readUploadedFileAsText } from "utils/convertoToBase64";
 import * as Yup from "yup"; // component props interface
+import { Request } from "utils/http";
 
 // styled components
 const StyledAppModal = styled(AppModal)(({
@@ -51,61 +48,66 @@ const CreateProductoModal = ({
     open,
     data,
     onClose,
-    editProduct,
-    tipo,
-    id
+    editProduct
 }) => {
+    const { codigo, proveedores, categorias, productosMaestros, initialState } = data;
     const [context, setContext] = useContext(Context);
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
-    const [precioMin, setPrecioMin] = useState(0)
-    const initialState = {
-        id: 0,
-        codigoProducto: '',
-        codigoBarra: '',
-        nombreProducto: '',
-        unidadMedida: '',
-        precioCompra: 0,
-        utilidadMin: 0,
-        stockMinimo: 0,
-        PrecioVentaMin: 0,
-        utilidadMax: 0,
-        PrecioVentaMax: 0,
-        proveedorId: '',
-        proveedor: '',
-        categoriaId: '',
-        grupoId: '',
-        marcaId: '',
-        modeloId: '',
-        categoria: '',
-        grupo: '',
-        marca: '',
-        modelo: '',
-        imagenes: []
-    };
+    const [selectProductoMaestro, setSelectProductoMaestro] = useState(null)
 
     const validationSchema = Yup.object().shape({
-        id: Yup.number().nullable(),
+        productoId: Yup.number().nullable(),
         codigoProducto: Yup.string().min(3, "Es muy corto").required("Codigo es requerido!"),
         codigoBarra: Yup.string().min(3, "Es muy corto").required("Codigo barra es requerido!"),
+        productoMaestroId: Yup.string().nullable(),
+        productoMaestroNombre: Yup.string().required("Nombre es requerido!"),
         nombreProducto: Yup.string().min(3, "Es muy corto").required("Nombre es requerido!"),
         unidadMedida: Yup.string().required("Unidad medida es requerido!"),
         stockMinimo: Yup.string().required("Stock minimo requerido!"),
         precioCompra: Yup.number('debe ser un numero').required("Precio compra es requerido!"),
         utilidadMin: Yup.number('debe ser un numero').required("Utilidad max es requerido!"),
-        PrecioVentaMin: Yup.number('debe ser un numero').required("Precio venta min es requerido!"),
+        precioVentaMin: Yup.number('debe ser un numero').required("Precio venta min es requerido!"),
         utilidadMax: Yup.number('debe ser un numero').required("Utilidad min es requerido!"),
-        PrecioVentaMax: Yup.number('debe ser un numero').required("Precio venta max es requerido!"),
+        precioVentaMax: Yup.number('debe ser un numero').required("Precio venta max es requerido!"),
         proveedorId: Yup.string().required("Proveedores es requerido!"),
-        proveedor: Yup.string().nullable(),
         categoriaId: Yup.number().nullable(),
-        grupoId: Yup.number().nullable(),
-        marcaId: Yup.number(),//.required("Marca es requerido!"),
-        modeloId: Yup.number(),//.required("Modelo es requerido!"),
-        categoria: Yup.string().nullable(),
-        grupo: Yup.string().nullable(),
-        marca: Yup.string().nullable(),
-        modelo: Yup.string().nullable(),
-        imagenes: Yup.array()
+        imagenes: Yup.array().nullable(),
+        atributos: Yup.array()
+            .of(Yup.object().shape({
+                atributoId: Yup.string().max(3, "debe ser mayor a 3 caracteres"),
+                valor: Yup.string().min(3, "debe ser mayor a 3 caracteres"),
+            }))
+    });
+    const formik = useFormik({
+        initialValues: initialState,
+        validationSchema,
+        onSubmit: async (values) => {
+            if (editProduct) {
+                const { data, message, status } = await Request({
+                    endPoint: `${process.env.REACT_APP_API}api/Producto/update/${values.productoId}`,
+                    initialValues: [],
+                    method: 'put',
+                    showError: true,
+                    showSuccess: true,
+                    values: values
+                });
+                if (!!status) {
+                    onClose()
+                }
+            } else {
+                const { data, message, status } = await Request({
+                    endPoint: `${process.env.REACT_APP_API}api/Producto`,
+                    initialValues: [],
+                    method: 'post',
+                    showError: true,
+                    showSuccess: true,
+                    values: values
+                });
+                if (!!status) {
+                    onClose()
+                }
+            }
+        }
     });
     const {
         values,
@@ -115,508 +117,495 @@ const CreateProductoModal = ({
         touched,
         setFieldValue,
         setValues,
-        resetForm
-    } = useFormik({
-        initialValues: initialState,
-        validationSchema,
-        onSubmit: values => {
-            setValues({ ...values, imagenes: imagenes })
-            console.log(values);
-            console.log(imagenes)
-            switch (tipo) {
-                case 'nuevo':
-                    ApiInsertProducto();
-                    break;
-                case 'editar':
+        resetForm,
+    } = formik;
 
-                    break
-                default:
-                    break;
-            }
-        }
-    });
-    const [optionProveedor, setOptionProveedor] = useState([]);
-    const [optionCategoria, setOptionCategoria] = useState([]);
-    const [optionGrupo, setOptionGrupo] = useState([])
-    const [optionMarca, setOptionMarca] = useState([])
-    const [optionModelo, setOptionModelo] = useState([])
-    const [imagenes, setImagen] = useState([]);
-
-    const onImagenChange = async (e) => {
-        console.log('data entrante ', e);
-        let imagen = await readUploadedFileAsText(e);
-        console.log(imagen)
-        setValues({ ...values, imagenes: imagenes })
-        setImagen([...imagenes, imagen]);
-
-    }
-    const onImagenRemove = (i) => {
-        var nuevo = []
-        imagenes.forEach((element, index) => {
-            if (index != i) {
-                nuevo.push(element)
-            }
-        });
-        setValues({ ...values, imagenes: nuevo })
-        setFieldValue('imagenes', nuevo)
-
-    }
     const calcularPrecioVentaMin = () => {
         let resultado = parseInt(values.precioCompra) + (((values.utilidadMin) / 100) * values.precioCompra);
-        setFieldValue('PrecioVentaMin', resultado);
+        setFieldValue('precioVentaMin', resultado);
     }
     const calcularPrecioVentaMax = () => {
         let resultado = parseInt(values.precioCompra) + (((values.utilidadMax) / 100) * values.precioCompra);
-        setFieldValue('PrecioVentaMax', resultado);
+        setFieldValue('precioVentaMax', resultado);
     }
     const calcularUtilidadMin = () => {
-        let resultado = parseInt(((values.PrecioVentaMin * 100) / values.precioCompra) - (100));
+        let resultado = parseInt(((values.precioVentaMin * 100) / values.precioCompra) - (100));
         setFieldValue('utilidadMin', resultado);
     }
     const calcularUtilidadMax = () => {
         let resultado = parseInt(((values.PrecioVentaMax * 100) / values.precioCompra) - (100));
         setFieldValue('utilidadMax', resultado);
     }
-    const ApiCrearProducto = async () => {
-        const { data } = await CrearProductoService();
-        console.log(data.data)
-        setOptionProveedor(data.data.proveedores)
-        setValues({ ...initialState, codigoProducto: data.data.codigo })
-        setOptionCategoria(data.data.categorias);
-    }
-    const ApiEditarProducto = async () => {
-        const { data } = await EditarProductoService(id);
-        setOptionProveedor(data.data.proveedores)
-        setOptionCategoria(data.data.categorias)
-        console.log(data.data.proveedores)
-        console.log(data.data.categorias)
-        setImagen(data.data.imagenes);
-        setValues({ ...data.data.producto });
-    }
-    const ApiModificarProducto = async () => {
-        const { data } = await EditarProductoService(id);
-        setValues({ ...data.data.clasificacion })
-    }
-    const ApiInsertProducto = async () => {
-        const { data } = await GuardarProductoService(values);
-        console.log(data.data)
-        resetForm();
-        onClose();
-        setContext(true)
-    }
 
-    const ApiClasificacionPorId = async (clasificacionId) => {
-        const { data } = await obtenerClasificacionIdService(clasificacionId);
-        setOptionGrupo(data.data);
+    const onImagenesChange = async (e) => {
+        const imagen = await readUploadedFileAsText(e);
+        values.imagenes.push(imagen);
+        setValues({ ...values })
     }
-    useLayoutEffect(() => {
-        console.log(tipo)
-        switch (tipo) {
-            case 'nuevo':
-                ApiCrearProducto();
-                break;
-            case 'editar':
-                ApiEditarProducto();
-                break
-            default:
-                break;
+    const selectFilterProductoMaestro = () => {
+        let productoMaestro = productosMaestros.find(x => { return x.productoMaestroId == values.productoMaestroId });
+        if (productoMaestro == undefined) {
+            return null;
         }
-        return () => {
+        return productoMaestro
+    }
+    const selectFilterProveedor = () => {
+        let proveedor = proveedores.find(x => { return x.id == values.proveedoreId });
+        if (proveedor == undefined) {
+            return null;
+        }
+        return proveedor;
+    }
+    const selectFilterCategoria = () => {
+        let categoria = categorias.find(x => { return x.categoriaId == values.categoriaId })
+        if (categoria == undefined) {
+            return null;
+        }
+        return categoria
+    }
+    useEffect(() => {
 
-        };
-    }, [open])
+        setValues({ ...initialState, codigoProducto: codigo });
+        console.log(values)
+    }, [data])
 
+    const ApiObtenerAtributo = async (categoriaId) => {
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/Atributo/create/${categoriaId}`,
+            initialValues: [],
+            method: 'get',
+            showError: true,
+            showSuccess: false
+        });
+        if (!!status) {
+            const nuevoAtributos = data.map((atributo) => {
+                return {
+                    atributoId: atributo.atributoId,
+                    valor: '',
+                    etiqueta: atributo.etiqueta
+                }
+            });
+            setValues({
+                ...values, atributos: nuevoAtributos
+            })
+        }
+    }
     return <StyledAppModal open={open} handleClose={onClose}>
         <H2 marginBottom={2}>
             {editProduct && data ? "Editar producto" : "Añadir producto"}
         </H2>
+        <FormikProvider value={formik}  >
+            <Form autoComplete="off" noValidate onSubmit={(e) => { console.log(values); handleSubmit(e) }}>
+                <Scrollbar style={{
+                    maxHeight: 500,
+                    overflow: 'auto'
+                }}>
+                    <Grid container spacing={2}>
+                        <Grid item sm={6} xs={12}>
+                            <H6 mb={1}>Codigo</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="codigoProducto"
+                                placeholder="Codigo producto"
+                                value={values.codigoProducto}
+                                onChange={handleChange}
+                                error={Boolean(touched.codigoProducto && errors.codigoProducto)}
+                                helperText={touched.codigoProducto && errors.codigoProducto}
+                            />
+                        </Grid>
+                        <Grid item sm={6} xs={12}>
+                            <H6 mb={1}>Codigo de Barras</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="codigoBarra"
+                                placeholder="Codigo de barras"
+                                value={values.codigoBarra}
+                                onChange={handleChange}
+                                error={Boolean(touched.codigoBarra && errors.codigoBarra)}
+                                helperText={touched.codigoBarra && errors.codigoBarra}
+                            />
+                        </Grid>
+                        <Grid item sm={12} xs={12}>
+                            <H6 mb={1}>Selecciones producto maestro</H6>
+                            <Autocomplete
+                                options={productosMaestros}
+                                getOptionLabel={(options) => options.nombre}
+                                defaultValue={selectFilterProductoMaestro()}
+                                size="small"
+                                fullWidth
+                                onChange={(event, newValue) => {
+                                    if (newValue != null) {
+                                        console.log(values)
+                                        console.log('select producto maestro', newValue)
+                                        setFieldValue('productoMaestroId', newValue.productoMaestroId)
+                                        setFieldValue('productoMaestroNombre', newValue.nombre)
+                                    } else {
+                                        setFieldValue('productoMaestroId', initialState.id)
+                                        setFieldValue('productoMaestroNombre', initialState.productoMaestroNombre)
+                                    }
+                                }}
+                                renderInput={
+                                    (params) =>
+                                        <TextField
+                                            {...params}
+                                            value={values.productoMaestroNombre}
+                                            label="Selecione un producto maestro (opcional)"
+                                            error={Boolean(touched.productoMaestroNombre && errors.productoMaestroNombre)}
+                                            helperText={touched.productoMaestroNombre && errors.productoMaestroNombre}
+                                        />}
+                            />
+                        </Grid>
+                        <Grid item sm={12} xs={12}>
+                            <H6 mb={1}>Nombre producto maestro</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="productoMaestroNombre"
+                                placeholder="Nombre producto maestro"
+                                value={values.productoMaestroNombre}
+                                onChange={handleChange}
+                                error={Boolean(touched.productoMaestroNombre && errors.productoMaestroNombre)}
+                                helperText={touched.productoMaestroNombre && errors.productoMaestroNombre}
+                            />
+                        </Grid>
+                        <Grid item sm={12} xs={12}>
+                            <H6 mb={1}>Nombre producto</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="nombreProducto"
+                                placeholder="Nombre producto"
+                                value={values.nombreProducto}
+                                onChange={handleChange}
+                                error={Boolean(touched.nombreProducto && errors.nombreProducto)}
+                                helperText={touched.nombreProducto && errors.nombreProducto}
+                            />
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
+                            <H6 mb={1}>Stock minimo</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="stockMinimo"
+                                type="number"
+                                placeholder="Stock minimo"
+                                value={values.stockMinimo}
+                                onChange={handleChange}
+                                error={Boolean(touched.stockMinimo && errors.stockMinimo)}
+                                helperText={touched.stockMinimo && errors.stockMinimo}
+                            />
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
+                            <H6 mb={1}>Unidad Medida</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="unidadMedida"
+                                placeholder="Unidad Medida"
+                                value={values.unidadMedida}
+                                onChange={handleChange}
+                                error={Boolean(touched.unidadMedida && errors.unidadMedida)}
+                                helperText={touched.unidadMedida && errors.unidadMedida}
+                            />
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
 
-        <form onSubmit={(e) => { console.log(errors); handleSubmit(e) }}>
-            <Scrollbar style={{
-                maxHeight: downXl ? 500 : "auto"
-            }}>
-                <Grid container spacing={2}>
-                    <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Codigo</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="codigoProducto"
-                            placeholder="Codigo producto"
-                            value={values.codigoProducto}
-                            onChange={handleChange}
-                            error={Boolean(touched.codigoProducto && errors.codigoProducto)}
-                            helperText={touched.codigoProducto && errors.codigoProducto}
-                        />
-                    </Grid>
-                    <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Codigo de Barras</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="codigoBarra"
-                            placeholder="Codigo de barras"
-                            value={values.codigoBarra}
-                            onChange={handleChange}
-                            error={Boolean(touched.codigoBarra && errors.codigoBarra)}
-                            helperText={touched.codigoBarra && errors.codigoBarra}
-                        />
-                    </Grid>
-                    <Grid item sm={12} xs={12}>
-                        <H6 mb={1}>Nombre</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="nombreProducto"
-                            placeholder="Nombre"
-                            value={values.productName}
-                            onChange={handleChange}
-                            error={Boolean(touched.nombreProducto && errors.nombreProducto)}
-                            helperText={touched.nombreProducto && errors.nombreProducto}
-                        />
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>Stock minimo</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="stockMinimo"
-                            type="number"
-                            placeholder="Stock minimo"
-                            value={values.stockMinimo}
-                            onChange={handleChange}
-                            error={Boolean(touched.stockMinimo && errors.stockMinimo)}
-                            helperText={touched.stockMinimo && errors.stockMinimo}
-                        />
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>Unidad Medida</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="unidadMedida"
-                            placeholder="Unidad Medida"
-                            value={values.unidadMedida}
-                            onChange={handleChange}
-                            error={Boolean(touched.unidadMedida && errors.unidadMedida)}
-                            helperText={touched.unidadMedida && errors.unidadMedida}
-                        />
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
+                            <H6 mb={1}>Precio compra</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="precioCompra"
+                                type="number"
+                                placeholder="precio compra"
+                                value={values.precioCompra}
+                                onChange={handleChange}
+                                onKeyUp={
+                                    (e) => {
+                                        //calcularUtilidadMin()
+                                        console.log(e.target.value)
+                                    }
+                                }
+                                error={Boolean(touched.precioCompra && errors.precioCompra)}
+                                helperText={touched.precioCompra && errors.precioCompra}
+                            />
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
+                            <H6 mb={1}>% Utilidad min</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="utilidadMin"
+                                type="number"
+                                placeholder="% Utilidad mi"
+                                value={values.utilidadMin}
+                                onChange={(e) => {
+                                    handleChange(e)
+                                }}
+                                onKeyUp={
+                                    (e) => {
+                                        calcularPrecioVentaMin()
+                                        console.log(e.target.value)
+                                    }
+                                }
+                                error={Boolean(touched.utilidadMin && errors.utilidadMin)}
+                                helperText={touched.utilidadMin && errors.utilidadMin}
+                            />
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
+                            <H6 mb={1}>Precio venta min</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="precioVentaMin"
+                                type="number"
+                                placeholder="Precio venta min"
+                                value={values.precioVentaMin}
+                                onChange={handleChange}
+                                onKeyUp={
+                                    (e) => {
+                                        calcularUtilidadMin()
+                                        console.log(e.target.value)
+                                    }
+                                }
+                                error={Boolean(touched.precioVentaMin && errors.precioVentaMin)}
+                                helperText={touched.precioVentaMin && errors.precioVentaMin}
+                            />
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
+                            <H6 mb={1}>% Utilidad max</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="utilidadMax"
+                                type="number"
+                                placeholder="% Utilidad max"
+                                value={values.utilidadMax}
+                                onChange={handleChange}
+                                onKeyUp={
+                                    (e) => {
+                                        calcularPrecioVentaMax()
+                                        console.log(e.target.value)
+                                    }
+                                }
+                                error={Boolean(touched.utilidadMax && errors.utilidadMax)}
+                                helperText={touched.utilidadMax && errors.utilidadMax}
+                            />
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
+                            <H6 mb={1}>Precio venta max</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="precioVentaMax"
+                                type="number"
+                                placeholder="Categoria"
+                                value={values.precioVentaMax}
+                                onChange={handleChange}
+                                onKeyUp={
+                                    (e) => {
+                                        calcularUtilidadMax()
+                                        console.log(e.target.value)
+                                    }
+                                }
+                                error={Boolean(touched.PrecioVentaMax && errors.PrecioVentaMax)}
+                                helperText={touched.PrecioVentaMax && errors.PrecioVentaMax}
+                            />
+                        </Grid>
 
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>Precio compra</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="precioCompra"
-                            type="number"
-                            placeholder="precio compra"
-                            value={values.precioCompra}
-                            onChange={handleChange}
-                            onKeyUp={
-                                (e) => {
-                                    //calcularUtilidadMin()
-                                    console.log(e.target.value)
-                                }
-                            }
-                            error={Boolean(touched.precioCompra && errors.precioCompra)}
-                            helperText={touched.precioCompra && errors.precioCompra}
-                        />
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>% Utilidad min</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="utilidadMin"
-                            type="number"
-                            placeholder="% Utilidad mi"
-                            value={values.utilidadMin}
-                            onChange={(e) => {
-                                handleChange(e)
-                            }}
-                            onKeyUp={
-                                (e) => {
-                                    calcularPrecioVentaMin()
-                                    console.log(e.target.value)
-                                }
-                            }
-                            error={Boolean(touched.utilidadMin && errors.utilidadMin)}
-                            helperText={touched.utilidadMin && errors.utilidadMin}
-                        />
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>Precio venta min</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="PrecioVentaMin"
-                            type="number"
-                            placeholder="Precio venta min"
-                            value={values.PrecioVentaMin}
-                            onChange={handleChange}
-                            onKeyUp={
-                                (e) => {
-                                    calcularUtilidadMin()
-                                    console.log(e.target.value)
-                                }
-                            }
-                            error={Boolean(touched.PrecioVentaMin && errors.PrecioVentaMin)}
-                            helperText={touched.PrecioVentaMin && errors.PrecioVentaMin}
-                        />
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>% Utilidad max</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="utilidadMax"
-                            type="number"
-                            placeholder="% Utilidad max"
-                            value={values.utilidadMax}
-                            onChange={handleChange}
-                            onKeyUp={
-                                (e) => {
-                                    calcularPrecioVentaMax()
-                                    console.log(e.target.value)
-                                }
-                            }
-                            error={Boolean(touched.utilidadMax && errors.utilidadMax)}
-                            helperText={touched.utilidadMax && errors.utilidadMax}
-                        />
-                    </Grid>
-                    <Grid item sm={4} xs={12}>
-                        <H6 mb={1}>Precio venta max</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="PrecioVentaMax"
-                            type="number"
-                            placeholder="Categoria"
-                            value={values.PrecioVentaMax}
-                            onChange={handleChange}
-                            onKeyUp={
-                                (e) => {
-                                    calcularUtilidadMax()
-                                    console.log(e.target.value)
-                                }
-                            }
-                            error={Boolean(touched.PrecioVentaMax && errors.PrecioVentaMax)}
-                            helperText={touched.PrecioVentaMax && errors.PrecioVentaMax}
-                        />
-                    </Grid>
+                        <Grid item sm={12} xs={12}>
+                            <H6 mb={1}>Proveedor</H6>
+                            <Autocomplete
+                                id="proveedor"
+                                fullWidth
+                                defaultValue={selectFilterProveedor()}
+                                options={proveedores}
+                                getOptionLabel={(options) => options.nombreProveedor}
+                                size="small"
+                                onChange={(event, newValue) => {
+                                    if (newValue != null) {
+                                        setFieldValue('proveedorId', newValue.id)
+                                    } else {
+                                        setFieldValue('proveedorId', initialState.id)
+                                    }
+                                }}
+                                renderInput={
+                                    (params) =>
+                                        <TextField
+                                            {...params}
+                                            value={values.proveedorId}
+                                            label="Seleccione una proveedores"
+                                            error={Boolean(touched.proveedorId && errors.proveedorId)}
+                                            helperText={touched.proveedorId && errors.proveedorId}
+                                        />}
+                            />
+                        </Grid>
+                        <Grid item sm={12} xs={12}>
+                            <H6 mb={1}>Categoria</H6>
+                            <Autocomplete
+                                fullWidth
+                                id="categoria"
+                                options={categorias}
+                                defaultValue={selectFilterCategoria}
+                                getOptionLabel={(options) => options.nombre}
+                                size="small"
+                                onChange={async (event, newValue) => {
+                                    if (newValue != null) {
+                                        console.log('obteniendo caTEGORIA', newValue.categoriaId)
+                                        await ApiObtenerAtributo(newValue.categoriaId);
+                                        setFieldValue('categoriaId', newValue.categoriaId);
+                                    } else {
+                                        setFieldValue('categoriaId', initialState.id)
+                                    }
+                                }}
+                                renderInput={
+                                    (params) =>
+                                        <TextField
+                                            {...params}
+                                            value={values.categoriaId}
+                                            label="Seleccione una categoria"
+                                            error={Boolean(touched.categoriaId && errors.categoriaId)}
+                                            helperText={touched.categoriaId && errors.categoriaId}
+                                        />}
+                            />
+                        </Grid>
+                        <Grid item sm={12} xs={12}>
+                            <FieldArray
+                                name="atributos"
+                                render={arrayHelpers => {
+                                    const atributos = values.atributos;
+                                    return (
+                                        <Grid container spacing={2}>
+                                            {atributos && atributos.length > 0 ? (
+                                                atributos.map((atributo, index) => {
+                                                    return (
+                                                        <Grid item sm={12} xs={12} key={index}>
+                                                            <AppTextField
+                                                                fullWidth
+                                                                size="small"
+                                                                name={`atributos[${index}].valor`}
+                                                                placeholder={atributos[index].etiqueta}
+                                                                value={atributos[index].valor}
+                                                                onChange={handleChange}
+                                                            /* error={Boolean(touched.atributos && errors.atributos)}
+                                                            helperText={touched.atributos && errors.atributos} */
+                                                            />
 
-                    <Grid item sm={12} xs={12}>
-                        <H6 mb={1}>Proveedor</H6>
-                        <Autocomplete
-                            disablePortal
-                            id="combo-box-proveedor"
-                            options={optionProveedor}
-                            getOptionLabel={(options) => options.nombreProveedor}
-                            size="small"
-                            onChange={(event, newValue) => {
-                                if (newValue != null) {
-                                    setFieldValue('proveedorId', newValue.id)
-                                } else {
-                                    setFieldValue('proveedorId', initialState.id)
-                                }
-                            }}
-                            renderInput={
-                                (params) =>
-                                    <TextField
-                                        {...params}
-                                        value={values.proveedorId}
-                                        label="Proveedores"
-                                        error={Boolean(touched.proveedorId && errors.proveedorId)}
-                                        helperText={touched.proveedorId && errors.proveedorId}
-                                    />}
-                        />
-                    </Grid>
-                    <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Categoria</H6>
-                        <Autocomplete
-                            disablePortal
-                            id="combo-box-demo"
-                            options={optionCategoria}
-                            getOptionLabel={(options) => options.nombreClasificacion}
-                            size="small"
-                            onChange={(event, newValue) => {
-                                if (newValue != null) {
-                                    setFieldValue('categoriaId', newValue.id);
-                                    ApiClasificacionPorId(newValue.id);
-                                } else {
-                                    setFieldValue('categoriaId', initialState.id)
-                                }
-                            }}
-                            renderInput={
-                                (params) =>
-                                    <TextField
-                                        {...params}
-                                        value={values.categoria}
-                                        label="Grupo"
-                                        error={Boolean(touched.categoriaId && errors.categoriaId)}
-                                        helperText={touched.categoriaId && errors.categoriaId}
-                                    />}
-                        />
-                    </Grid>
-                    <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Grupo</H6>
-                        <Autocomplete
-                            disablePortal
-                            id="combo-box-demo"
-                            options={optionGrupo}
-                            getOptionLabel={(options) => options.nombreClasificacion}
-                            size="small"
-                            onChange={(event, newValue) => {
-                                if (newValue != null) {
-                                    setFieldValue('grupoId', newValue.id);
-                                    ApiClasificacionPorId(newValue.id);
-                                } else {
-                                    setFieldValue('grupoId', initialState.id)
-                                }
-                            }}
-                            renderInput={
-                                (params) =>
-                                    <TextField
-                                        {...params}
-                                        value={values.grupoId}
-                                        label="Grupo"
-                                        error={Boolean(touched.grupoId && errors.grupoId)}
-                                        helperText={touched.grupoId && errors.grupoId}
-                                    />}
-                        />
-                    </Grid>
-                    <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Marca</H6>
-                        <Autocomplete
-                            disablePortal
-                            id="combo-box-demo"
-                            getOptionLabel={(options) => options.nombreClasificacion}
-                            options={optionMarca}
-                            size="small"
-                            onChange={(event, newValue) => {
-                                if (newValue != null) {
-                                    setFieldValue('marcaId', newValue.id);
-                                    ApiClasificacionPorId(newValue.id);
-                                } else {
-                                    setFieldValue('marcaId', initialState.id)
-                                }
-                            }}
-                            renderInput={
-                                (params) =>
-                                    <TextField
-                                        {...params}
-                                        value={values.marcaId}
-                                        label="Marca"
-                                        error={Boolean(touched.marcaId && errors.marcaId)}
-                                        helperText={touched.marcaId && errors.marcaId}
-                                    />}
-                        />
-                    </Grid>
-                    <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Modelo</H6>
-                        <Autocomplete
-                            disablePortal
-                            id="combo-box-demo"
-                            getOptionLabel={(options) => options.nombreClasificacion}
-                            options={optionModelo}
-                            size="small"
-                            onChange={(event, newValue) => {
-                                if (newValue != null) {
-                                    setFieldValue('modeloId', newValue.id);
-                                    ApiClasificacionPorId(newValue.id);
-                                } else {
-                                    setFieldValue('modeloId', initialState.id)
-                                }
-                            }}
-                            renderInput={
-                                (params) =>
-                                    <TextField
-                                        {...params}
-                                        value={values.modeloId}
-                                        label="Modelo"
-                                        error={Boolean(touched.modeloId && errors.modeloId)}
-                                        helperText={touched.modeloId && errors.modeloId}
-                                    />}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <H6 pb={1}>Imagenes de producto</H6>
-                        <Box sx={{
-                            padding: 1,
-                            borderRadius: "8px",
-                            border: "1px dashed",
-                            borderColor: "text.disabled",
-                            backgroundColor: "grey.100"
-                        }}>
-                            <Grid container spacing={1}>
-                                {imagenes.map((item, i) =>
-                                    <Grid item sm={3} xs={4} key={i}>
-                                        <Box sx={{
-                                            minHeight: 140,
-                                            borderRadius: "8px",
-                                            overflow: "hidden",
-                                            position: "relative"
+                                                            {/* <button
+                                                            type="button"
+                                                            onClick={() => arrayHelpers.remove(index)} // remove a amenity from the list
+                                                        >
+                                                        </button> */}
+                                                        </Grid>
+                                                    )
+                                                })) : null
+                                            }
+                                            {/* <button type="button" onClick={() => {
+                                            arrayHelpers.push({
+                                                atributoId: 0,
+                                                valor: "",
+                                            })
                                         }}>
-                                            <img src={item} width="100%" height="100%" alt={item} />
-                                            <ImageDeleteWrapper>
-                                                <IconButton
-                                                    onClick={() => { onImagenRemove(i) }}
-                                                >
-                                                    <DeleteIcon
-                                                        sx={{
-                                                            fontSize: 12,
-                                                            color: "white"
-                                                        }}
-                                                    />
-                                                </IconButton>
-                                            </ImageDeleteWrapper>
-                                        </Box>
-                                    </Grid>
-                                )}
-                                <Grid item sm={3} xs={4}>
-                                    <label htmlFor="image-upload">
-                                        <input type="file" accept="image/*" id="image-upload"
-                                            style={{
-                                                display: "none"
-                                            }}
-                                            onChange={onImagenChange}
-                                        />
-                                        <ImageUploadWrapper textAlign="center">
-                                            <Box>
-                                                <Add color="disabled" />
-                                                <Small fontWeight={600} display="block">
-                                                    Choose a file
-                                                </Small>
-                                                <Small fontWeight={600} color="text.disabled">
-                                                    or drag it here
-                                                </Small>
-                                            </Box>
-                                        </ImageUploadWrapper>
-                                    </label>
+                                            Add a Amenity
+                                        </button> */}
+                                        </Grid>
+                                    )
+                                }}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <H6 pb={1}>Imagenes de producto</H6>
+                            <Box sx={{
+                                padding: 1,
+                                borderRadius: "8px",
+                                border: "1px dashed",
+                                borderColor: "text.disabled",
+                                backgroundColor: "grey.100"
+                            }}>
+                                <Grid container spacing={1}>
+                                    <FieldArray
+                                        name="imagenes"
+                                        render={arrayImagenes => {
+                                            const imagenes = values.imagenes;
+                                            return (
+                                                <Grid container spacing={2}>
+                                                    {imagenes && imagenes.length > 0 ? (
+                                                        imagenes.map((imagen, i) => {
+                                                            return (
+                                                                <Grid item sm={3} xs={4} key={i}>
+                                                                    <Box sx={{
+                                                                        minHeight: 140,
+                                                                        borderRadius: "8px",
+                                                                        overflow: "hidden",
+                                                                        position: "relative"
+                                                                    }}>
+                                                                        <img src={imagen} width="100%" height="100%" alt={imagen} />
+                                                                        <ImageDeleteWrapper>
+                                                                            <IconButton
+                                                                                onClick={() => { arrayImagenes.remove(i) }}
+                                                                            >
+                                                                                <DeleteIcon
+                                                                                    sx={{
+                                                                                        fontSize: 12,
+                                                                                        color: "white"
+                                                                                    }}
+                                                                                />
+                                                                            </IconButton>
+                                                                        </ImageDeleteWrapper>
+                                                                    </Box>
+                                                                </Grid>
+                                                            )
+                                                        })) : null
+                                                    }
+                                                    <Grid item sm={3} xs={4}>
+                                                        <label htmlFor="image-upload">
+                                                            <input type="file" accept="image/*" id="image-upload"
+                                                                style={{
+                                                                    display: "none"
+                                                                }}
+                                                                onChange={onImagenesChange}
+                                                            />
+                                                            <ImageUploadWrapper textAlign="center">
+                                                                <Box>
+                                                                    <Add color="disabled" />
+                                                                    <Small fontWeight={600} display="block">
+                                                                        Choose a file
+                                                                    </Small>
+                                                                    <Small fontWeight={600} color="text.disabled">
+                                                                        or drag it here
+                                                                    </Small>
+                                                                </Box>
+                                                            </ImageUploadWrapper>
+                                                        </label>
+                                                    </Grid>
+                                                </Grid>
+                                            )
+                                        }}
+                                    />
                                 </Grid>
-                            </Grid>
-                        </Box>
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </Scrollbar>
+                <Grid container>
+                    <Grid item xs={12}>
+                        <FlexBox justifyContent="flex-end" gap={2} marginTop={2}>
+                            <Button fullWidth variant="outlined" onClick={onClose}>
+                                Cancelar
+                            </Button>
+                            <Button fullWidth type="submit" variant="contained">
+                                guardar
+                            </Button>
+                        </FlexBox>
                     </Grid>
                 </Grid>
-            </Scrollbar>
-            <Grid container>
-                <Grid item xs={12}>
-                    <FlexBox justifyContent="flex-end" gap={2} marginTop={2}>
-                        <Button fullWidth variant="outlined" onClick={onClose}>
-                            Cancel
-                        </Button>
-                        <Button fullWidth type="submit" variant="contained">
-                            Save
-                        </Button>
-                    </FlexBox>
-                </Grid>
-            </Grid>
-        </form>
+            </Form>
+        </FormikProvider>
     </StyledAppModal>;
 };
 

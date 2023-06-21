@@ -28,6 +28,7 @@ import LayerGroup from "./LayerGroup";
 import FileCircleQuestion from "./FileCircleQuestion";
 import UserList from "./UserList"; // eslint-disable-next-line import/no-anonymous-default-export
 import SettingsIcon from '@mui/icons-material/Settings';
+import RuleIcon from '@mui/icons-material/Rule';
 export default {
   AdminEcommerce,
   ArrowLeftToLine,
@@ -58,5 +59,6 @@ export default {
   RectangleCirclePlus,
   PersonChalkboard,
   PersonCircleCheck,
+  RuleIcon,
   SettingsIcon
 };

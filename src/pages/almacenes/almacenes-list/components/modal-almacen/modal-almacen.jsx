@@ -40,7 +40,7 @@ const ImageUploadWrapper = styled(FlexRowAlign)(({
     backgroundColor: theme.palette.grey[200]
 }));
 
-const CreateAlmacenModal = ({
+const ModalAlmacen = ({
     open,
     data,
     onClose,
@@ -126,4 +126,4 @@ const CreateAlmacenModal = ({
 };
 
 const images = ["/static/products/watch.png", "/static/products/camera.png", "/static/products/headphone.png"];
-export default CreateAlmacenModal;
+export default ModalAlmacen;
