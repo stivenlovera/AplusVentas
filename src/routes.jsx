@@ -51,19 +51,33 @@ const ActiveLayout = ({ nombreCompleto }) => {
 
 const routes = (user, token) => {
   if (token) {
-    console.log('bloquear login')
+    console.log('bloquear login', user, token)
   }
-  return [
-    ...authRoutes,
-    {
-      path: "dashboard",
-      element: <ActiveLayout nombreCompleto={`${user.nombre} ${user.apellido}`} />,
-      children: dashboardRoutes,
-    },
-    {
-      path: "*",
-      element: <Error />
-    }];
+  if (token) { // true si hay token
+    return [
+      {
+        path: "dashboard",
+        element: <ActiveLayout nombreCompleto={`${user.nombre} ${user.apellido}`} />,
+        children: dashboardRoutes,
+      },
+      {
+        path: "*",
+        element: <Error />
+      },
+      {
+        path: "/login",
+        element: <Navigate to="/dashboard" />
+      },
+      {
+        path: "",
+        element: <Navigate to="/dashboard" />
+      }];
+  } else {
+    return [
+      ...authRoutes,
+    ]
+  }
+
 
 };
 
@@ -74,7 +88,11 @@ const authRoutes = [
   }, {
     path: "login",
     element: <Login />
-  }
+  },
+  {
+    path: "*",
+    element: <Navigate to="/login" />
+  },
 ];
 
 const dashboardRoutes = [

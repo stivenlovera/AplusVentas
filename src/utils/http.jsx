@@ -12,7 +12,6 @@ export async function Request({ endPoint, initialValues, method, showError, show
             if (showSuccess) {
                 enqueueSnackbar(data.message, { variant: 'success' });
             }
-
             console.log('Status Todo bien 1', data);
             return data;
         } else {

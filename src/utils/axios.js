@@ -1,5 +1,4 @@
 import axios from "axios";
-import { request } from "http";
 const asyncLocalStorage = {
     setItem: async function (key, value) {
         return localStorage.setItem(key, value);
@@ -14,6 +13,9 @@ export const AxiosRequest = async () => {
         async (config) => {
             config.headers = {
                 'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Access-Control-Allow-Origin': '*',
+                'ngrok-skip-browser-warning': true,
                 'Authorization': `Bearer ${await asyncLocalStorage.getItem('token')}`,
             };
             return config;
@@ -27,7 +29,9 @@ axiosInstance.interceptors.response.use(response => response, error => Promise.r
 axiosInstance.interceptors.request.use((request) => {
     request.headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJleHAiOjE2ODQ0NTY3OTZ9.vyvLMLCdpMtU2nV39EBkN20tVcrryb85iNDb76TyQNc`
+        'X-Requested-With': 'XMLHttpRequest',
+        'ngrok-skip-browser-warning': true,
+        'Access-Control-Allow-Origin': '*',
     };
     return request;
 })

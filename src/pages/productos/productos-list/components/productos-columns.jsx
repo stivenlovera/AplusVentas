@@ -1,8 +1,10 @@
 import { Edit } from "@mui/icons-material";
-import { Box, IconButton, Rating } from "@mui/material";
-import { Fragment, useState } from "react";
+import { IconButton } from "@mui/material";
+import { Fragment, useEffect, useState } from "react";
 import CreateProductoModal from "./create-producto";
 import Delete from "icons/Delete";
+import { initialState } from "../utils/utils-productos";
+import { Request } from "utils/http";
 const ProductosColumns = [
     {
         Header: "Cod barras",
@@ -26,7 +28,7 @@ const ProductosColumns = [
     },
     {
         Header: "Acciones",
-        accessor: "acciones",
+        accessor: "productoId",
         Cell: ({
             row
         }) => {
@@ -35,14 +37,45 @@ const ProductosColumns = [
                 transition: "color 0.3s",
                 color: row.isSelected ? "white" : "text.disabled"
             };
-            const [tipo, setTipo] = useState('');
+            const [editar, setEditar] = useState({
+                codigo: '',
+                proveedores: [],
+                categorias: [],
+                productosMaestros: [],
+                initialState: initialState
+            })
             const [openModal, setOpenModal] = useState(false);
+            /*Api */
+            const onEditarProducto = async () => {
+                setOpenModal(true)
+                const { data, message, status } = await Request({
+                    endPoint: `${process.env.REACT_APP_API}api/Producto/editar/${row.original.productoId}`,
+                    initialValues: [],
+                    method: 'get',
+                    showError: true,
+                    showSuccess: false
+                });
+                if (!!status) {
+                    setEditar({
+                        codigo: data.producto.codigoProducto,
+                        categorias: data.categorias,
+                        proveedores: data.proveedores,
+                        productosMaestros: data.productosMaestros,
+                        initialState: data.producto
+                    });
+                    setOpenModal(true);
+                }
+                else {
+                    setOpenModal(false)
+                }
+            }
+            useEffect(() => {
+
+            }, [editar])
+            
             return <Fragment>
                 <IconButton
-                    onClick={() => {
-                        setOpenModal(true)
-                        setTipo('editar')
-                    }}
+                    onClick={onEditarProducto}
                 >
                     <Edit
                         sx={{
@@ -55,17 +88,10 @@ const ProductosColumns = [
                     <Delete sx={style} />
                 </IconButton>
                 <CreateProductoModal
-                    editProduct
                     open={openModal}
-                    data={row.original}
-                    id={row.original.id}
-                    onClose={
-                        () => {
-                            setOpenModal(false);
-                            setTipo('')
-                        }}
-                    tipo={tipo}
-                />
+                    editProduct
+                    onClose={() => setOpenModal(false)}
+                    data={editar} />
             </Fragment>;
         }
     }];

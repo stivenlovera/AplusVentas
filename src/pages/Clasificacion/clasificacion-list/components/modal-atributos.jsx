@@ -1,5 +1,5 @@
 
-import { Button, Grid, styled, useMediaQuery } from "@mui/material";
+import { Backdrop, Box, Button, CircularProgress, Grid, styled, useMediaQuery } from "@mui/material";
 import AppModal from "components/AppModal";
 import FlexBox from "components/flexbox/FlexBox";
 import AppTextField from "components/input-fields/AppTextField";
@@ -15,8 +15,8 @@ import { Request } from "utils/http";
 const StyledAppModal = styled(AppModal)(({
     theme
 }) => ({
-    maxWidth: 700,
-    minWidth: 300,
+    maxWidth: 800,
+    minWidth: 400,
     outline: "none",
     padding: "1.5rem"
 }));
@@ -25,139 +25,195 @@ const AtributoModal = ({
     open,
     data,
     onClose,
-    editClasificacion,
-    hijo
+    onUpdate
 }) => {
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [context, setContext] = useContext(Context);
-
-
+    const [loader, setLoader] = useState(false)
     /*METODOS */
 
     /*API */
+    const onHandlerSave = async (values) => {
+        setLoader(true);
+        if (values.atributoId == 0) {
+            const { data, message, status } = await Request({
+                endPoint: `${process.env.REACT_APP_API}api/Atributo`,
+                initialValues: [],
+                method: 'post',
+                showError: true,
+                showSuccess: true,
+                values: values
+            });
+        } else {
+            const { data, message, status } = await Request({
+                endPoint: `${process.env.REACT_APP_API}api/Atributo`,
+                initialValues: [],
+                method: 'put',
+                showError: true,
+                showSuccess: true,
+                values: values
+            });
+        }
+        onUpdate(true);
+        setLoader(false);
+    }
+    const onHandlerDelete = async (atributo, arrayHelpers, index) => {
+        setLoader(true);
+        if (atributo.atributoId == 0) {
+            arrayHelpers.remove(index)
+        } else {
+            const { data, message, status } = await Request({
+                endPoint: `${process.env.REACT_APP_API}api/Atributo/${atributo.atributoId}`,
+                initialValues: [],
+                method: 'delete',
+                showError: true,
+                showSuccess: true,
+            });
+            if (!!status) {
+                onUpdate(true);
+            }
+        }
+        setLoader(false);
+    }
 
     useEffect(() => {
-
-    }, [data])
-
-    return <StyledAppModal open={open} handleClose={onClose}>
+        console.log('data de entrada', data.atributos)
+    }, [data.atributos])
+    
+    return <StyledAppModal open={open} handleClose={onClose} >
         <H2 marginBottom={2}>
             Atributos
         </H2>
 
-        <form >
-            <Scrollbar style={{
-                maxHeight: downXl ? 500 : "auto"
-            }}>
-                <Formik
-                    initialValues={{
-                        users: [{
-                            name: "deshan madurajith",
-                            email: "desh@email.com"
-                        },
-                        {
-                            name: "Hello Desh",
-                            email: "hello@email.com"
-                        }
-
-                        ],
-                        organizationName: []
-                    }}
-                    validationSchema={Yup.object({
-                        organizationName: Yup.string().required(
-                            "Organization Name is required"
-                        ),
-                        users: Yup.array().of(
-                            Yup.object().shape({
-                                name: Yup.string().required("Name required"),
-                                email: Yup.string()
-                                    .required("email required")
-                                    .email("Enter valid email")
-                            })
-                        )
-                    })}
-                    onSubmit={values => alert(JSON.stringify(values, null, 2))}
-                >
-
+        <Formik
+            initialValues={{
+                atributos: data.atributos /* [ {
+                    categoriaId: 0,
+                    atributoId: 0,
+                    etiqueta: "string",
+                    tipo: "string"
+                } ] */
+            }}
+            validationSchema={Yup.object({
+                atributos: Yup.array().of(
+                    Yup.object().shape({
+                        etiqueta: Yup.string().required("Nombre etiqueta requerido"),
+                        tipo: Yup.string(),
+                        categoriaId: Yup.number(),
+                        atributoId: Yup.number()
+                    })
+                )
+            })}
+            onSubmit={values => {
+                onHandlerSave(values)
+            }}
+        >
+            {({ values, handleChange, touched, errors, setValues }) => {
+                return (
                     <Form>
-                        <h5>Form </h5>
-                        <Field placeholder="Organization name" name={`organizationName`} />
-                        <ErrorMessage name={`organizationName`} />
-                        <h5>Organzation users </h5>
                         <FieldArray
-                            name="users"
+                            name="atributos"
                             render={arrayHelpers => {
-                                const users = values.users;
+                                const atributos = values.atributos;
                                 return (
                                     <div>
-                                        {users && users.length > 0
-                                            ? users.map((user, index) => (
-                                                <div key={index}>
-                                                    <Field
-                                                        placeholder="user name"
-                                                        name={`users.${index}.name`}
-                                                    />
-                                                    <ErrorMessage name={`users.${index}.name`} />
-                                                    <br />
-
-                                                    <Field
-                                                        placeholder="user email"
-                                                        name={`users.${index}.email`}
-                                                    />
-                                                    <ErrorMessage name={`users.${index}.email`} />
-
-                                                    <br />
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
-                                                    >
-                                                        -
-                                                    </button>
-                                                    <br />
-                                                    <br />
-                                                </div>
-                                            ))
-                                            : null}
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                arrayHelpers.push({
-                                                    name: "",
-                                                    email: ""
-                                                })
-                                            } // insert an empty string at a position
+                                        <Backdrop
+                                            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                                            open={loader}
+                                            onClick={() => { setLoader(false) }}
                                         >
-                                            add a User
-                                        </button>
-                                        <br />
-                                        <br />
-                                        <br />
-                                        <div>
-                                            <button type="submit">Form Submit</button>
-                                        </div>
+                                            <CircularProgress color="inherit" />
+                                        </Backdrop>
+                                        <Scrollbar style={{ maxHeight: 600, overflow: 'auto' }} >
+                                            {atributos && atributos.length > 0
+                                                ? atributos.map((atributo, index) => {
+                                                    return (
+                                                        <Box
+                                                            key={index}
+                                                            sx={{
+                                                                backgroundColor: '#f3f4f9',
+                                                                /* '&:hover': {
+                                                                    backgroundColor: 'primary.main',
+                                                                    opacity: [0.9, 0.8, 0.7],
+                                                                }, */
+                                                                p: 2,
+                                                                m: 1
+                                                            }}
+                                                        >
+                                                            <Grid container spacing={2}>
+                                                                <Grid item sm={12} xs={12}>
+                                                                    <H6 mb={1}>Nombre</H6>
+                                                                    <AppTextField
+                                                                        fullWidth
+                                                                        size="small"
+                                                                        name={`atributos.${index}.etiqueta`}
+                                                                        placeholder="etiqueta"
+                                                                        value={atributos[index].etiqueta}
+                                                                        onChange={handleChange}
+                                                                    /* error={Boolean(touched.atributos && atributos.${index}.etiqueta)}*/
+                                                                    //helperText={`atributos.${index}.etiqueta` && `atributos.${index}.etiqueta`} 
+                                                                    />
+                                                                    <ErrorMessage name={`atributos.${index}.etiqueta`} />
+                                                                </Grid>
+                                                                <Grid item xs={12}>
+                                                                    <FlexBox justifyContent="flex-end" gap={2} marginTop={0}>
+                                                                        <Button
+                                                                            fullWidth
+                                                                            color="error"
+                                                                            variant="contained"
+                                                                            onClick={() => { onHandlerDelete(atributo, arrayHelpers, index) }}
+                                                                        >
+                                                                            Eliminar
+                                                                        </Button>
+                                                                        <Button
+                                                                            fullWidth
+                                                                            //type="submit"
+                                                                            variant="contained"
+                                                                            onClick={() => { onHandlerSave(atributo) }}
+                                                                        >
+                                                                            Guardar
+                                                                        </Button>
+                                                                    </FlexBox>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Box>
+                                                    );
+                                                })
+                                                : null}
+                                        </Scrollbar>
+                                        <Grid container>
+                                            <Grid item xs={12}>
+                                                <FlexBox justifyContent="flex-end" gap={2} marginTop={2}>
+                                                    <Button fullWidth variant="outlined" onClick={onClose}>
+                                                        Cancel
+                                                    </Button>
+                                                    <Button
+                                                        fullWidth
+                                                        //type="submit"
+                                                        variant="contained"
+                                                        onClick={() => {
+                                                            arrayHelpers.push({
+                                                                categoriaId: data.categoriaId,
+                                                                atributoId: 0,
+                                                                etiqueta: "",
+                                                                tipo: "text"
+                                                            })
+                                                        }}
+                                                    >
+                                                        Añadir atributo
+                                                    </Button>
+                                                </FlexBox>
+                                            </Grid>
+                                        </Grid>
                                     </div>
                                 );
                             }}
                         />
                         <hr />
                     </Form>
-                </Formik>
-
-            </Scrollbar>
-            <Grid container>
-                <Grid item xs={12}>
-                    <FlexBox justifyContent="flex-end" gap={2} marginTop={2}>
-                        <Button fullWidth variant="outlined" onClick={onClose}>
-                            Cancel
-                        </Button>
-                        <Button fullWidth type="submit" variant="contained">
-                            Guardar
-                        </Button>
-                    </FlexBox>
-                </Grid>
-            </Grid>
-        </form>
+                )
+            }}
+        </Formik>
     </StyledAppModal>;
 };
 export default AtributoModal;

@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import ProductosColumns from "./components/clasificacion-columns";
 import CreateClasificacionModal from "./components/create-clasificacion";
 import { Context } from "contexts/ContextDataTable";
-import { initialClasificacionForm, searchByClasificacion} from "./utils/utils-clasificacion";
+import { initialClasificacionForm, searchByClasificacion } from "./utils/utils-clasificacion";
 import { Request } from "utils/http";
 
 
@@ -52,7 +52,7 @@ const ClasificacionList = () => {
             const result = searchByClasificacion(listaClasificacion, searchValue);
             setFilteredItem(result);
         }
-    }, [searchValue, actualizarTable,listaClasificacion]);
+    }, [searchValue, actualizarTable, listaClasificacion]);
 
     /*METODOS */
     const handlerClose = () => {
@@ -136,7 +136,7 @@ const ClasificacionList = () => {
                     </Button>
                 </HeadingWrapper>
                 <CustomTable columnShape={ProductosColumns} data={filteredItem} />
-                <CreateClasificacionModal data={create} open={openModal} onClose={handlerClose}/>
+                <CreateClasificacionModal data={create} open={openModal} onClose={handlerClose} />
             </Box>
         </Context.Provider>
     );

@@ -1,6 +1,6 @@
 import { Edit, Style } from "@mui/icons-material";
 import { IconButton, Rating, Tooltip } from "@mui/material";
-import { Fragment, useContext, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import CreateClasificacionModal from "./create-clasificacion";
 import AddIcon from '@mui/icons-material/Add';
@@ -36,11 +36,9 @@ const ClasificacionColumns = [
             const [modalAtributo, setModalAtributo] = useState(false)
             const [editar, setEditar] = useState(false);
             const [hijo, setHijo] = useState(false);
-
+            const [atributos, setAtributos] = useState([])
             /*METODOS */
-            const handlerOpenAtributo = () => {
-                setModalAtributo(true);
-            }
+
             const handlerOpenEditar = () => {
                 setEditar(true);
                 setHijo(false);
@@ -58,6 +56,37 @@ const ClasificacionColumns = [
             const handlerOpenEliminar = () => {
                 setModalEliminar(true)
             }
+
+            /*API */
+            const handlerOpenAtributo = async () => {
+                const { data, message, status } = await Request({
+                    endPoint: `${process.env.REACT_APP_API}api/Atributo/create/${row.original.categoriaId}`,
+                    initialValues: [],
+                    method: 'get',
+                    showError: true,
+                    showSuccess: false
+                });
+                if (!!status) {
+                    setAtributos(data);
+                    setModalAtributo(false);
+                }
+                setModalAtributo(true);
+            }
+            const handlerUpdateListAtributo = async (actualizar) => {
+                console.log('actuaizando lista', actualizar)
+                if (actualizar) {
+                    const { data, message, status } = await Request({
+                        endPoint: `${process.env.REACT_APP_API}api/Atributo/create/${row.original.categoriaId}`,
+                        initialValues: [],
+                        method: 'get',
+                        showError: true,
+                        showSuccess: false
+                    });
+                    if (!!status) {
+                        setAtributos(data);
+                    }
+                }
+            }
             const hanlderEliminar = async () => {
                 const { data, message, status } = await Request({
                     endPoint: `${process.env.REACT_APP_API}api/categoria/${row.original.categoriaId}`,
@@ -71,7 +100,7 @@ const ClasificacionColumns = [
                     setModalEliminar(false);
                 }
             }
-            /*API */
+            
             return <Fragment>
                 <IconButton onClick={handlerOpenEditar}>
                     <Tooltip title="Editar Clasificacion" arrow>
@@ -122,9 +151,13 @@ const ClasificacionColumns = [
                     disabledButton={!modalEliminar}
                 />
                 <AtributoModal
-                    data={initialEtiquetaForm}
+                    data={{
+                        categoriaId: row.original.categoriaId,
+                        atributos: atributos
+                    }}
                     onClose={() => { setModalAtributo(false) }}
                     open={modalAtributo}
+                    onUpdate={(updateListAtributo) => { handlerUpdateListAtributo(updateListAtributo) }}
                 />
             </Fragment>;
         }
