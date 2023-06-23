@@ -9,13 +9,11 @@ import { H5 } from "components/Typography";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import OrdenCompraColumns from "./components/orden-compra-columns";
-import { searchByName } from "./components/orden-compra-utils";
 import CreateOrdenCompraModal from "./components/create-orden-compra";
-import { ordenCompraFake } from "./components/orden-compra-fake";
 import { Link } from "react-router-dom";
-import { UseListaOrdenCompra } from "./hooks/useListaOrdenCompra";
 import { Context } from "contexts/ContextDataTable";
-import RecibirProducto from "../recibir/recibir-producto";
+import { preProcesarOrdenCompra, searchByOrdenCompra } from "./utils/ultils-orden-compra";
+import { Request } from "utils/http";
 export const HeadingWrapper = styled(FlexBox)(({
   theme
 }) => ({
@@ -36,17 +34,34 @@ const OrdenCompraList = () => {
   const {
     t
   } = useTranslation();
-  const [openModal, setOpenModal] = useState(false); // search input
+  const [actualizarTable, setActualizarTableContext] = useState(true);
+  const [listaOrdenCompra, setListaOrdenCompra] = useState([]);
+  const [filteredItem, setFilteredItem] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
 
-  const [actualizarTable, setActualizarTableContext] = useState(false);
-  const { filter, filteredItem, listar, searchValue, setSearchValue, setFilteredItem, ApiListaOrdenCompra } = UseListaOrdenCompra();
-
-  const onLoad = async () => {
-    await ApiListaOrdenCompra();
+  //API
+  const onLoadLista = async () => {
+    const { data, message, status } = await Request({
+      endPoint: `${process.env.REACT_APP_API}api/orden-compra`,
+      initialValues: [],
+      method: 'get',
+      showError: true,
+      showSuccess: false
+    });
+    if (!!status) {
+      console.log('respuesta de la api', data)
+      setListaOrdenCompra(preProcesarOrdenCompra(data));
+    }
   }
   useEffect(() => {
-    onLoad()
-  }, [searchValue]);
+    if (actualizarTable) {
+      onLoadLista();
+      setActualizarTableContext(false);
+    } else {
+      const result = searchByOrdenCompra(listaOrdenCompra, searchValue);
+      setFilteredItem(result);
+    }
+  }, [searchValue, actualizarTable, listaOrdenCompra]);
   return (
     <Context.Provider value={[actualizarTable, setActualizarTableContext]}>
       <Box pt={2} pb={4}>
@@ -65,11 +80,8 @@ const OrdenCompraList = () => {
               {t("Añadir orden compra")}
             </Button>
           </Link>
-
         </HeadingWrapper>
-              
         <CustomTable columnShape={OrdenCompraColumns} data={filteredItem} />
-        <CreateOrdenCompraModal open={openModal} onClose={() => setOpenModal(false)} />
       </Box>
     </Context.Provider>
   );

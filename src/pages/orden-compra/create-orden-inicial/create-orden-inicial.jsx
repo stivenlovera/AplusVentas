@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Card, Grid, IconButton, Table, TableBody, TableHead, TableRow, TextField } from '@mui/material'
+import { Autocomplete, Backdrop, Box, Button, Card, CircularProgress, Grid, IconButton, Table, TableBody, TableHead, TableRow, TextField } from '@mui/material'
 import IconWrapper from 'components/IconWrapper'
 import Scrollbar from 'components/ScrollBar'
 import { H5, H6 } from 'components/Typography'
@@ -23,10 +23,12 @@ import RecibirProducto from '../recibir/recibir-producto'
 import CreateModalPreguntar from '../pregunta/pregunta'
 import CreateProveedorModal from 'pages/proveedores/proveedores-list/components/create-proveedor'
 import { Context } from "pages/proveedores/context/actualizarTabla";
+import { Request } from 'utils/http'
+import moment from 'moment';
 
 const CreateOrdenInicial = () => {
     const [actualizarTable, setActualizarTableContext] = useState(false);
-
+    const [loading, setLoading] = useState(true)
     const { id } = useParams();
     const { t } = useTranslation();
     const [items, setItems] = useState([]);
@@ -35,9 +37,29 @@ const CreateOrdenInicial = () => {
     const [modalRecibir, setModalRecibir] = useState(false);
     const [buttonProcesar, setButtonProcesar] = useState(true);
     const [openModalProveedor, setOpenModalProveedor] = useState(false);
-    const [ordenCompraId, setOrdenCompraId] = useState(0)
+    const [modalPreguntar, setModalPreguntar] = useState(false);
+    const [OrdenCompra, setOrderCompra] = useState({
+        ordenCompra: {
+            id: 0,
+            descripcion: '',
+            fecha: 0,
+            codigoOrden: '',
+            VProveedoreId: '',
+            nombreProveedor: '',
+            montoliteral: '',
+            total: 0,
+            telefono: '',
+            asientoId: '',
+            usuario: '',
+            nit: '',
+            nombreAsiento: '',
+            productos: []
+        },
+        proveedores: [],
+        asientos: [],
+        productos: []
+    })
 
-    const [modalPreguntar, setModalPreguntar] = useState(false)
     const handleAddItem = () => {
         items.push({
             id: 0,
@@ -60,11 +82,9 @@ const CreateOrdenInicial = () => {
         })
         setFieldValue('total', resultado)
         setFieldValue('montoliteral', numeroALetras(resultado));
-        console.log(resultado, numeroALetras(resultado))
     }
-
     const validationSchema = Yup.object().shape({
-        id: Yup.number().required(),
+        id: Yup.number(),
         fecha: Yup.string().required(),
         descripcion: Yup.string().required('Descripcion es requerida'),
         codigoOrden: Yup.string().required('Codigo es requerido'),
@@ -89,50 +109,55 @@ const CreateOrdenInicial = () => {
         isValid,
         setFieldValue,
         resetForm,
-        setValues
+        setValues,
+        onSubmit
     } = useFormik({
-        initialValues: {
-            id: 0,
-            descripcion: '',
-            fecha: 0,
-            codigoOrden: '',
-            VProveedoreId: '',
-            nombreProveedor: '',
-            montoliteral: '',
-            total: 0,
-            telefono: '',
-            asientoId: '',
-            usuario: '',
-            nit: '',
-            nombreAsiento: '',
-            productos: []
-        },
+        initialValues: OrdenCompra.ordenCompra,
         validationSchema,
         //enableReinitialize: true,
-        onSubmit: async (values) => {
-            if (id == 'create') {
-                let id = await ApiGuardar()
-                setOrdenCompraId(id);
-                await ApiPreviewPago(id)
-
-                setActualizarTableContext(true)
-                console.log(ordenCompraId)
-                setButtonProcesar(false);
-                setModalPreguntar(true);
-            }
-            console.log('envio de datos')
-            console.log(values)
+        onSubmit: async (valores) => {
+            valores.fecha = moment().format('yyyy-MM-DD')
+            StoreOrdenCompra(valores)
         }
     });
 
-    const { ApiCrearOrdenCompra, asientos, create, proveedores, productos } = UseCreateOrdenCompra();
-    const { ApiGuardar } = UseStoreOrdenCompra(values)
+    const { ApiPreviewPago, previewPago } = UsePreviewOrdenCompraPago(1)
 
-    const { ApiPreviewPago, previewPago } = UsePreviewOrdenCompraPago(ordenCompraId)
-
+    const StoreOrdenCompra = async (valores) => {
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/orden-compra`,
+            initialValues: [],
+            method: 'post',
+            showError: true,
+            showSuccess: true,
+            values: valores
+        });
+        setLoading(false)
+    }
     const loadOrdenCompra = async () => {
-        await ApiCrearOrdenCompra();
-        setValues(create);
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/orden-compra/create`,
+            initialValues: [],
+            method: 'get',
+            showError: true,
+            showSuccess: false
+        });
+        if (!!status) {
+            const { asientos, proveedores, productos, ordenCompra } = data
+            setValues({
+                ...ordenCompra,
+                codigoOrden: ordenCompra.codigoOrden,
+                usuario: ordenCompra.usuario,
+                fecha: moment().format('DD/MM/yyy')
+            });
+            setOrderCompra({
+                asientos: asientos,
+                ordenCompra: ordenCompra,
+                productos: productos,
+                proveedores: proveedores
+            })
+        }
+        setLoading(false)
     }
 
     useEffect(() => {
@@ -141,14 +166,9 @@ const CreateOrdenInicial = () => {
         }
         setActualizarTableContext(false);
 
-    }, [values, ordenCompraId, actualizarTable])
+    }, [])
 
     /*handler procesar */
-    const handlerButtonProcesar = () => {
-        if (id == 'true') {
-
-        }
-    }
 
     const onOpenRecibir = () => {
         setModalRecibir(true)
@@ -158,11 +178,14 @@ const CreateOrdenInicial = () => {
     }
     return (
         <Context.Provider value={[actualizarTable, setActualizarTableContext]}>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={loading}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
             <Box pt={2} pb={4}>
-                <form onSubmit={(e) => {
-                    console.log(errors)
-                    handleSubmit(e)
-                }}>
+                <form onSubmit={handleSubmit}>
                     <HeadingWrapper justifyContent="space-between" alignItems="center">
                         <FlexBox gap={0.5} alignItems="center">
                             <IconWrapper>
@@ -172,18 +195,12 @@ const CreateOrdenInicial = () => {
                             </IconWrapper>
                             <H5>Lista orden compra</H5>
                         </FlexBox>
-
-                        {/*  <Button variant="contained" endIcon={<Add />} onClick={() => { }}>
-                    {t("Añadir producto")}
-                </Button> */}
-
                     </HeadingWrapper>
                     <Grid item md={8} xs={12}>
                         <Card sx={{
                             padding: 3
                         }}>
                             <Grid container spacing={3}>
-
                                 <Grid item xs={12} sm={3}>
                                     <H6 mb={1}>Codigo orden compra</H6>
                                     <AppTextField
@@ -247,31 +264,19 @@ const CreateOrdenInicial = () => {
                                     <Autocomplete
                                         fullWidth
                                         getOptionLabel={(options) => options.nombreProveedor}
-                                        //defaultValue={optionPlanCuenta[0]}
-                                        options={proveedores}
-                                        //autoSelect={true}
-                                        //inputValue={inputValue}
-                                        //value={values.id}
+                                        options={OrdenCompra.proveedores}
                                         size="small"
-                                        /*    isOptionEqualToValue={(option, value) => {
-                                               if (value) {
-                                                   return (option.value === value.value)
-                                               } else {
-                                                   return false;
-                                               }
-                                           }} */
                                         onChange={(event, newValue) => {
                                             if (newValue != null) {
                                                 console.log(newValue)
                                                 setFieldValue('VProveedoreId', newValue.id)
                                                 setFieldValue('nombreProveedor', newValue.nombreProveedor)
                                                 setItems([...items]);
-                                                setFieldValue('descripcion', `${values.descripcion} ${newValue.contacto}`)
+                                                setFieldValue('descripcion', `orden para ${newValue.contacto}`)
                                             } else {
                                                 setItems([...items]);
                                             }
                                         }}
-
                                         renderInput={
                                             (params) => <TextField
                                                 {...params}
@@ -314,7 +319,7 @@ const CreateOrdenInicial = () => {
                                         fullWidth
                                         getOptionLabel={(options) => options.nombreAsiento}
                                         //defaultValue={optionPlanCuenta[0]}
-                                        options={asientos}
+                                        options={OrdenCompra.asientos}
                                         //autoSelect={true}
                                         //inputValue={inputValue}
                                         value={selectAsiento}
@@ -418,7 +423,7 @@ const CreateOrdenInicial = () => {
                                                                     fullWidth
                                                                     getOptionLabel={(options) => options.nombreProducto}
                                                                     //defaultValue={optionPlanCuenta[0]}
-                                                                    options={productos}
+                                                                    options={OrdenCompra.productos}
                                                                     //autoSelect={true}
                                                                     //inputValue={inputValue}
                                                                     value={items[i] ? items[i] : null}
@@ -504,7 +509,6 @@ const CreateOrdenInicial = () => {
                                                             </BodyTableCell>
                                                             <BodyTableCell>
                                                                 <AppTextField
-                                                                    //onChange={e => handleUpdateItem(e, item.id)}
                                                                     fullWidth
                                                                     size="small"
                                                                     name="precioTotal"

@@ -137,6 +137,10 @@ const dashboardRoutes = [
     element: <CreateOrden />
   },
   {
+    path: "orden-compra-list/editar/:id",
+    element: <CreateOrden />
+  },
+  {
     path: "clasificacion",
     element: <ClasificacionList />
   },
@@ -152,14 +156,18 @@ const dashboardRoutes = [
     path: "orden-inicial/:id",
     element: <CreateOrdenInicial />
   },
-  {
-    path: "venta",
+{
+  path: "orden-inicial/editar/:id",
+    element: <CreateOrdenInicial />
+},
+{
+  path: "venta",
     element: <Venta />
-  },
-  {
-    path: "venta-create/:id",
+},
+{
+  path: "venta-create/:id",
     element: <VentaCreate />
-  },
+},
   /* {
     path: "plan-cuentas",
     element: <Sales />
