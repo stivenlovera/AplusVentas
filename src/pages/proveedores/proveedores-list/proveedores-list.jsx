@@ -57,7 +57,7 @@ const ProveedorList = () => {
     const result = searchByName(proveedorFake, searchValue);
     setFilteredItem(result);
     setActualizarTableContext(false);
-  }, [searchValue,actualizarTable]);
+  }, [searchValue, actualizarTable]);
   return (
     <Context.Provider value={[actualizarTable, setActualizarTableContext]}>
       <Box pt={2} pb={4}>
@@ -79,7 +79,7 @@ const ProveedorList = () => {
           </Button>
         </HeadingWrapper>
         <CustomTable columnShape={ProveedorColumns} data={filteredItem} />
-        <CreateProveedorModal open={openModal} onClose={() => OpenModal(false)} tipo={'nuevo'} />
+        <CreateProveedorModal open={openModal} onClose={() => OpenModal(false)} editProveedor={true} id={0}/>
       </Box>
     </Context.Provider>
   );

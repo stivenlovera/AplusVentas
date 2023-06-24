@@ -28,11 +28,10 @@ const StyledAppModal = styled(AppModal)(({
 
 const CreateProveedorModal = ({
     open,
-    data,
-    onClose,
-    editProduct,
-    tipo,
-    id
+    onClose,//void
+    editProveedor,
+    id,
+    status//void
 }) => {
     const initialState = {
         id: 0,
@@ -43,21 +42,6 @@ const CreateProveedorModal = ({
         contacto: '',
     }
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
-    const [context, setContext] = useContext(Context);
-    const [selectedMoneda, setSelectedMoneda] = useState("1");
-    const handleSelectedChangeMoneda = event => {
-        setFieldValue('moneda', event.target.value);
-        setSelectedMoneda(event.target.value);
-    };
-
-    const [selectedPlanCuenta, setSelectdPlanCuenta] = useState("1");
-    const handleSelectedPlanCuenta = event => {
-        setFieldValue('planCuentaId', event.target.value);
-        setSelectdPlanCuenta(event.target.value);
-    };
-
-    const [planCuentas, setPlanCuentas] = useState([]);
-    const [monedas, setMonedas] = useState([]);
 
     const validationSchema = Yup.object().shape({
         codigoProveedor: Yup.string().min(3, "Es muy cortos").required("Codigo proveedor es requerido!"),
@@ -81,55 +65,38 @@ const CreateProveedorModal = ({
         initialValues: initialState,
         validationSchema,
         onSubmit: async (values) => {
-            switch (tipo) {
-                case 'nuevo':
-                    await ApiGuardarProveedores();
-                    break;
-                case 'editar':
-                    await ApiModificarProveedores();
-                    break;
-                default:
-                    break;
-            }
+
         }
     });
 
     useEffect(() => {
-        switch (tipo) {
-            case 'nuevo':
-                ApiCreateProveedores()
-                return;
-            case 'editar':
-                ApiEditarProveedores()
-                return;
-            default:
-                return;
-                break;
+        if (editProveedor) {
+            ApiEditarProveedores()
+        } else {
+            ApiCreateProveedores()
         }
     }, [open])
 
     const ApiCreateProveedores = async () => {
         const { data } = await CrearProveedorService();
-        console.log('crear data')
+
         setValues({
             ...initialState,
             codigoProveedor: data.data.codigo
         });
-        setPlanCuentas(data.data.planCuentas);
-        setMonedas(data.data.monedas);
     }
     const ApiGuardarProveedores = async () => {
         const { data } = await GuardarProveedorService(values)
         resetForm();
         onClose();
-        setContext(true)
+      
         console.log(data.message);
     }
     const ApiModificarProveedores = async () => {
         const { data } = await ModificarProveedorService(values)
         resetForm();
         onClose();
-        setContext(true)
+      
         console.log(data.message);
     }
     const ApiEditarProveedores = async () => {
@@ -142,13 +109,10 @@ const CreateProveedorModal = ({
             telefono: data.data.proveedor.telefono,
             contacto: data.data.proveedor.contacto,
         });
-        setPlanCuentas(data.data.planCuentas);
-        setMonedas(data.data.monedas);
-        console.log(data.message);
     }
     return <StyledAppModal open={open} handleClose={onClose}>
         <H2 marginBottom={2}>
-            {editProduct && data ? "Editar proveedor" : "Añadir proveedor"}
+            {editProveedor ? "Editar proveedor" : "Añadir proveedor"}
         </H2>
 
         <form onSubmit={handleSubmit}>
@@ -222,17 +186,8 @@ const CreateProveedorModal = ({
                             error={Boolean(touched.telefono && errors.telefono)}
                             helperText={touched.telefono && errors.telefono} />
                     </Grid>
-                    {/* <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Tipo Pago</H6>
-                        <RadioGroup row value={selectedValue} onChange={handleChangeSelect} >
-                            <StyledFormControlLabel value="1" control={<AppRadio />} label="Credito" />
-                            <StyledFormControlLabel value="0" control={<AppRadio />} label="Contado" />
-                        </RadioGroup>
-                    </Grid> */}
-
                 </Grid>
             </Scrollbar>
-
             <Grid container>
                 <Grid item xs={12}>
                     <FlexBox justifyContent="flex-end" gap={2} marginTop={2}>
@@ -248,6 +203,4 @@ const CreateProveedorModal = ({
         </form>
     </StyledAppModal>;
 };
-
-const images = ["/static/products/watch.png", "/static/products/camera.png", "/static/products/headphone.png"];
 export default CreateProveedorModal;

@@ -35,13 +35,12 @@ const ProveedorColumns = [
                 transition: "color 0.3s",
                 color: row.isSelected ? "white" : "text.disabled"
             };
-            const [tipo, setTipo] = useState('');
+
             const [openModal, setOpenModal] = useState(false);
             return <Fragment>
                 <IconButton onClick={
                     () => {
                         setOpenModal(true)
-                        setTipo('editar')
                     }
                 }>
                     <Edit sx={{
@@ -49,12 +48,17 @@ const ProveedorColumns = [
                         color: "text.disabled"
                     }} />
                 </IconButton>
-                <CreateProveedorModal editProduct open={openModal} id={row.original.id} data={row.original} onClose={
-                    () => {
-                        setOpenModal(false)
-                        setTipo('')
+                <CreateProveedorModal
+                    open={openModal}
+                    id={row.original.id}
+                    onClose={
+                        () => {
+                            setOpenModal(false)
+                        }
                     }
-                } tipo={tipo} />
+                    editProveedor={true}
+                    status={() => { }}
+                />
                 <IconButton onClick={() => { alert('funcion pendiente') }}>
                     <Delete sx={style} />
                 </IconButton>

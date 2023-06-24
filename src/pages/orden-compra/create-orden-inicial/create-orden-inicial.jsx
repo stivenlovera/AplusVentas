@@ -27,7 +27,10 @@ import { Request } from 'utils/http'
 import moment from 'moment';
 
 const CreateOrdenInicial = () => {
-    const [actualizarTable, setActualizarTableContext] = useState(false);
+    const [estado, setEstado] = useState({
+        modificar: true,
+        nombre: 'Editar orden compra'
+    })
     const [loading, setLoading] = useState(true)
     const { id } = useParams();
     const { t } = useTranslation();
@@ -38,6 +41,7 @@ const CreateOrdenInicial = () => {
     const [buttonProcesar, setButtonProcesar] = useState(true);
     const [openModalProveedor, setOpenModalProveedor] = useState(false);
     const [modalPreguntar, setModalPreguntar] = useState(false);
+
     const [OrdenCompra, setOrderCompra] = useState({
         ordenCompra: {
             id: 0,
@@ -134,13 +138,32 @@ const CreateOrdenInicial = () => {
         });
         setLoading(false)
     }
-    const loadOrdenCompra = async () => {
+    const CreateOrdenCompra = async () => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/orden-compra/create`,
             initialValues: [],
             method: 'get',
             showError: true,
             showSuccess: false
+        });
+        if (!!status) {
+            const { asientos, proveedores, productos, ordenCompra } = data
+            setValues({
+                ...ordenCompra,
+                codigoOrden: ordenCompra.codigoOrden,
+                usuario: ordenCompra.usuario,
+                fecha: moment().format('DD/MM/yyy')
+            });
+        }
+        setLoading(false)
+    }
+    const EditarOrdenCompra = async () => {
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/orden-compra/editar/${id}`,
+            initialValues: [],
+            method: 'get',
+            showError: true,
+            showSuccess: true
         });
         if (!!status) {
             const { asientos, proveedores, productos, ordenCompra } = data
@@ -159,17 +182,23 @@ const CreateOrdenInicial = () => {
         }
         setLoading(false)
     }
-
-    useEffect(() => {
-        if (values.codigoOrden == '') {
-            loadOrdenCompra()
+    const Iniciar = () => {
+        if (id == 'create') {
+            CreateOrdenCompra();
+            setEstado({
+                modificar: false,
+                nombre: 'Crear orden compra'
+            })
         }
-        setActualizarTableContext(false);
-
+        else {
+            EditarOrdenCompra()
+        }
+    }
+    useEffect(() => {
+        Iniciar()
     }, [])
 
     /*handler procesar */
-
     const onOpenRecibir = () => {
         setModalRecibir(true)
     }
@@ -177,7 +206,7 @@ const CreateOrdenInicial = () => {
         setModalRecibir(false)
     }
     return (
-        <Context.Provider value={[actualizarTable, setActualizarTableContext]}>
+        <>
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={loading}
@@ -193,7 +222,7 @@ const CreateOrdenInicial = () => {
                                     color: "primary.main"
                                 }} />
                             </IconWrapper>
-                            <H5>Lista orden compra</H5>
+                            <H5>{estado.nombre}</H5>
                         </FlexBox>
                     </HeadingWrapper>
                     <Grid item md={8} xs={12}>
@@ -602,9 +631,9 @@ const CreateOrdenInicial = () => {
                 <CreateModalProcesar open={modalProcesar} data={previewPago} ></CreateModalProcesar>
                 <CreateModalPreguntar onPago={() => { setModalProcesar(true); setModalPreguntar(false) }} open={modalPreguntar} />
                 <RecibirProducto data={previewPago} onClose={onCloseRecibir} open={modalRecibir} />
-                <CreateProveedorModal open={openModalProveedor} onClose={() => setOpenModalProveedor(false)} tipo={'nuevo'} />
+                {/* <CreateProveedorModal open={openModalProveedor} onClose={() => setOpenModalProveedor(false)} tipo={'nuevo'} /> */}
             </Box>
-        </Context.Provider>
+        </>
     )
 }
 
