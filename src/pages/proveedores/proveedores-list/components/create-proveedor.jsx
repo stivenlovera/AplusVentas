@@ -1,19 +1,11 @@
-import { Add, KeyboardArrowDown } from "@mui/icons-material";
 import { Button, Grid, IconButton, RadioGroup, styled, useMediaQuery } from "@mui/material";
-import { Box } from "@mui/system";
 import AppModal from "components/AppModal";
-import AppRadio from "components/AppRadio";
 import FlexBox from "components/flexbox/FlexBox";
-import FlexRowAlign from "components/flexbox/FlexRowAlign";
 import AppTextField from "components/input-fields/AppTextField";
 import Scrollbar from "components/ScrollBar";
 import { H2, H6, Small } from "components/Typography";
 import { useFormik } from "formik";
-import DeleteIcon from "icons/DeleteIcon";
-import { StyledFormControlLabel } from "page-sections/accounts/account-v2/StyledComponent";
-import { Context } from "pages/proveedores/context/actualizarTabla";
 import React, { useContext, useEffect, useState } from "react";
-import { CrearProveedorService, EditarProveedorService, GuardarProveedorService, ModificarProveedorService } from "Services/api-ventas-erp/proveedores";
 import * as Yup from "yup"; // component props interface
 
 // styled components
@@ -30,19 +22,10 @@ const CreateProveedorModal = ({
     open,
     onClose,//void
     editProveedor,
-    id,
-    status//void
+    data,
+    onSubmit//void
 }) => {
-    const initialState = {
-        id: 0,
-        codigoProveedor: '',
-        nombreProveedor: '',
-        dirrecion: '',
-        telefono: '',
-        contacto: '',
-    }
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
-
     const validationSchema = Yup.object().shape({
         codigoProveedor: Yup.string().min(3, "Es muy cortos").required("Codigo proveedor es requerido!"),
         nombreProveedor: Yup.string().min(3, "Es muy cortos").required("Nombre es requerido!"),
@@ -62,54 +45,17 @@ const CreateProveedorModal = ({
         resetForm,
         setValues
     } = useFormik({
-        initialValues: initialState,
+        initialValues: data,
         validationSchema,
         onSubmit: async (values) => {
-
+            onSubmit(values)
         }
     });
 
     useEffect(() => {
-        if (editProveedor) {
-            ApiEditarProveedores()
-        } else {
-            ApiCreateProveedores()
-        }
+        setValues(data)
     }, [open])
 
-    const ApiCreateProveedores = async () => {
-        const { data } = await CrearProveedorService();
-
-        setValues({
-            ...initialState,
-            codigoProveedor: data.data.codigo
-        });
-    }
-    const ApiGuardarProveedores = async () => {
-        const { data } = await GuardarProveedorService(values)
-        resetForm();
-        onClose();
-      
-        console.log(data.message);
-    }
-    const ApiModificarProveedores = async () => {
-        const { data } = await ModificarProveedorService(values)
-        resetForm();
-        onClose();
-      
-        console.log(data.message);
-    }
-    const ApiEditarProveedores = async () => {
-        const { data } = await EditarProveedorService(id)
-        setValues({
-            id: id,
-            codigoProveedor: data.data.proveedor.codigoProveedor,
-            nombreProveedor: data.data.proveedor.nombreProveedor,
-            dirrecion: data.data.proveedor.dirrecion,
-            telefono: data.data.proveedor.telefono,
-            contacto: data.data.proveedor.contacto,
-        });
-    }
     return <StyledAppModal open={open} handleClose={onClose}>
         <H2 marginBottom={2}>
             {editProveedor ? "Editar proveedor" : "Añadir proveedor"}

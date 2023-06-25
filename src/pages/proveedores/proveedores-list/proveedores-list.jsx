@@ -11,9 +11,9 @@ import { useTranslation } from "react-i18next";
 import { searchByName } from "./components/proveedor-util";
 import ProveedorColumns from "./components/proveedor-columns";
 import CreateProveedorModal from "./components/create-proveedor";
-import { proveedorFake } from "./components/proveedor-fake";
-import { CrearProveedorService, ObtenerProveedorService } from "Services/api-ventas-erp/proveedores";
-import { Context } from "../context/actualizarTabla";
+import { proveedorInitial } from "./components/proveedor-fake";
+import { UseProveedor } from "./hooks/useProveedor";
+import { Context } from "contexts/ContextDataTable";
 
 export const HeadingWrapper = styled(FlexBox)(({
   theme
@@ -35,29 +35,55 @@ const ProveedorList = () => {
   const {
     t
   } = useTranslation();
-  const [actualizarTable, setActualizarTableContext] = useState(false);
-  const [openModal, setOpenModal] = useState(false); // search input
+  const [actualizarTable, setActualizarTableContext] = useState(true);
 
+  const [openModal, setOpenModal] = useState(false); // search input
+  const [loadDataTable, setLoadDataTable] = useState(false)
   const [searchValue, setSearchValue] = useState("");
   const [filteredItem, setFilteredItem] = useState([]);
+  const [data, setData] = useState(proveedorInitial)
 
+  const { List, Store, Create } = UseProveedor({ loadDataTable })
+
+  //API
   const ApiProveedores = async () => {
-    const { data } = await ObtenerProveedorService();
-    console.log(data.message)
-    setFilteredItem(data.data)
+    const { lista, status } = await List()
+    if (status) {
+      setFilteredItem(lista)
+    }
   }
+  const ApiCreate = async () => {
+    const { create, status } = await Create()
+    if (status) {
+      setData({ ...data, codigoProveedor: create.codigo, planCuentaId: 0 });
+      setOpenModal(true);
+    } else {
+      setOpenModal(false);
+    }
+  }
+  const ApiStore = async (values) => {
+    const { store, status } = await Store(values)
+    if (status) {
+      setOpenModal(false);
+      ApiProveedores()
+    } else {
+      setOpenModal(true);
+    }
+  }
+  //METODOS
 
-  //use context para actualizar el update y  delete
-  const OpenModal = async (estado) => {
-    setOpenModal(estado);
+  const onCloseModal = () => {
+    setOpenModal(false);
   }
 
   useEffect(() => {
-    ApiProveedores()
-    const result = searchByName(proveedorFake, searchValue);
-    setFilteredItem(result);
-    setActualizarTableContext(false);
-  }, [searchValue, actualizarTable]);
+    if (actualizarTable) {
+      ApiProveedores()
+      setActualizarTableContext(false)
+    }
+
+  }, [actualizarTable]);
+  
   return (
     <Context.Provider value={[actualizarTable, setActualizarTableContext]}>
       <Box pt={2} pb={4}>
@@ -74,12 +100,18 @@ const ProveedorList = () => {
           <Button
             variant="contained"
             endIcon={<Add />}
-            onClick={async () => { await OpenModal(true) }}>
+            onClick={ApiCreate}>
             {t("Añadir Proveedor")}
           </Button>
         </HeadingWrapper>
         <CustomTable columnShape={ProveedorColumns} data={filteredItem} />
-        <CreateProveedorModal open={openModal} onClose={() => OpenModal(false)} editProveedor={true} id={0}/>
+        <CreateProveedorModal
+          open={openModal}
+          data={data}
+          onClose={onCloseModal}
+          editProveedor={false}
+          onSubmit={ApiStore}
+        />
       </Box>
     </Context.Provider>
   );
