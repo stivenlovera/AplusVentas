@@ -5,7 +5,7 @@ import moment from 'moment';
 import { Request } from "utils/http";
 import { proveedorintial } from "../components/proveedor-fake";
 
-export const UseProveedor = ({ refreshDataTable = false }) => {
+export const UseProveedor = () => {
 
   const List = async () => {
     const { data, message, status } = await Request({

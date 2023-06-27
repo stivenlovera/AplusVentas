@@ -44,7 +44,7 @@ const ProveedorColumns = [
             const [loadDataTable, setLoadDataTable] = useState(false)
             const [openModal, setOpenModal] = useState(false);
 
-            const { Delete, Editar, List, Store, Update } = UseProveedor({ loadDataTable })
+            const { Delete, Editar, List, Store, Update } = UseProveedor()
             //API
             const onEditar = async () => {
                 const { edit, status } = await Editar(row.original.id)

@@ -21,10 +21,13 @@ import numeroALetras from 'convertir-numero-a-letras-mexico';
 import { UsePreviewOrdenCompraPago } from '../procesar/hooks/usePreviewPago'
 import RecibirProducto from '../recibir/recibir-producto'
 import CreateModalPreguntar from '../pregunta/pregunta'
-import CreateProveedorModal from 'pages/proveedores/proveedores-list/components/create-proveedor'
 import { Context } from "pages/proveedores/context/actualizarTabla";
 import { Request } from 'utils/http'
 import moment from 'moment';
+import CreateProveedorCompra from './components/create-proveedor/create-proveedor-compra'
+import AutocompleteAsync from 'components/AutocompleteAsync'
+import { UseProveedor } from 'pages/proveedores/proveedores-list/hooks/useProveedor'
+import { proveedorInitial } from 'pages/proveedores/proveedores-list/components/proveedor-fake'
 
 const CreateOrdenInicial = () => {
     const [estado, setEstado] = useState({
@@ -41,6 +44,28 @@ const CreateOrdenInicial = () => {
     const [buttonProcesar, setButtonProcesar] = useState(true);
     const [openModalProveedor, setOpenModalProveedor] = useState(false);
     const [modalPreguntar, setModalPreguntar] = useState(false);
+
+    //proveedores
+    const [listaProveedores, setlistaProveedores] = useState(proveedorInitial);
+    const [openAutoCompleteProveedores, setOpenAutoCompleteProveedores] = useState(false)
+    const [loadingAutoCompleteProveedores, setLoadingAutoCompleteProveedores] = useState(false)
+    const { List } = UseProveedor()
+    const LoadListaProveedores = async () => {
+        setLoadingAutoCompleteProveedores(true)
+        const { lista, status } = await List()
+        if (status) {
+            setlistaProveedores(lista)
+            setOpenAutoCompleteProveedores(true)
+        }
+        setLoadingAutoCompleteProveedores(false)
+    }
+    const refresListaProveedores = () => {
+        setOpenAutoCompleteProveedores(false)
+        setlistaProveedores([])
+    }
+    const isOptionEqualToValueProveedor = (option, value) => option.nombreProveedor === value.nombreProveedor
+    const getOptionLabelProveedor = (option) => option.nombreProveedor
+    //
 
     const [OrdenCompra, setOrderCompra] = useState({
         ordenCompra: {
@@ -286,6 +311,19 @@ const CreateOrdenInicial = () => {
                                         onChange={handleChange}
                                         error={Boolean(touched.descripcion && errors.descripcion)}
                                         helperText={touched.descripcion && errors.descripcion}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <H6 mb={1}>Proveedor</H6>
+                                    <AutocompleteAsync
+                                        label={'selecione un proveedor'}
+                                        values={listaProveedores}
+                                        loading={loadingAutoCompleteProveedores}
+                                        open={openAutoCompleteProveedores}
+                                        onOpen={LoadListaProveedores}
+                                        onClose={refresListaProveedores}
+                                        isOptionEqualToValue={isOptionEqualToValueProveedor}
+                                        getOptionLabel={getOptionLabelProveedor}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
@@ -631,7 +669,11 @@ const CreateOrdenInicial = () => {
                 <CreateModalProcesar open={modalProcesar} data={previewPago} ></CreateModalProcesar>
                 <CreateModalPreguntar onPago={() => { setModalProcesar(true); setModalPreguntar(false) }} open={modalPreguntar} />
                 <RecibirProducto data={previewPago} onClose={onCloseRecibir} open={modalRecibir} />
-                {/* <CreateProveedorModal open={openModalProveedor} onClose={() => setOpenModalProveedor(false)} tipo={'nuevo'} /> */}
+                <CreateProveedorCompra
+                    openModal={openModalProveedor}
+                    onClose={() => { setOpenModalProveedor(false) }}
+                    onSummit={() => { console.log('proveedor registrado') }}
+                />
             </Box>
         </>
     )

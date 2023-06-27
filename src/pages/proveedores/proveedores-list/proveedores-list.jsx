@@ -43,7 +43,7 @@ const ProveedorList = () => {
   const [filteredItem, setFilteredItem] = useState([]);
   const [data, setData] = useState(proveedorInitial)
 
-  const { List, Store, Create } = UseProveedor({ loadDataTable })
+  const { List, Store, Create } = UseProveedor()
 
   //API
   const ApiProveedores = async () => {
