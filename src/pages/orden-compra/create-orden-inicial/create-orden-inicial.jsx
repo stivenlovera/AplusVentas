@@ -26,8 +26,7 @@ import { Request } from 'utils/http'
 import moment from 'moment';
 import CreateProveedorCompra from './components/create-proveedor/create-proveedor-compra'
 import AutocompleteAsync from 'components/AutocompleteAsync'
-import { UseProveedor } from 'pages/proveedores/proveedores-list/hooks/useProveedor'
-import { proveedorInitial } from 'pages/proveedores/proveedores-list/components/proveedor-fake'
+import { useAutocompleteProveedor } from './hooks/useAutocompleteProveedor'
 
 const CreateOrdenInicial = () => {
     const [estado, setEstado] = useState({
@@ -46,26 +45,15 @@ const CreateOrdenInicial = () => {
     const [modalPreguntar, setModalPreguntar] = useState(false);
 
     //proveedores
-    const [listaProveedores, setlistaProveedores] = useState(proveedorInitial);
-    const [openAutoCompleteProveedores, setOpenAutoCompleteProveedores] = useState(false)
-    const [loadingAutoCompleteProveedores, setLoadingAutoCompleteProveedores] = useState(false)
-    const { List } = UseProveedor()
-    const LoadListaProveedores = async () => {
-        setLoadingAutoCompleteProveedores(true)
-        const { lista, status } = await List()
-        if (status) {
-            setlistaProveedores(lista)
-            setOpenAutoCompleteProveedores(true)
-        }
-        setLoadingAutoCompleteProveedores(false)
-    }
-    const refresListaProveedores = () => {
-        setOpenAutoCompleteProveedores(false)
-        setlistaProveedores([])
-    }
-    const isOptionEqualToValueProveedor = (option, value) => option.nombreProveedor === value.nombreProveedor
-    const getOptionLabelProveedor = (option) => option.nombreProveedor
-    //
+    const {
+        LoadListaProveedores,
+        getOptionLabelProveedor,
+        isOptionEqualToValueProveedor,
+        listaProveedores,
+        loadingAutoCompleteProveedores,
+        openAutoCompleteProveedores,
+        refresListaProveedores
+    } = useAutocompleteProveedor();
 
     const [OrdenCompra, setOrderCompra] = useState({
         ordenCompra: {
@@ -316,7 +304,7 @@ const CreateOrdenInicial = () => {
                                 <Grid item xs={12} sm={6}>
                                     <H6 mb={1}>Proveedor</H6>
                                     <AutocompleteAsync
-                                        label={'selecione un proveedor'}
+                                        label={'Selecione un proveedor'}
                                         values={listaProveedores}
                                         loading={loadingAutoCompleteProveedores}
                                         open={openAutoCompleteProveedores}
@@ -324,34 +312,6 @@ const CreateOrdenInicial = () => {
                                         onClose={refresListaProveedores}
                                         isOptionEqualToValue={isOptionEqualToValueProveedor}
                                         getOptionLabel={getOptionLabelProveedor}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <H6 mb={1}>Proveedor</H6>
-                                    <Autocomplete
-                                        fullWidth
-                                        getOptionLabel={(options) => options.nombreProveedor}
-                                        options={OrdenCompra.proveedores}
-                                        size="small"
-                                        onChange={(event, newValue) => {
-                                            if (newValue != null) {
-                                                console.log(newValue)
-                                                setFieldValue('VProveedoreId', newValue.id)
-                                                setFieldValue('nombreProveedor', newValue.nombreProveedor)
-                                                setItems([...items]);
-                                                setFieldValue('descripcion', `orden para ${newValue.contacto}`)
-                                            } else {
-                                                setItems([...items]);
-                                            }
-                                        }}
-                                        renderInput={
-                                            (params) => <TextField
-                                                {...params}
-                                                label="Selecione proveedor"
-                                                error={Boolean(touched.VProveedoreId && errors.VProveedoreId)}
-                                                helperText={touched.VProveedoreId && errors.VProveedoreId}
-                                            />
-                                        }
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={3}>
@@ -382,54 +342,26 @@ const CreateOrdenInicial = () => {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                     <H6 mb={1}>Metodo Pago</H6>
-                                    <Autocomplete
-                                        fullWidth
-                                        getOptionLabel={(options) => options.nombreAsiento}
-                                        //defaultValue={optionPlanCuenta[0]}
-                                        options={OrdenCompra.asientos}
-                                        //autoSelect={true}
-                                        //inputValue={inputValue}
-                                        value={selectAsiento}
-                                        size="small"
-                                        isOptionEqualToValue={(option, value) => {
-                                            if (value) {
-                                                return (option.value === value.value)
-                                            } else {
-                                                return false;
-                                            }
-                                        }}
-                                        onChange={(event, newValue) => {
-                                            if (newValue != null) {
-                                                setSelectAsiento(newValue);
-                                                setValues({
-                                                    ...values,
-                                                    asientoId: newValue.id,
-                                                    nombreAsiento: newValue.nombreAsiento
-                                                });
-                                            } else {
-                                                setItems([...items]);
-                                            }
-                                        }}
-
-                                        renderInput={
-                                            (params) => <TextField
-                                                {...params}
-                                                label="Selecione proveedor"
-                                                error={Boolean(touched.asientoId && errors.asientoId)}
-                                                helperText={touched.asientoId && errors.asientoId}
-                                            />
-                                        }
+                                    <AutocompleteAsync
+                                        label={'Selecione Metodo de pago'}
+                                        values={listaProveedores}
+                                        loading={loadingAutoCompleteProveedores}
+                                        open={openAutoCompleteProveedores}
+                                        onOpen={LoadListaProveedores}
+                                        onClose={refresListaProveedores}
+                                        isOptionEqualToValue={isOptionEqualToValueProveedor}
+                                        getOptionLabel={getOptionLabelProveedor}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={3}>
                                     <H6 mb={1}>Cree un producto</H6>
-                                    <Button variant="contained" endIcon={<Add />} onClick={() => { }}>
+                                    <Button fullWidth variant="contained" endIcon={<Add />} onClick={() => { }}>
                                         {t("Crea un producto")}
                                     </Button>
                                 </Grid>
                                 <Grid item xs={12} sm={3}>
                                     <H6 mb={1}>Cree un proveedor</H6>
-                                    <Button variant="contained" endIcon={<Add />} onClick={() => { setOpenModalProveedor(true); }}>
+                                    <Button fullWidth variant="contained" endIcon={<Add />} onClick={() => { setOpenModalProveedor(true); }}>
                                         {t("Crea un proveedor")}
                                     </Button>
                                 </Grid>
@@ -486,13 +418,10 @@ const CreateOrdenInicial = () => {
                                                             </BodyTableCell>
 
                                                             <BodyTableCell>
-                                                                <Autocomplete
+                                                                {/* <Autocomplete
                                                                     fullWidth
                                                                     getOptionLabel={(options) => options.nombreProducto}
-                                                                    //defaultValue={optionPlanCuenta[0]}
                                                                     options={OrdenCompra.productos}
-                                                                    //autoSelect={true}
-                                                                    //inputValue={inputValue}
                                                                     value={items[i] ? items[i] : null}
                                                                     size="small"
                                                                     isOptionEqualToValue={(option, value) => {
@@ -520,11 +449,9 @@ const CreateOrdenInicial = () => {
                                                                         (params) => <TextField
                                                                             {...params}
                                                                             label="Selecione producto"
-                                                                        /*error={Boolean(touched.tipoAsientoId && errors.tipoAsientoId)}
-                                                                        helperText={touched.tipoAsientoId && errors.tipoAsientoId} */
                                                                         />
                                                                     }
-                                                                />
+                                                                /> */}
                                                             </BodyTableCell>
                                                             <BodyTableCell>
                                                                 <AppTextField

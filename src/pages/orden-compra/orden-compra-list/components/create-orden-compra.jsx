@@ -170,6 +170,4 @@ const CreateOrdenCompraModal = ({
         </form>
     </StyledAppModal>;
 };
-
-const images = ["/static/products/watch.png", "/static/products/camera.png", "/static/products/headphone.png"];
 export default CreateOrdenCompraModal;

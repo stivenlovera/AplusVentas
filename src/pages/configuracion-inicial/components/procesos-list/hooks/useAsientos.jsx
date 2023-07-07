@@ -1,10 +1,11 @@
 import { Request } from "utils/http";
 
-export const UseProveedor = () => {
+
+export const UseAsiento = () => {
 
   const List = async () => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/proveedor`,
+      endPoint: `${process.env.REACT_APP_API}api/asiento`,
       initialValues: [],
       method: 'get',
       showError: true,
@@ -17,7 +18,7 @@ export const UseProveedor = () => {
   }
   const Create = async () => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/proveedor/create`,
+      endPoint: `${process.env.REACT_APP_API}api/asiento/create`,
       initialValues: [],
       method: 'get',
       showError: true,
@@ -30,7 +31,7 @@ export const UseProveedor = () => {
   }
   const Store = async (values) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/proveedor`,
+      endPoint: `${process.env.REACT_APP_API}api/asiento`,
       initialValues: [],
       method: 'post',
       showError: true,
@@ -44,7 +45,7 @@ export const UseProveedor = () => {
   }
   const Editar = async (id) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/proveedor/${id}`,
+      endPoint: `${process.env.REACT_APP_API}api/asiento/${id}`,
       initialValues: [],
       method: 'get',
       showError: true,
@@ -57,7 +58,7 @@ export const UseProveedor = () => {
   }
   const Update = async (values) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/proveedor/${values.id}`,
+      endPoint: `${process.env.REACT_APP_API}api/asiento/${values.id}`,
       initialValues: [],
       method: 'put',
       showError: true,
@@ -71,7 +72,7 @@ export const UseProveedor = () => {
   }
   const Delete = async (id) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/proveedor/${id}`,
+      endPoint: `${process.env.REACT_APP_API}api/asiento/${id}`,
       initialValues: [],
       method: 'delete',
       showError: true,
