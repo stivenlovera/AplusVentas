@@ -1,6 +1,5 @@
 
 import { UseAsiento } from "pages/configuracion-inicial/components/procesos-list/hooks/useAsientos";
-import { UseProveedor } from "pages/proveedores/proveedores-list/hooks/useProveedor";
 import { useState } from "react";
 
 export const useAutocompleteMetodoPago = () => {
@@ -23,9 +22,9 @@ export const useAutocompleteMetodoPago = () => {
         setOpenAutoCompleteMetodoPago(false)
         setlistaMetodoPago([])
     }
-    const isOptionEqualToValueMetodoPago = (option, value) => option.nombreProveedor === value.nombreProveedor
-    const getOptionLabelMetodoPago = (option) => option.nombreProveedor
-
+    const isOptionEqualToValueMetodoPago = (option, value) => option.nombreAsiento === value.nombreAsiento
+    const getOptionLabelMetodoPago = (option) => option.nombreAsiento
+    
     return {
         listaMetodoPago,
         openAutoCompleteMetodoPago,

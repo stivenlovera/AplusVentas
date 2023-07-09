@@ -4,7 +4,7 @@ import Scrollbar from 'components/ScrollBar'
 import { H5, H6 } from 'components/Typography'
 import FlexBox from 'components/flexbox/FlexBox'
 import AppTextField from 'components/input-fields/AppTextField'
-import { useFormik } from "formik";
+import { FieldArray, Form, FormikProvider, useFormik } from "formik";
 import * as Yup from "yup"; // component props interface
 import Add from 'icons/Add'
 import ShoppingBasket from 'icons/ShoppingBasket'
@@ -27,6 +27,9 @@ import moment from 'moment';
 import CreateProveedorCompra from './components/create-proveedor/create-proveedor-compra'
 import AutocompleteAsync from 'components/AutocompleteAsync'
 import { useAutocompleteProveedor } from './hooks/useAutocompleteProveedor'
+import { useAutocompleteMetodoPago } from './hooks/useAutocompleteMetodoPago'
+import { useAutocompleteProducto } from './hooks/useAutoCompleteProducto'
+import OrdenProducto from './components/orden-productos/ordenProducto'
 
 const CreateOrdenInicial = () => {
     const [estado, setEstado] = useState({
@@ -55,6 +58,16 @@ const CreateOrdenInicial = () => {
         refresListaProveedores
     } = useAutocompleteProveedor();
 
+    const {
+        LoadListaMetodoPago,
+        getOptionLabelMetodoPago,
+        isOptionEqualToValueMetodoPago,
+        listaMetodoPago,
+        loadingAutoCompleteMetodoPago,
+        openAutoCompleteMetodoPago,
+        refresListaMetodoPago,
+    } = useAutocompleteMetodoPago();
+
     const [OrdenCompra, setOrderCompra] = useState({
         ordenCompra: {
             id: 0,
@@ -78,27 +91,48 @@ const CreateOrdenInicial = () => {
     })
 
     const handleAddItem = () => {
-        items.push({
-            id: 0,
-            codigoProducto: 0,
+        console.log(values)
+        values.productos.push({
+            productoId: 0,
+            cantidad: 0,
+            codigoProducto: '',
             nombreProducto: '',
             precioCompra: 0,
-            precioTotal: 0
+            precioTotal: 0,
         });
-        setItems([...items]);
-        values.productos = items;
+        setValues({ ...values })
     };
-    const handleDeleteItem = id => {
-        setItems(items => items.filter(item => item.id !== id));
+    const handleDeleteItem = (i) => {
+        console.log(i)
+        values.productos.splice(i, 1);
+        console.log(values)
+        setValues({ ...values })
     };
 
-    const onCalculoTotal = () => {
+    const onCalculoTotal = (total, i) => {
         let resultado = 0;
-        items.map((item) => {
-            resultado += item.precioTotal;
+        values.productos.map((item, index) => {
+            if (index != i) {
+                resultado += item.precioTotal;
+            }
         })
+        resultado += total;
         setFieldValue('total', resultado)
         setFieldValue('montoliteral', numeroALetras(resultado));
+    }
+
+    const onCantidad = (e, i) => {
+        setFieldValue(`productos[${i}].cantidad`, e.target.value);
+        const nuevo = parseInt(e.target.value == '' ? 0 : e.target.value) * parseFloat(values.productos[i].precioCompra);
+        setFieldValue(`productos[${i}].precioTotal`, nuevo);
+        onCalculoTotal(nuevo, i)
+    }
+    const onprecioCompra = (e, i) => {
+        setFieldValue(`productos[${i}].precioCompra`, e.target.value);
+        const nuevo = parseInt(e.target.value == '' ? 0 : e.target.value) * parseFloat(values.productos[i].cantidad);
+        console.log(nuevo)
+        setFieldValue(`productos[${i}].precioTotal`, nuevo);
+        onCalculoTotal(nuevo, i)
     }
     const validationSchema = Yup.object().shape({
         id: Yup.number(),
@@ -114,7 +148,27 @@ const CreateOrdenInicial = () => {
         nit: Yup.string().required('Nit es requerido!'),
         nombreAsiento: Yup.string().required(),
         telefono: Yup.string().nullable(),
-        productos: Yup.array()
+        productos: Yup.array().of(
+            Yup.object().shape({
+                productoId: Yup.number(),
+                cantidad: Yup.number(),
+                stock: Yup.number(),
+                codigoProducto: Yup.string(),
+                nombreProducto: Yup.string(),
+                precioCompra: Yup.number(),
+                precioTotal: Yup.number(),
+            })
+        )
+    });
+
+    const formProducto = useFormik({
+        initialValues: OrdenCompra.ordenCompra,
+        validationSchema,
+        //enableReinitialize: true,
+        onSubmit: async (valores) => {
+            valores.fecha = moment().format('yyyy-MM-DD')
+            StoreOrdenCompra(valores)
+        }
     });
 
     const {
@@ -128,15 +182,7 @@ const CreateOrdenInicial = () => {
         resetForm,
         setValues,
         onSubmit
-    } = useFormik({
-        initialValues: OrdenCompra.ordenCompra,
-        validationSchema,
-        //enableReinitialize: true,
-        onSubmit: async (valores) => {
-            valores.fecha = moment().format('yyyy-MM-DD')
-            StoreOrdenCompra(valores)
-        }
-    });
+    } = formProducto;
 
     const { ApiPreviewPago, previewPago } = UsePreviewOrdenCompraPago(1)
 
@@ -162,7 +208,7 @@ const CreateOrdenInicial = () => {
         if (!!status) {
             const { asientos, proveedores, productos, ordenCompra } = data
             setValues({
-                ...ordenCompra,
+                ...OrdenCompra.ordenCompra,
                 codigoOrden: ordenCompra.codigoOrden,
                 usuario: ordenCompra.usuario,
                 fecha: moment().format('DD/MM/yyy')
@@ -182,16 +228,11 @@ const CreateOrdenInicial = () => {
             const { asientos, proveedores, productos, ordenCompra } = data
             setValues({
                 ...ordenCompra,
+                nombreProveedor: 'demo provedor',
                 codigoOrden: ordenCompra.codigoOrden,
                 usuario: ordenCompra.usuario,
                 fecha: moment().format('DD/MM/yyy')
             });
-            setOrderCompra({
-                asientos: asientos,
-                ordenCompra: ordenCompra,
-                productos: productos,
-                proveedores: proveedores
-            })
         }
         setLoading(false)
     }
@@ -227,372 +268,362 @@ const CreateOrdenInicial = () => {
                 <CircularProgress color="inherit" />
             </Backdrop>
             <Box pt={2} pb={4}>
-                <form onSubmit={handleSubmit}>
-                    <HeadingWrapper justifyContent="space-between" alignItems="center">
-                        <FlexBox gap={0.5} alignItems="center">
-                            <IconWrapper>
-                                <ShoppingBasket sx={{
-                                    color: "primary.main"
-                                }} />
-                            </IconWrapper>
-                            <H5>{estado.nombre}</H5>
-                        </FlexBox>
-                    </HeadingWrapper>
-                    <Grid item md={8} xs={12}>
-                        <Card sx={{
-                            padding: 3
-                        }}>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} sm={3}>
-                                    <H6 mb={1}>Codigo orden compra</H6>
-                                    <AppTextField
-                                        fullWidth
-                                        size="small"
-                                        name="codigoOrden"
-                                        placeholder="Orden compra"
-                                        value={values.codigoOrden}
-                                        onChange={handleChange}
-                                        error={Boolean(touched.codigoOrden && errors.codigoOrden)}
-                                        helperText={touched.codigoOrden && errors.codigoOrden}
-                                        disabled={true}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={3}>
-                                    <H6 mb={1}>Fecha </H6>
-                                    <AppTextField
-                                        fullWidth
-                                        size="small"
-                                        name="fecha"
-                                        placeholder="Fecha"
-                                        value={values.fecha}
-                                        onChange={handleChange}
-                                        error={Boolean(touched.fecha && errors.fecha)}
-                                        helperText={touched.fecha && errors.fecha}
-                                        disabled={true}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={3}>
-
-                                </Grid>
-                                <Grid item xs={12} sm={3}>
-                                    <H6 mb={1}>Usuario</H6>
-                                    <AppTextField
-                                        fullWidth
-                                        size="small"
-                                        name="usuario"
-                                        placeholder="Usuario"
-                                        value={values.usuario}
-                                        onChange={handleChange}
-                                        error={Boolean(touched.usuario && errors.usuario)}
-                                        helperText={touched.usuario && errors.usuario}
-                                        disabled={true}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={12}>
-                                    <H6 mb={1}>Descripcion</H6>
-                                    <AppTextField
-                                        fullWidth
-                                        size="small"
-                                        name="descripcion"
-                                        placeholder="Descripcion"
-                                        value={values.descripcion}
-                                        onChange={handleChange}
-                                        error={Boolean(touched.descripcion && errors.descripcion)}
-                                        helperText={touched.descripcion && errors.descripcion}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <H6 mb={1}>Proveedor</H6>
-                                    <AutocompleteAsync
-                                        label={'Selecione un proveedor'}
-                                        values={listaProveedores}
-                                        loading={loadingAutoCompleteProveedores}
-                                        open={openAutoCompleteProveedores}
-                                        onOpen={LoadListaProveedores}
-                                        onClose={refresListaProveedores}
-                                        isOptionEqualToValue={isOptionEqualToValueProveedor}
-                                        getOptionLabel={getOptionLabelProveedor}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={3}>
-                                    <H6 mb={1}>Nit CI</H6>
-                                    <AppTextField
-                                        fullWidth
-                                        size="small"
-                                        name="nit"
-                                        placeholder="Nit CI"
-                                        value={values.nit}
-                                        onChange={handleChange}
-                                        error={Boolean(touched.nit && errors.nit)}
-                                        helperText={touched.nit && errors.nit}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={3}>
-                                    <H6 mb={1}>Telefono</H6>
-                                    <AppTextField
-                                        fullWidth
-                                        size="small"
-                                        name="telefono"
-                                        placeholder="Telefono"
-                                        value={values.telefono}
-                                        onChange={handleChange}
-                                        error={Boolean(touched.telefono && errors.telefono)}
-                                        helperText={touched.telefono && errors.telefono}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <H6 mb={1}>Metodo Pago</H6>
-                                    <AutocompleteAsync
-                                        label={'Selecione Metodo de pago'}
-                                        values={listaProveedores}
-                                        loading={loadingAutoCompleteProveedores}
-                                        open={openAutoCompleteProveedores}
-                                        onOpen={LoadListaProveedores}
-                                        onClose={refresListaProveedores}
-                                        isOptionEqualToValue={isOptionEqualToValueProveedor}
-                                        getOptionLabel={getOptionLabelProveedor}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={3}>
-                                    <H6 mb={1}>Cree un producto</H6>
-                                    <Button fullWidth variant="contained" endIcon={<Add />} onClick={() => { }}>
-                                        {t("Crea un producto")}
-                                    </Button>
-                                </Grid>
-                                <Grid item xs={12} sm={3}>
-                                    <H6 mb={1}>Cree un proveedor</H6>
-                                    <Button fullWidth variant="contained" endIcon={<Add />} onClick={() => { setOpenModalProveedor(true); }}>
-                                        {t("Crea un proveedor")}
-                                    </Button>
-                                </Grid>
-                                <Grid item xs={12} sm={3}>
-
-                                </Grid>
-                            </Grid>
-                        </Card>
-                    </Grid>
-                    <Box pt={2} pb={4}>
+                <FormikProvider value={formProducto}>
+                    <Form onSubmit={(e) => { console.log(values); handleSubmit(e) }}>
+                        <HeadingWrapper justifyContent="space-between" alignItems="center">
+                            <FlexBox gap={0.5} alignItems="center">
+                                <IconWrapper>
+                                    <ShoppingBasket sx={{
+                                        color: "primary.main"
+                                    }} />
+                                </IconWrapper>
+                                <H5>{estado.nombre}</H5>
+                            </FlexBox>
+                        </HeadingWrapper>
                         <Grid item md={8} xs={12}>
                             <Card sx={{
                                 padding: 3
                             }}>
-                                <H5>Lista de Productos </H5>
                                 <Grid container spacing={3}>
-                                    <Grid item sm={12} xs={12}>
-                                        <Box my={3}>
-                                            <Scrollbar autoHide={false}>
-                                                <Button
-                                                    variant="contained"
-                                                    endIcon={<Add />}
-                                                    color='success'
-                                                    onClick={handleAddItem}
-                                                >
-                                                    {t("Añadir item")}
-                                                </Button>
-                                                <Table sx={{
-                                                    minWidth: 700
-                                                }}>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <HeadTableCell width={150}>Codigo producto</HeadTableCell>
-                                                            <HeadTableCell width={350}>Nombre producto</HeadTableCell>
-                                                            <HeadTableCell>Stock</HeadTableCell>
-                                                            <HeadTableCell>Cantidad</HeadTableCell>
-                                                            <HeadTableCell>precio compra</HeadTableCell>
-                                                            <HeadTableCell>Precio total</HeadTableCell>
-                                                            <HeadTableCell>Acciones</HeadTableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-
-                                                    <TableBody>
-                                                        {items.map((item, i) => <TableRow key={i}>
-                                                            <BodyTableCell>
-                                                                <AppTextField
-                                                                    //onChange={e => handleUpdateItem(e, item.id)}
-                                                                    fullWidth
-                                                                    size="small"
-                                                                    name="codigoProducto"
-                                                                    label="Codigo"
-                                                                    value={items[i].codigoProducto}
-                                                                />
-                                                            </BodyTableCell>
-
-                                                            <BodyTableCell>
-                                                                {/* <Autocomplete
-                                                                    fullWidth
-                                                                    getOptionLabel={(options) => options.nombreProducto}
-                                                                    options={OrdenCompra.productos}
-                                                                    value={items[i] ? items[i] : null}
-                                                                    size="small"
-                                                                    isOptionEqualToValue={(option, value) => {
-                                                                        if (value) {
-                                                                            return (option.value === value.value)
-                                                                        } else {
-                                                                            return false;
-                                                                        }
-                                                                    }}
-                                                                    onChange={(event, newValue) => {
-                                                                        if (newValue != null) {
-                                                                            console.log(newValue)
-                                                                            items[i].codigoProducto = newValue.codigoProducto;
-                                                                            items[i].precioCompra = newValue.precioCompra;
-                                                                            items[i].id = newValue.id;
-                                                                            items[i].nombreProducto = newValue.nombreProducto;
-                                                                            setItems([...items]);
-                                                                            console.log(items)
-                                                                        } else {
-
-                                                                        }
-                                                                    }}
-
-                                                                    renderInput={
-                                                                        (params) => <TextField
-                                                                            {...params}
-                                                                            label="Selecione producto"
-                                                                        />
-                                                                    }
-                                                                /> */}
-                                                            </BodyTableCell>
-                                                            <BodyTableCell>
-                                                                <AppTextField
-                                                                    //onChange={e => handleUpdateItem(e, item.id)}
-                                                                    fullWidth
-                                                                    size="small"
-                                                                    name="stock"
-                                                                    label="Stock"
-                                                                    value={items[i].stock}
-                                                                />
-                                                            </BodyTableCell>
-                                                            <BodyTableCell>
-                                                                <AppTextField
-                                                                    //onChange={e => handleUpdateItem(e, item.id)}
-                                                                    fullWidth
-                                                                    size="small"
-                                                                    id="cantidad"
-                                                                    name="cantidad"
-                                                                    value={items[i].cantidad}
-                                                                    label="Cantidad"
-                                                                    onChange={(e) => {
-                                                                        console.log('on change', e.target.value);
-                                                                        items[i].cantidad = (e.target.value);
-                                                                        items[i].precioTotal = parseInt(items[i].cantidad == '' ? 0 : items[i].cantidad) * parseFloat(items[i].precioCompra);
-                                                                        setItems([...items]);
-                                                                        onCalculoTotal()
-                                                                    }}
-                                                                    type={'number'}
-                                                                />
-                                                            </BodyTableCell>
-                                                            <BodyTableCell>
-                                                                <AppTextField
-                                                                    //onChange={e => handleUpdateItem(e, item.id)}
-                                                                    fullWidth
-                                                                    size="small"
-                                                                    id="precioCompra"
-                                                                    name="precioCompra"
-                                                                    label="Precio compra"
-                                                                    value={items[i].precioCompra}
-                                                                    onChange={(e) => {
-                                                                        console.log('on change', e.target.value);
-                                                                        items[i].precioCompra = (e.target.value);
-                                                                        items[i].precioTotal = parseInt(items[i].cantidad == '' ? 0 : items[i].cantidad) * parseFloat(items[i].precioCompra == '' ? 0 : items[i].precioCompra);
-                                                                        setItems([...items]);
-                                                                        onCalculoTotal()
-                                                                    }}
-                                                                    type={'number'}
-                                                                />
-                                                            </BodyTableCell>
-                                                            <BodyTableCell>
-                                                                <AppTextField
-                                                                    fullWidth
-                                                                    size="small"
-                                                                    name="precioTotal"
-                                                                    label="Precio total"
-                                                                    autoFocus
-                                                                    value={items[i].precioTotal}
-                                                                />
-                                                            </BodyTableCell>
-                                                            <BodyTableCell>
-                                                                <IconButton onClick={() => handleDeleteItem(item.id)}>
-                                                                    <Delete sx={{
-                                                                        color: "text.disabled"
-                                                                    }} />
-                                                                </IconButton>
-                                                            </BodyTableCell>
-                                                        </TableRow>)}
-                                                    </TableBody>
-                                                </Table>
-                                            </Scrollbar>
-                                        </Box>
-                                    </Grid>
                                     <Grid item xs={12} sm={3}>
-
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <H6 mb={1}>Total</H6>
+                                        <H6 mb={1}>Codigo orden compra</H6>
                                         <AppTextField
-                                            fullWidth size="small"
-                                            placeholder="Total"
-                                            name="total"
-                                            value={values.total}
+                                            fullWidth
+                                            size="small"
+                                            name="codigoOrden"
+                                            placeholder="Orden compra"
+                                            value={values.codigoOrden}
+                                            onChange={handleChange}
+                                            error={Boolean(touched.codigoOrden && errors.codigoOrden)}
+                                            helperText={touched.codigoOrden && errors.codigoOrden}
+                                            disabled={true}
                                         />
                                     </Grid>
-                                    <Grid item xs={12} sm={12} style={{ m: 0, p: 0 }}>
-                                        <H6 mb={1}>Precio total</H6>
+                                    <Grid item xs={12} sm={3}>
+                                        <H6 mb={1}>Fecha </H6>
                                         <AppTextField
-                                            fullWidth size="small"
-                                            name="montoliteral"
-                                            placeholder="total literal"
-                                            value={values.montoliteral}
+                                            fullWidth
+                                            size="small"
+                                            name="fecha"
+                                            placeholder="Fecha"
+                                            value={values.fecha}
+                                            onChange={handleChange}
+                                            error={Boolean(touched.fecha && errors.fecha)}
+                                            helperText={touched.fecha && errors.fecha}
+                                            disabled={true}
                                         />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        <H6 mb={1}>Usuario</H6>
+                                        <AppTextField
+                                            fullWidth
+                                            size="small"
+                                            name="usuario"
+                                            placeholder="Usuario"
+                                            value={values.usuario}
+                                            onChange={handleChange}
+                                            error={Boolean(touched.usuario && errors.usuario)}
+                                            helperText={touched.usuario && errors.usuario}
+                                            disabled={true}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={12}>
+                                        <H6 mb={1}>Descripcion</H6>
+                                        <AppTextField
+                                            fullWidth
+                                            size="small"
+                                            name="descripcion"
+                                            placeholder="Descripcion"
+                                            value={values.descripcion}
+                                            onChange={handleChange}
+                                            error={Boolean(touched.descripcion && errors.descripcion)}
+                                            helperText={touched.descripcion && errors.descripcion}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        <H6 mb={1}>Proveedor</H6>
+                                        <AutocompleteAsync
+                                            label={'Selecione un proveedor'}
+                                            options={listaProveedores}
+                                            loading={loadingAutoCompleteProveedores}
+                                            open={openAutoCompleteProveedores}
+                                            onOpen={LoadListaProveedores}
+                                            onClose={refresListaProveedores}
+                                            isOptionEqualToValue={isOptionEqualToValueProveedor}
+                                            getOptionLabel={getOptionLabelProveedor}
+                                            handleChange={handleChange}
+                                            name={'VProveedoreId'}
+                                            value={values.VProveedoreId}
+                                            onChange={(e, value) => {
+                                                if (value != null) {
+                                                    console.log(value)
+                                                    setFieldValue('VProveedoreId', value.id)
+                                                }
+                                            }}
+                                            defaultValue={() => {
+                                                return {
+                                                    id: values.VProveedoreId,
+                                                    nombreProveedor: values.nombreProveedor,
+                                                }
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        <H6 mb={1}>Nit CI</H6>
+                                        <AppTextField
+                                            fullWidth
+                                            size="small"
+                                            name="nit"
+                                            placeholder="Nit CI"
+                                            value={values.nit}
+                                            onChange={handleChange}
+                                            error={Boolean(touched.nit && errors.nit)}
+                                            helperText={touched.nit && errors.nit}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        <H6 mb={1}>Telefono</H6>
+                                        <AppTextField
+                                            fullWidth
+                                            size="small"
+                                            name="telefono"
+                                            placeholder="Telefono"
+                                            value={values.telefono}
+                                            onChange={handleChange}
+                                            error={Boolean(touched.telefono && errors.telefono)}
+                                            helperText={touched.telefono && errors.telefono}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        <H6 mb={1}>Metodo Pago</H6>
+                                        <AutocompleteAsync
+                                            label={'Selecione Metodo de pago'}
+                                            options={listaMetodoPago}
+                                            loading={loadingAutoCompleteMetodoPago}
+                                            open={openAutoCompleteMetodoPago}
+                                            onOpen={LoadListaMetodoPago}
+                                            onClose={refresListaMetodoPago}
+                                            isOptionEqualToValue={isOptionEqualToValueMetodoPago}
+                                            getOptionLabel={getOptionLabelMetodoPago}
+                                            handleChange={handleChange}
+                                            name={'asientoId'}
+                                            value={values.asientoId}
+                                            onChange={(e, value) => {
+                                                if (value != null) {
+                                                    console.log(value)
+                                                    setFieldValue('asientoId', value.asientoId)
+                                                }
+                                            }}
+                                            defaultValue={() => {
+                                                return {
+                                                    asientoId: values.asientoId,
+                                                    nombreAsiento: values.nombreProveedor
+                                                }
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        <H6 mb={1}>Cree un producto</H6>
+                                        <Button fullWidth variant="contained" endIcon={<Add />} onClick={() => { }}>
+                                            {t("Crea un producto")}
+                                        </Button>
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        <H6 mb={1}>Cree un proveedor</H6>
+                                        <Button fullWidth variant="contained" endIcon={<Add />} onClick={() => { setOpenModalProveedor(true); }}>
+                                            {t("Crea un proveedor")}
+                                        </Button>
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+
                                     </Grid>
                                 </Grid>
                             </Card>
                         </Grid>
-                    </Box>
-                    <Grid item md={8} xs={12}>
-                        <Card sx={{
-                            padding: 3
-                        }}>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} sm={4}>
-                                    <Button
-                                        variant="contained"
-                                        color='success'
-                                        endIcon={<Add />}
-                                        disabled={buttonProcesar}
-                                        onClick={() => { setModalProcesar(true) }}
-                                    >
-                                        {t("Procesar pago")}
-                                    </Button>
-                                </Grid>
-                                <Grid item xs={12} sm={4}>
-                                    <Button
-                                        variant="contained"
-                                        endIcon={<Add />}
-                                        onClick={onOpenRecibir}
-                                    >
-                                        {t("Recibir")}
-                                    </Button>
-                                </Grid>
-                                <Grid item xs={12} sm={4}>
-                                    <Button
-                                        variant="contained"
-                                        endIcon={<Add />}
-                                        type='submit'
-                                    >
-                                        {t("Guardar")}
-                                    </Button>
-                                </Grid>
+                        <Box pt={2} pb={4}>
+                            <Grid item md={8} xs={12}>
+                                <Card sx={{
+                                    padding: 3
+                                }}>
+                                    <H5>Lista de Productos </H5>
+                                    <Grid container spacing={3}>
+                                        <Grid item sm={12} xs={12}>
+                                            <Box my={3}>
+                                                <Scrollbar autoHide={false}>
+                                                    <Button
+                                                        variant="contained"
+                                                        endIcon={<Add />}
+                                                        color='success'
+                                                        onClick={handleAddItem}
+                                                    >
+                                                        {t("Añadir item")}
+                                                    </Button>
+                                                    <Table sx={{
+                                                        minWidth: 700
+                                                    }}>
+                                                        <TableHead>
+                                                            <TableRow>
+                                                                <HeadTableCell width={150}>Codigo producto</HeadTableCell>
+                                                                <HeadTableCell width={350}>Nombre producto</HeadTableCell>
+                                                                <HeadTableCell>Stock</HeadTableCell>
+                                                                <HeadTableCell>Cantidad</HeadTableCell>
+                                                                <HeadTableCell>precio compra</HeadTableCell>
+                                                                <HeadTableCell>Precio total</HeadTableCell>
+                                                                <HeadTableCell>Acciones</HeadTableCell>
+                                                            </TableRow>
+                                                        </TableHead>
+
+                                                        <FieldArray name="productos" render={(arrayProducto) => {
+                                                            return (
+                                                                <TableBody >
+                                                                    {
+                                                                        values.productos && values.productos.length > 0 ? (
+                                                                            values.productos.map((producto, index) => {
+                                                                                return (
+                                                                                    <OrdenProducto key={index}
+                                                                                        dataAcction={{
+                                                                                            delete: () => {
+                                                                                                arrayProducto.remove(index)
+                                                                                            }
+                                                                                        }}
+                                                                                        dataCantidad={{
+                                                                                            name: `productos[${index}].cantidad`,
+                                                                                            value: values.productos[index].cantidad,
+                                                                                            label: "Cantidad",
+                                                                                            handleChange: (e) => {
+                                                                                                onCantidad(e, index);
+                                                                                            }
+
+                                                                                        }}
+                                                                                        dataCodigoProducto={
+                                                                                            {
+                                                                                                name: `productos[${index}].codigoProducto`,
+                                                                                                value: values.productos[index].codigoProducto,
+                                                                                                label: "codigoProducto"
+                                                                                            }
+                                                                                        }
+                                                                                        dataPrecioCompra={
+                                                                                            {
+                                                                                                name: `productos[${index}].precioCompra`,
+                                                                                                value: values.productos[index].precioCompra,
+                                                                                                label: "Precio compra",
+                                                                                                handleChange: (e) => {
+                                                                                                    onprecioCompra(e, index);
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                        dataProducto={
+                                                                                            {
+                                                                                                name: `productos[${index}].productoId`,
+                                                                                                value: values.productos[index].productoId,
+                                                                                                label: "Selecione un producto",
+                                                                                                handleChange: (e, value) => {
+                                                                                                    if (value != null) {
+                                                                                                        console.log(value)
+                                                                                                        setFieldValue(`productos[${index}].productoId`, value.productoId)
+                                                                                                        setFieldValue(`productos[${index}].codigoProducto`, value.codigoProducto)
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                        dataStock={
+                                                                                            {
+                                                                                                name: `productos[${index}].stock`,
+                                                                                                value: values.productos[index].stock,
+                                                                                                label: "Stock"
+                                                                                            }
+                                                                                        }
+                                                                                        dataPrecioTotal={
+                                                                                            {
+                                                                                                name: `productos[${index}].precioTotal`,
+                                                                                                value: values.productos[index].precioTotal,
+                                                                                                label: "Precio total",
+                                                                                            }
+                                                                                        }
+                                                                                    />
+                                                                                )
+                                                                            })) : null
+                                                                    }
+                                                                </TableBody >
+                                                            )
+                                                        }} />
+                                                    </Table>
+                                                </Scrollbar>
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={12} sm={3}>
+
+                                        </Grid>
+                                        <Grid item xs={12} sm={3}>
+
+                                        </Grid>
+                                        <Grid item xs={12} sm={3}>
+
+                                        </Grid>
+                                        <Grid item xs={12} sm={3}>
+                                            <H6 mb={1}>Total</H6>
+                                            <AppTextField
+                                                fullWidth size="small"
+                                                placeholder="Total"
+                                                name="total"
+                                                value={values.total}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={12} style={{ m: 0, p: 0 }}>
+                                            <H6 mb={1}>Precio total</H6>
+                                            <AppTextField
+                                                fullWidth size="small"
+                                                name="montoliteral"
+                                                placeholder="total literal"
+                                                value={values.montoliteral}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Card>
                             </Grid>
-                        </Card>
-                    </Grid>
-                </form>
+                        </Box>
+                        <Grid item md={8} xs={12}>
+                            <Card sx={{
+                                padding: 3
+                            }}>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} sm={4}>
+                                        <Button
+                                            variant="contained"
+                                            color='success'
+                                            endIcon={<Add />}
+                                            disabled={buttonProcesar}
+                                            onClick={() => { setModalProcesar(true) }}
+                                        >
+                                            {t("Procesar pago")}
+                                        </Button>
+                                    </Grid>
+                                    <Grid item xs={12} sm={4}>
+                                        <Button
+                                            variant="contained"
+                                            endIcon={<Add />}
+                                            onClick={onOpenRecibir}
+                                        >
+                                            {t("Recibir")}
+                                        </Button>
+                                    </Grid>
+                                    <Grid item xs={12} sm={4}>
+                                        <Button
+                                            variant="contained"
+                                            endIcon={<Add />}
+                                            type='submit'
+                                        >
+                                            {t("Guardar")}
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </Card>
+                        </Grid>
+                    </Form>
+                </FormikProvider>
                 <CreateModalProcesar open={modalProcesar} data={previewPago} ></CreateModalProcesar>
                 <CreateModalPreguntar onPago={() => { setModalProcesar(true); setModalPreguntar(false) }} open={modalPreguntar} />
                 <RecibirProducto data={previewPago} onClose={onCloseRecibir} open={modalRecibir} />
@@ -601,7 +632,7 @@ const CreateOrdenInicial = () => {
                     onClose={() => { setOpenModalProveedor(false) }}
                     onSummit={() => { console.log('proveedor registrado') }}
                 />
-            </Box>
+            </Box >
         </>
     )
 }

@@ -1,9 +1,11 @@
 import { Request } from "utils/http";
-export const UseAsiento = () => {
+
+
+export const UseProducto = () => {
 
   const List = async () => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/asiento`,
+      endPoint: `${process.env.REACT_APP_API}api/Producto`,
       initialValues: [],
       method: 'get',
       showError: true,
@@ -16,7 +18,7 @@ export const UseAsiento = () => {
   }
   const Create = async () => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/asiento/create`,
+      endPoint: `${process.env.REACT_APP_API}api/Producto/create`,
       initialValues: [],
       method: 'get',
       showError: true,
@@ -29,7 +31,7 @@ export const UseAsiento = () => {
   }
   const Store = async (values) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/asiento`,
+      endPoint: `${process.env.REACT_APP_API}api/Producto`,
       initialValues: [],
       method: 'post',
       showError: true,
@@ -43,7 +45,7 @@ export const UseAsiento = () => {
   }
   const Editar = async (id) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/asiento/${id}`,
+      endPoint: `${process.env.REACT_APP_API}api/Producto/editar${id}`,
       initialValues: [],
       method: 'get',
       showError: true,
@@ -56,7 +58,7 @@ export const UseAsiento = () => {
   }
   const Update = async (values) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/asiento/${values.id}`,
+      endPoint: `${process.env.REACT_APP_API}api/Producto/update${values.id}`,
       initialValues: [],
       method: 'put',
       showError: true,
@@ -70,7 +72,7 @@ export const UseAsiento = () => {
   }
   const Delete = async (id) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/asiento/${id}`,
+      endPoint: `${process.env.REACT_APP_API}api/Producto/delete/${id}`,
       initialValues: [],
       method: 'delete',
       showError: true,

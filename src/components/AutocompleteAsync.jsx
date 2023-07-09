@@ -2,24 +2,29 @@ import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
+import { values } from 'lodash';
 
 const AutocompleteAsync = ({
     onOpen,
     onClose,
     label,
-    values,
+    options,
     open,
     loading,
     isOptionEqualToValue,
-    getOptionLabel
+    getOptionLabel,
+    handleChange,
+    name,
+    value,
+    onChange,
+    defaultValue
 }) => {
     React.useEffect(() => {
-       
+
     }, [open]);
 
     return (
         <Autocomplete
-            id="asynchronous-demo"
             size='small'
             fullWidth
             open={open}
@@ -27,10 +32,16 @@ const AutocompleteAsync = ({
             onClose={onClose}
             isOptionEqualToValue={isOptionEqualToValue}
             getOptionLabel={getOptionLabel}
-            options={values}
+            options={options}
             loading={loading}
+            defaultValue={defaultValue}
+            onChange={onChange}
+            //onChange={handleChange}
             renderInput={(params) => (
                 <TextField
+
+                    name={name}
+                    value={value}
                     {...params}
                     label={label}
                     InputProps={{
