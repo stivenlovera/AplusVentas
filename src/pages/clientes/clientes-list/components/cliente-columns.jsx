@@ -3,6 +3,8 @@ import { Box, IconButton, Rating } from "@mui/material";
 import { Fragment, useState } from "react";
 import Delete from "icons/Delete";
 import CreateClienteModal from "./create-cliente";
+import { UseCliente } from "pages/clientes/hooks/useCliente";
+import ModalDelete from "components/modal-delete/modal-delete";
 
 const ClienteColumns = [
     {
@@ -10,8 +12,22 @@ const ClienteColumns = [
         accessor: "codigoCliente"
     },
     {
-        Header: "CI - NIT",
-        accessor: "ci"
+        Header: "Numero Documento",
+        accessor: "numeroDocumento",
+        Cell: ({
+            row
+        }) => {
+            return row.original.numeroDocumento;
+        }
+    },
+    {
+        Header: "Tipo Documento",
+        accessor: "tipoDocumentoIdentidad",
+        Cell: ({
+            row
+        }) => {
+            return row.original.tipoDocumentoIdentidad.descripcion;
+        }
     },
     {
         Header: "Nombre",
@@ -29,10 +45,7 @@ const ClienteColumns = [
         Header: "Telefono",
         accessor: "telefono"
     },
-    {
-        Header: "Linea credito",
-        accessor: "lineaCredito"
-    },
+
     {
         Header: "Acciones",
         accessor: "acciones",
@@ -44,13 +57,35 @@ const ClienteColumns = [
                 transition: "color 0.3s",
                 color: row.isSelected ? "white" : "text.disabled"
             };
-            const [tipo, setTipo] = useState('');
             const [openModal, setOpenModal] = useState(false);
+            const [openModalDelete, setOpenModalDelete] = useState(false);
+
+            const { Update, Delete } = UseCliente()
+
+            const ApiUpdate = async (values) => {
+                const { data, status } = await Update(values);
+                if (status) {
+                    setOpenModal(false)
+                }
+            }
+           /*  const ApiDelete = async (values) => {
+                const { data, status } = await Delete(row.original.id);
+                if (status) {
+                    setOpenModalDelete(false)
+                }
+            } */
+            const onUpdate = async (values) => {
+                await ApiUpdate(values);
+            }
+
+           /*  const onDelete = async () => {
+                await ApiDelete();
+            } */
+
             return <Fragment>
                 <IconButton onClick={
                     () => {
                         setOpenModal(true)
-                        setTipo('editar')
                     }
                 }>
                     <Edit sx={{
@@ -58,15 +93,22 @@ const ClienteColumns = [
                         color: "text.disabled"
                     }} />
                 </IconButton>
-                <IconButton onClick={() => { alert('funcion pendiente') }}>
+                <IconButton onClick={() => { setOpenModalDelete(true) }}>
                     <Delete sx={style} />
                 </IconButton>
-                <CreateClienteModal editProduct open={openModal} id={row.original.id} data={row.original} onClose={
-                    () => {
-                        setOpenModal(false)
-                        setTipo('')
-                    }
-                } tipo={tipo} />
+                <CreateClienteModal
+                    editCliente={true}
+                    open={openModal}
+                    data={row.original}
+                    onSubmit={onUpdate}
+                    onClose={() => { setOpenModal(false) }
+                    } />
+              {/*   <ModalDelete
+                    disabledButton={false}
+                    onClose={() => { setOpenModalDelete(false) }}
+                    onSave={onDelete}
+                    open={openModalDelete}
+                /> */}
             </Fragment>;
         }
     }];

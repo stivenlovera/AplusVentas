@@ -10,25 +10,12 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CreateClienteModal from "./components/create-cliente";
 import ClienteColumns from "./components/cliente-columns";
-import { clienteFake } from "./components/cliente-fake";
+import { clienteListFake, initialStateCliente } from "./components/cliente-fake";
 import { searchByName } from "./components/clientes-utils";
 import { Context } from "./context/context";
-import { ObtenerClienteService } from "Services/api-ventas-erp/clienteService";
-export const HeadingWrapper = styled(FlexBox)(({
-  theme
-}) => ({
-  marginBottom: 20,
-  flexWrap: "wrap",
-  [theme.breakpoints.down(530)]: {
-    "& .MuiButton-root": {
-      width: "100%"
-    },
-    "& .MuiInputBase-root": {
-      maxWidth: "100%",
-      marginBottom: 15
-    }
-  }
-}));
+import { UseCliente } from "../hooks/useCliente";
+import { HeadingWrapper } from "pages/orden-compra/orden-compra-list/orden-compra-list";
+
 
 const ClientesList = () => {
   const {
@@ -36,18 +23,43 @@ const ClientesList = () => {
   } = useTranslation();
   const [actualizarTable, setActualizarTableContext] = useState(false);
   const [openModal, setOpenModal] = useState(false); // search input
+  const [create, setCreate] = useState(initialStateCliente)
 
-  const ApiClientes= async () => {
-    const { data } = await ObtenerClienteService();
-    console.log(data.message)
-    setFilteredItem(data.data)
+  const { List, Create, Store } = UseCliente()
+
+  const ApiClientes = async () => {
+    const { data, status } = await List();
+    if (status) {
+      setFilteredItem(data);
+    }
+  }
+  const onOpenCreate = async () => {
+    await ApiCreate();
+    setOpenModal(true);
   }
 
+  const onOpenStore = async (values) => {
+    await ApiStore(values);
+    setOpenModal(false);
+  }
+
+  const ApiCreate = async () => {
+    const { data, status } = await Create();
+    if (status) {
+      setCreate({ ...create, codigoCliente: data.codigoCliente })
+    }
+  }
+  const ApiStore = async (values) => {
+    const { data, status } = await Store(values);
+    if (status) {
+      console.log(status,'on close modal')
+    }
+  }
   const [searchValue, setSearchValue] = useState("");
-  const [filteredItem, setFilteredItem] = useState(clienteFake);
+  const [filteredItem, setFilteredItem] = useState(clienteListFake);
   useEffect(() => {
     ApiClientes()
-    const result = searchByName(clienteFake, searchValue);
+    const result = searchByName(clienteListFake, searchValue);
     setFilteredItem(result);
     setActualizarTableContext(false);
   }, [searchValue, actualizarTable]);
@@ -65,14 +77,14 @@ const ClientesList = () => {
             <H5>Clientes</H5>
           </FlexBox>
           <SearchInput bordered={'true'} placeholder="Buscar clientes" onChange={e => setSearchValue(e.target.value)} />
-          <Button variant="contained" endIcon={<Add />} onClick={() => setOpenModal(true)}>
+          <Button variant="contained" endIcon={<Add />} onClick={onOpenCreate}>
             {t("Añadir cliente")}
           </Button>
         </HeadingWrapper>
 
         <CustomTable columnShape={ClienteColumns} data={filteredItem} />
 
-        <CreateClienteModal open={openModal} onClose={() => setOpenModal(false)} tipo={'nuevo'} />
+        <CreateClienteModal open={openModal} onSubmit={onOpenStore} editCliente={false} onClose={() => setOpenModal(false)} data={create} />
       </Box>
     </Context.Provider>
   );
