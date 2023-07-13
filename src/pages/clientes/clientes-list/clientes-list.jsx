@@ -12,23 +12,23 @@ import CreateClienteModal from "./components/create-cliente";
 import ClienteColumns from "./components/cliente-columns";
 import { clienteListFake, initialStateCliente } from "./components/cliente-fake";
 import { searchByName } from "./components/clientes-utils";
-import { Context } from "./context/context";
 import { UseCliente } from "../hooks/useCliente";
 import { HeadingWrapper } from "pages/orden-compra/orden-compra-list/orden-compra-list";
+import { Context } from "contexts/ContextDataTable";
 
 
 const ClientesList = () => {
   const {
     t
   } = useTranslation();
-  const [actualizarTable, setActualizarTableContext] = useState(false);
+  const [actualizarTable, setActualizarTableContext] = useState(true);
   const [openModal, setOpenModal] = useState(false); // search input
   const [create, setCreate] = useState(initialStateCliente)
 
-  const { List, Create, Store } = UseCliente()
+  const { onList, onCreate, onStore } = UseCliente()
 
   const ApiClientes = async () => {
-    const { data, status } = await List();
+    const { data, status } = await onList();
     if (status) {
       setFilteredItem(data);
     }
@@ -44,19 +44,20 @@ const ClientesList = () => {
   }
 
   const ApiCreate = async () => {
-    const { data, status } = await Create();
+    const { data, status } = await onCreate();
     if (status) {
       setCreate({ ...create, codigoCliente: data.codigoCliente })
     }
   }
   const ApiStore = async (values) => {
-    const { data, status } = await Store(values);
+    const { data, status } = await onStore(values);
     if (status) {
       console.log(status,'on close modal')
     }
   }
   const [searchValue, setSearchValue] = useState("");
   const [filteredItem, setFilteredItem] = useState(clienteListFake);
+
   useEffect(() => {
     ApiClientes()
     const result = searchByName(clienteListFake, searchValue);

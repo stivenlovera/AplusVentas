@@ -7,11 +7,11 @@ import FlexRowAlign from "components/flexbox/FlexRowAlign";
 import AppTextField from "components/input-fields/AppTextField";
 import Scrollbar from "components/ScrollBar";
 import { H2, H6, Small } from "components/Typography";
+import { Context } from "contexts/ContextDataTable";
 import { Form, FormikProvider, useFormik } from "formik";
 import React, { useContext, useEffect, useState } from "react";
 import { CrearClienteService, EditarClienteService, GuardarClienteService, ModificarClienteService } from "Services/api-ventas-erp/clienteService";
 import * as Yup from "yup"; // component props interface
-import { Context } from "../context/context";
 
 // styled components
 const StyledAppModal = styled(AppModal)(({
@@ -56,6 +56,7 @@ const CreateClienteModal = ({
         onSubmit: async (values) => {
             onSubmit(values);
             setActualizarTableContext(true);
+            resetForm()
         }
     });
     const {

@@ -3,7 +3,7 @@ import { Request } from "utils/http";
 
 export const UseCliente = () => {
 
-    const List = async () => {
+    const onList = async () => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/Clientes`,
             initialValues: [],
@@ -16,7 +16,7 @@ export const UseCliente = () => {
             status: !!status
         };
     }
-    const Create = async () => {
+    const onCreate = async () => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/Clientes/create`,
             initialValues: [],
@@ -29,7 +29,7 @@ export const UseCliente = () => {
             status: !!status
         };
     }
-    const Store = async (values) => {
+    const onStore = async (values) => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/Clientes`,
             initialValues: [],
@@ -43,7 +43,7 @@ export const UseCliente = () => {
             status: !!status
         };
     }
-    const Editar = async (id) => {
+    const onEditar = async (id) => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/Clientes/editar/${id}`,
             initialValues: [],
@@ -56,7 +56,7 @@ export const UseCliente = () => {
             status: !!status
         };
     }
-    const Update = async (values) => {
+    const onUpdate = async (values) => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/Clientes/${values.id}`,
             initialValues: [],
@@ -70,7 +70,7 @@ export const UseCliente = () => {
             status: !!status
         };
     }
-    const Delete = async (id) => {
+    const onDelete = async (id) => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/Clientes/${id}`,
             initialValues: [],
@@ -85,11 +85,11 @@ export const UseCliente = () => {
     }
 
     return {
-        List,
-        Create,
-        Store,
-        Editar,
-        Update,
-        Delete
+        onList,
+        onCreate,
+        onStore,
+        onEditar,
+        onUpdate,
+        onDelete
     }
 }

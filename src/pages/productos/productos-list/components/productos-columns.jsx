@@ -3,7 +3,7 @@ import { IconButton } from "@mui/material";
 import { Fragment, useEffect, useState } from "react";
 import CreateProductoModal from "./create-producto";
 import Delete from "icons/Delete";
-import { initialState } from "../utils/utils-productos";
+import { initialStateProducto } from "../utils/utils-productos";
 import { Request } from "utils/http";
 const ProductosColumns = [
     {
@@ -42,7 +42,7 @@ const ProductosColumns = [
                 proveedores: [],
                 categorias: [],
                 productosMaestros: [],
-                initialState: initialState
+                initialState: initialStateProducto
             })
             const [openModal, setOpenModal] = useState(false);
             /*Api */

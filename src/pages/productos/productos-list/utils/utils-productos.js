@@ -11,7 +11,7 @@ export const getRoute = pathname => {
   return `/${str[1]}`;
 };
 
-export const initialState = {
+export const initialStateProducto = {
   productoId: 0,
   codigoProducto: '',
   codigoBarra: '',
