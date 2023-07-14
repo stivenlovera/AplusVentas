@@ -33,16 +33,18 @@ export async function Request({ endPoint, initialValues, method, showError, show
                 console.log(e.response?.status)
                 switch (e.response?.status) {
                     case 401:
-                        enqueueSnackbar('NO authenticate', { variant: 'error' });
+                        enqueueSnackbar('No authenticate', { variant: 'error' });
                         break;
                     case 400:
-                        enqueueSnackbar('Error Validacion', { variant: 'error' });
+                        enqueueSnackbar('Error validacion', { variant: 'error' });
                         return e.response?.data
                         break;
                     case 403:
-                        enqueueSnackbar('Error Desconectado', { variant: 'error' });
+                        enqueueSnackbar('Error desconectado', { variant: 'error' });
+                        return e.response?.data
                         break;
                     default:
+                        enqueueSnackbar('Error desconocido', { variant: 'error' });
                         break;
                 }
             }

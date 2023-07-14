@@ -61,7 +61,7 @@ const PermisoList = () => {
             const result = searchByRolPermisos(listRoles, searchValue);
             setFilteredItem(result);
         }
-    }, [searchValue, actualizarTable]);
+    }, [searchValue,actualizarTable]);
 
     /*METODOS */
     const onCloseModalDelete = () => {
@@ -84,7 +84,6 @@ const PermisoList = () => {
             showSuccess: false,
             values: create
         });
-        console.log('de response', data)
         setCreate({ ...create, permisos: data.permisos });
         if (!!status) {
             setOpenModal(true);
@@ -147,7 +146,7 @@ const PermisoList = () => {
                     <Box pt={2} pb={4}>
                         <HeadingWrapper justifyContent="space-between" alignItems="center">
                         </HeadingWrapper>
-                        <CustomTable columnShape={ColumnsPermiso} data={listPermisos} />
+                        <CustomTable  columnShape={ColumnsPermiso} data={listPermisos} />
                     </Box>
                 </Grid>
             </Grid>

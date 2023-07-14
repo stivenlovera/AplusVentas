@@ -5,7 +5,7 @@ import FlexBox from "components/flexbox/FlexBox";
 import AppTextField from "components/input-fields/AppTextField";
 import Scrollbar from "components/ScrollBar";
 import { H2, H6, Small } from "components/Typography";
-import { useFormik } from "formik";
+import { setNestedObjectValues, useFormik } from "formik";
 import * as Yup from "yup"; // component props interface
 import { useContext, useEffect, useState } from "react";
 import { initialFormRoles } from "pages/permisos-roles/utils/initialValuesRol";
@@ -41,7 +41,6 @@ const RolModal = ({
     const { permisosRol, permisos } = form;
     const downXl = useMediaQuery(theme => theme.breakpoints.down("sm"));
     const [context, setContext] = useContext(ContextPermisos);
-    const [checked, setChecked] = useState([]);
     const [buttonStore, setButtonStore] = useState(false);
 
     const validationSchema = Yup.object().shape({
@@ -82,6 +81,7 @@ const RolModal = ({
     }
     /*API */
     const ApiStoreRol = async () => {
+        console.log('acctivate roles ')
         setButtonStore(true)
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/Rol`,
@@ -94,16 +94,16 @@ const RolModal = ({
         if (!!status) {
             setContext(true);
             resetForm();
-            setChecked([])
             onClose();
         } else {
+            setButtonStore(false)
             const value = convertError(data);
             setErrors(value)
         }
-        setButtonStore(false)
     }
 
     const ApiUpdateRol = async () => {
+
         setButtonStore(true)
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/Rol`,
@@ -113,56 +113,27 @@ const RolModal = ({
             showSuccess: true,
             values: values
         });
+
         if (!!status) {
             setContext(true);
             resetForm();
-            setChecked([])
+
             onClose();
         } else {
             const value = convertError(data);
             setErrors(value)
+            setButtonStore(false)
         }
-        setButtonStore(false)
     }
 
-    const handleToggle = (value) => () => {
-        const currentIndex = checked.indexOf(value);
-        const newChecked = [...checked];
-        if (currentIndex === -1) {
-            newChecked.push(value);
-        } else {
-            newChecked.splice(currentIndex, 1);
-        }
-        setChecked(newChecked);
-        var permisos = newChecked.map(
-            value => value.permisoId
-        );
-
-        setFieldValue('permisos', permisos);
-    };
-
     useEffect(() => {
-        console.log('entrada de datos form', form);
-        console.log('entrada de datos checked', checked);
-        setChecked(permisosRol.permisos)
         if (editRol) {
             setValues(permisosRol);
-
         } else {
             setValues(permisosRol);
         }
     }, [form]);
 
-    const verificar = (value) => {
-        let validar = false;
-        permisosRol.permisos.forEach(x => {
-            if (x.permisoId == value.permisoId) {
-                validar = true;
-                return validar;
-            }
-        });
-        return validar;
-    }
     return <StyledAppModal open={open} handleClose={onClose}>
         <H2 marginBottom={2}>
             {editRol && form ? "Editar Rol y permisos" : "Rol y permisos"}
@@ -187,34 +158,35 @@ const RolModal = ({
                         />
                     </Grid>
                     <Grid item sm={12} xs={12}>
-                        <H6 mb={1}>Permisos</H6>
                         <FormHelperText
                             error={Boolean(touched.permisos && errors.permisos)} >
                             {touched.permisos && errors.permisos}
                         </FormHelperText>
                         <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                            {permisos.map((value, i) => {
-                                const labelId = `checkbox-list-label-${value, i}`;
-                                return (
-                                    <ListItem
-                                        key={i}
-                                        disablePadding
-                                    >
-                                        <ListItemButton role={undefined} onClick={handleToggle(value)} dense>
-                                            <ListItemIcon>
-                                                <Checkbox
-                                                    edge="start"
-                                                    checked={verificar(value)}
-                                                    tabIndex={-1}
-                                                    disableRipple
-                                                    inputProps={{ 'aria-labelledby': labelId }}
-                                                />
-                                            </ListItemIcon>
-                                            <ListItemText id={labelId} primary={value.nombre} />
-                                        </ListItemButton>
-                                    </ListItem>
-                                );
-                            })}
+                            <Autocomplete
+                                multiple
+                                id="tags-standard"
+                                options={permisos}
+                                getOptionLabel={(option) => option.nombre}
+                                value={values.permisos}
+                                isOptionEqualToValue={(option, value) => {
+                                    return option.permisoId === value.permisoId
+                                }}
+                                onChange={(e, value) => {
+                                    console.log(value)
+                                    if (value !== null) {
+                                        setValues({ ...values, permisos: value })
+                                    }
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="standard"
+                                        label="Selecione permisos"
+                                        placeholder="Permisos"
+                                    />
+                                )}
+                            />
                         </List>
                     </Grid>
                 </Grid>
