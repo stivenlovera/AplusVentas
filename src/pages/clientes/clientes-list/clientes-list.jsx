@@ -16,7 +16,6 @@ import { UseCliente } from "../hooks/useCliente";
 import { HeadingWrapper } from "pages/orden-compra/orden-compra-list/orden-compra-list";
 import { Context } from "contexts/ContextDataTable";
 
-
 const ClientesList = () => {
   const {
     t
@@ -52,7 +51,7 @@ const ClientesList = () => {
   const ApiStore = async (values) => {
     const { data, status } = await onStore(values);
     if (status) {
-      console.log(status,'on close modal')
+      console.log(status, 'on close modal')
     }
   }
   const [searchValue, setSearchValue] = useState("");
@@ -85,7 +84,12 @@ const ClientesList = () => {
 
         <CustomTable columnShape={ClienteColumns} data={filteredItem} />
 
-        <CreateClienteModal open={openModal} onSubmit={onOpenStore} editCliente={false} onClose={() => setOpenModal(false)} data={create} />
+        <CreateClienteModal
+          open={openModal}
+          onSubmit={onOpenStore}
+          editCliente={false}
+          onClose={() => setOpenModal(false)} data={create}
+        />
       </Box>
     </Context.Provider>
   );
