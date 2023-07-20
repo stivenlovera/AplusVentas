@@ -20,10 +20,12 @@ import { UseStoreVenta } from './hooks/UseStoreVenta'
 import ModalPreguntarPagoVenta from './components/pregunta-pago-venta/preguntar-pago-venta'
 import { UsePreviewPagoVenta } from './hooks/UsePreviewPagoVenta'
 import ProcesarPagoVentaModal from './components/ProcesarPagoModal/ProcesarPagoModal'
+import CreateClienteVenta from './components/create-cliente/CreateClienteVenta'
+import { useAutocompleteCliente } from './hooks/useAutocompleteCliente'
+import AutocompleteAsync from 'components/AutocompleteAsync'
 
 const CreateVenta = () => {
     const [actualizarTable, setActualizarTableContext] = useState(false);
-
     const { id } = useParams();
     const { t } = useTranslation();
     const [items, setItems] = useState([]);
@@ -31,10 +33,22 @@ const CreateVenta = () => {
     const [modalProcesar, setModalProcesar] = useState(false);
     const [modalRecibir, setModalRecibir] = useState(false);
     const [buttonProcesar, setButtonProcesar] = useState(true);
-
+    const [opencliente, setOpencliente] = useState(false)
     const [ventaId, setVentaId] = useState(0)
 
     const [modalPreguntar, setModalPreguntar] = useState(false)
+
+    //clientes
+    const {
+        LoadListaCliente,
+        getOptionLabelCliente,
+        isOptionEqualToValueCliente,
+        listaCliente,
+        loadingAutoCompleteCliente,
+        openAutoCompleteCliente,
+        refreshListaCliente,
+    } = useAutocompleteCliente();
+
     const handleAddItem = () => {
         items.push({
             id: 0,
@@ -121,14 +135,11 @@ const CreateVenta = () => {
 
     const { ApiCrearVenta, asientos, create, clientes, productos } = UseCreateVenta();
     const { ApiStore } = UseStoreVenta(values)
-
     const { ApiPreviewPago, previewPago } = UsePreviewPagoVenta(ventaId)
 
     const load = async () => {
-
         await ApiCrearVenta();
         setValues(create);
-        console.log('ejecuacion exitosa', create)
     }
 
     useEffect(() => {
@@ -235,29 +246,30 @@ const CreateVenta = () => {
                             </Grid>
                             <Grid item xs={12} sm={6} >
                                 <H6 mb={1}>Cliente</H6>
-                                <Autocomplete
-                                    fullWidth
-                                    getOptionLabel={(options) => options.nombreCompletoCliente}
-                                    //defaultValue={optionPlanCuenta[0]}
-                                    options={clientes}
-                                    size="small"
-                                    onChange={(event, newValue) => {
-                                        if (newValue != null) {
-                                            console.log(newValue)
-                                            setFieldValue('VClienteId', newValue.id)
-                                            setItems([...items]);
-                                        } else {
-                                            setItems([...items]);
+                                <AutocompleteAsync
+                                    label={'Selecione un un cliente'}
+                                    options={listaCliente}
+                                    loading={loadingAutoCompleteCliente}
+                                    open={openAutoCompleteCliente}
+                                    onOpen={LoadListaCliente}
+                                    onClose={refreshListaCliente}
+                                    isOptionEqualToValue={isOptionEqualToValueCliente}
+                                    getOptionLabel={getOptionLabelCliente}
+                                    handleChange={handleChange}
+                                    name={'VClienteId'}
+                                    value={values.VClienteId}
+                                    onChange={(e, value) => {
+                                        if (value != null) {
+                                            console.log(value)
+                                            setFieldValue('VClienteId', value.id)
                                         }
                                     }}
-                                    renderInput={
-                                        (params) => <TextField
-                                            {...params}
-                                            label="Selecione un cliente"
-                                            error={Boolean(touched.VProveedoreId && errors.VProveedoreId)}
-                                            helperText={touched.VProveedoreId && errors.VProveedoreId}
-                                        />
-                                    }
+                                    defaultValue={() => {
+                                        return {
+                                            id: values.VClienteId,
+                                            nombreCompletoCliente: values.nombreCompletoCliente,
+                                        }
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={3}>
@@ -329,7 +341,11 @@ const CreateVenta = () => {
                             </Grid>
                             <Grid item xxs={12} sm={6}>
                                 <H6 mb={1}>Cree un cliente</H6>
-                                <Button variant="contained" endIcon={<Add />} onClick={() => { }}>
+                                <Button
+                                    variant="contained"
+                                    endIcon={<Add />}
+                                    onClick={() => setOpencliente(true)}
+                                >
                                     {t("Añadir un cliente")}
                                 </Button>
                             </Grid>
@@ -546,7 +562,11 @@ const CreateVenta = () => {
             </form>
             <ProcesarPagoVentaModal open={modalProcesar} data={previewPago} ></ProcesarPagoVentaModal>
             <ModalPreguntarPagoVenta onPago={() => { setModalProcesar(true); setModalPreguntar(false) }} open={modalPreguntar} />
-            {/* <RecibirProducto data={previewPago} onClose={onCloseRecibir} open={modalRecibir} /> */}
+            <CreateClienteVenta
+                openModal={opencliente}
+                onClose={() => { setOpencliente(false) }}
+                onSummit={() => { console.log('proveedor registrado') }}
+            />
         </Box>
     )
 }

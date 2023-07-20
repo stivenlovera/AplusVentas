@@ -8,6 +8,7 @@ import { Small } from "components/Typography";
 import RecibirProducto from "pages/orden-compra/recibir/recibir-producto";
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import { UsePreviewOrdenCompraRecibir } from "pages/orden-compra/recibir/hooks/usePreviewRecibir";
+import { Link } from "react-router-dom";
 const OrdenCompraColumns = [
     {
         Header: "Codigo",
@@ -94,12 +95,12 @@ const OrdenCompraColumns = [
                             color: "text.disabled"
                         }} />
                     </IconButton>
-                    <IconButton onClick={() => setOpenModal(true)}>
+                    <Link to={`/dashboard/orden-inicial/editar/${row.original.id}`}>
                         <Edit sx={{
                             fontSize: 18,
                             color: "text.disabled"
                         }} />
-                    </IconButton>
+                    </Link>
                     <IconButton onClick={() => setOpenModal(true)}>
                         <Delete sx={style} />
                     </IconButton>

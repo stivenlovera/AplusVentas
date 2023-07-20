@@ -13,7 +13,7 @@ import ProductosColumns from "./components/productos-columns";
 import { searchByProductos } from "./utils/utils-productos";
 import { Context } from "contexts/ContextDataTable";
 import { Request } from "utils/http";
-import { initialState } from "./utils/utils-productos";
+import { initialStateProducto } from "./utils/utils-productos";
 export const HeadingWrapper = styled(FlexBox)(({
     theme
 }) => ({
@@ -110,7 +110,7 @@ const ProductosList = () => {
                         proveedores: create.proveedores,
                         categorias: create.categorias,
                         productosMaestros: create.productosMaestros,
-                        initialState: initialState
+                        initialState: initialStateProducto
                     }} />
             </Box>
         </Context.Provider>

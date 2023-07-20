@@ -27,7 +27,6 @@ export const UseCreateOrdenCompra = () => {
     const ApiCrearOrdenCompra = async () => {
         try {
             const { data } = await CrearOrdenCompraService();
-            console.log(data)
             if (data.status == 1) {
                 setCreate({
                     ...create,
