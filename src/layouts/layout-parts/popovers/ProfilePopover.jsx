@@ -8,7 +8,8 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import PopoverLayout from './PopoverLayout'; // styled components
 import { ContextUser } from 'contexts/ContextUser';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { SelectToken, setToken } from 'reducers/Slice';
 const StyledButtonBase = styled(ButtonBase)(({
   theme
 }) => ({
@@ -32,6 +33,16 @@ const StyledSmall = styled(Small)(({
 }));
 
 const ProfilePopover = () => {
+  const token = useSelector(SelectToken);
+  const dispatch = useDispatch();
+
+  const updateToken = (token) => {
+    dispatch(
+      setToken({
+        token: token
+      })
+    )
+  }
   const [userContext, setUserContext] = useContext(ContextUser);
 
   const anchorRef = useRef(null);
@@ -50,10 +61,10 @@ const ProfilePopover = () => {
 
   const handleLogout = () => {
     logout();
+    updateToken(false)
     navigate('/login');
   };
   useEffect(() => {
-    console.log(userContext)
   }, [userContext])
 
   return <Fragment>
