@@ -29,18 +29,17 @@ const App = () => {
   const loadAuthenticacion = async () => {
     await ApiAuthenticar()
   }
-
   useEffect(() => {
     if (token) {
-      if (user.nombre == '') {
-        loadAuthenticacion();
-        return;
-      }
+      loadAuthenticacion();
+      
+    } else {
+      updateToken(false)
     }
     console.log('PERSONA', user.nombre, user.apellido)
-  }, [token,user.nombre])
+  }, [token, user.nombre])
 
-  const content = useRoutes(routes(user,token));
+  const content = useRoutes(routes(user, token));
   const {
     settings
   } = useSettings();

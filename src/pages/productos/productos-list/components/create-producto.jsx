@@ -117,7 +117,7 @@ const CreateProductoModal = ({
         touched,
         setFieldValue,
         setValues,
-        resetForm,
+        resetForm
     } = formik;
 
     const calcularPrecioVentaMin = () => {
@@ -195,7 +195,7 @@ const CreateProductoModal = ({
             {editProduct && data ? "Editar producto" : "Añadir producto"}
         </H2>
         <FormikProvider value={formik}  >
-            <Form autoComplete="off" noValidate onSubmit={(e) => { console.log(values); handleSubmit(e) }}>
+            <Form autoComplete="off" noValidate onSubmit={(e) => { console.log('erroes',errors); handleSubmit(e) }}>
                 <Scrollbar style={{
                     maxHeight: 500,
                     overflow: 'auto'

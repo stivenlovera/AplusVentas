@@ -26,8 +26,6 @@ const StyledButton = styled(ButtonBase)(({
 }));
 
 const Login = () => {
-
-
     const validationSchema = Yup.object().shape({
         usuario: Yup.string().required("Usuario requerido"),
         password: Yup.string().required("Password es requerido"),
