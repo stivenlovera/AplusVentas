@@ -139,15 +139,22 @@ const CreateOrdenInicial = () => {
         fecha: Yup.string().required(),
         descripcion: Yup.string().required('Descripcion es requerida'),
         codigoOrden: Yup.string().required('Codigo es requerido'),
-        VProveedoreId: Yup.number().required('Selecione un proveedor'),
-        nombreProveedor: Yup.string().nullable(),
+        proveedor: Yup.object().shape({
+            id: Yup.number(),
+            codigoProveedor: Yup.string(),
+            nombreProveedor: Yup.string(),
+            nit: Yup.string(),
+            telefono: Yup.string()
+
+        }),
         montoliteral: Yup.string().nullable(),
         total: Yup.number().required(),
-        asientoId: Yup.number().required('Selecione forma pago'),
-        usuario: Yup.string().required(),
-        nit: Yup.string().required('Nit es requerido!'),
-        nombreAsiento: Yup.string().required(),
-        telefono: Yup.string().nullable(),
+        asientoId: Yup.number().required('Seleccione forma pago'),
+        usuario: Yup.object().shape({
+            nombre: Yup.string(),
+            apellido: Yup.string(),
+            usuarioId: Yup.string()
+        }),
         productos: Yup.array().of(
             Yup.object().shape({
                 productoId: Yup.number(),
@@ -269,7 +276,7 @@ const CreateOrdenInicial = () => {
             </Backdrop>
             <Box pt={2} pb={4}>
                 <FormikProvider value={formProducto}>
-                    <Form onSubmit={(e) => { console.log(values); handleSubmit(e) }}>
+                    <Form onSubmit={(e) => { console.log(values); console.log(errors); handleSubmit(e) }}>
                         <HeadingWrapper justifyContent="space-between" alignItems="center">
                             <FlexBox gap={0.5} alignItems="center">
                                 <IconWrapper>
