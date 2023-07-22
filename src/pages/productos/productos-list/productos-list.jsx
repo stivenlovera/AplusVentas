@@ -1,5 +1,5 @@
 import { Add } from "@mui/icons-material";
-import { Box, Button, styled } from "@mui/material";
+import { Backdrop, Box, Button, CircularProgress, styled } from "@mui/material";
 import FlexBox from "components/flexbox/FlexBox";
 import IconWrapper from "components/IconWrapper";
 import SearchInput from "components/input-fields/SearchInput";
@@ -34,6 +34,7 @@ const ProductosList = () => {
     const {
         t
     } = useTranslation();
+    const [loading, setLoading] = useState(true)
     const [openModal, setOpenModal] = useState(false); // search input
     const [actualizarTable, setActualizarTableContext] = useState(true);
     const [listaProductos, setListaProductos] = useState([]);
@@ -58,6 +59,7 @@ const ProductosList = () => {
     }, [searchValue, actualizarTable, listaProductos]);
 
     const onListProducto = async () => {
+        setLoading(true)
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/Producto`,
             initialValues: [],
@@ -69,8 +71,10 @@ const ProductosList = () => {
             setListaProductos(data);
             setFilteredItem(data);
         }
+        setLoading(false)
     }
     const onCreateProducto = async () => {
+        setLoading(true)
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/Producto/create`,
             initialValues: [],
@@ -79,13 +83,19 @@ const ProductosList = () => {
             showSuccess: false
         });
         if (!!status) {
-            console.log('respuesta de la api', data)
             setCreate(data);
             setOpenModal(true);
         }
+        setLoading(false)
     }
     return (
         <Context.Provider value={[actualizarTable, setActualizarTableContext]}>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={loading}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
             <Box pt={2} pb={4}>
                 <HeadingWrapper justifyContent="space-between" alignItems="center">
                     <FlexBox gap={0.5} alignItems="center">
