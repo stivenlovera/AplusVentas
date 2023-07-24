@@ -67,6 +67,8 @@ const ProductosList = () => {
             showError: true,
             showSuccess: false
         });
+        
+        console.log(' reponse lista ',data)
         if (!!status) {
             setListaProductos(data);
             setFilteredItem(data);

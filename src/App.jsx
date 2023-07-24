@@ -17,13 +17,6 @@ const App = () => {
   const token = useSelector(SelectToken);
   const dispatch = useDispatch();
 
-  const updateToken = (token) => {
-    dispatch(
-      setToken({
-        token: token
-      })
-    )
-  }
 
   const { ApiAuthenticar, user } = UseAuthenticate();
   const loadAuthenticacion = async () => {
@@ -32,9 +25,7 @@ const App = () => {
   useEffect(() => {
     if (token) {
       loadAuthenticacion();
-      
     } else {
-      updateToken(false)
     }
     console.log('PERSONA', user.nombre, user.apellido)
   }, [token, user.nombre])

@@ -15,10 +15,8 @@ export const UseAuthenticate = () => {
     const ApiAuthenticar = async () => {
         try {
             const { data } = await Authenticate();
-            console.log(data)
             if (data.status == 1) {
                 setUser(data.data)
-                console.log(data.data)
             }
             else {
                 enqueueSnackbar(data.message, { variant: 'error' });

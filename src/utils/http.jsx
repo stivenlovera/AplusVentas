@@ -23,7 +23,7 @@ export async function Request({ endPoint, initialValues, method, showError, show
             return { ...data, data: initialValues };
         }
     } catch (e) {
-        console.log(e?.response)
+        console.log('Status con error 0',e?.response)
         if (axios.isAxiosError(e)) {
             console.log('error reconocido')
             if (!e?.response) {
