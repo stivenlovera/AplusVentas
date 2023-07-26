@@ -56,6 +56,7 @@ const ProductosColumns = [
                     showSuccess: false
                 });
                 if (!!status) {
+                    console.log('recibiendo data', data.producto)
                     setEditar({
                         codigo: data.producto.codigoProducto,
                         categorias: data.categorias,
@@ -71,8 +72,8 @@ const ProductosColumns = [
             }
             useEffect(() => {
 
-            }, [editar])
-            
+            }, [openModal])
+
             return <Fragment>
                 <IconButton
                     onClick={onEditarProducto}

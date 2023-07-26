@@ -14,6 +14,7 @@ import { useContext, useEffect, useState } from "react";
 import { readUploadedFileAsText } from "utils/convertoToBase64";
 import * as Yup from "yup"; // component props interface
 import { Request } from "utils/http";
+import { set } from "lodash";
 
 // styled components
 const StyledAppModal = styled(AppModal)(({
@@ -50,7 +51,7 @@ const CreateProductoModal = ({
     onClose,
     editProduct
 }) => {
-    const { codigo, proveedores, categorias, productosMaestros, initialState } = data;
+    const { codigo, categorias, productosMaestros, initialState } = data;
     const [context, setContext] = useContext(Context);
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [selectProductoMaestro, setSelectProductoMaestro] = useState(null)
@@ -59,22 +60,29 @@ const CreateProductoModal = ({
         productoId: Yup.number().nullable(),
         codigoProducto: Yup.string().min(3, "Es muy corto").required("Codigo es requerido!"),
         codigoBarra: Yup.string().min(3, "Es muy corto").required("Codigo barra es requerido!"),
-        productoMaestroId: Yup.string().nullable(),
-        productoMaestroNombre: Yup.string().required("Nombre es requerido!"),
+        productoMaestro: Yup.object().shape({
+            ProductoMaestroId: Yup.number(),
+            nombre: Yup.string(),
+            categoriaId: Yup.number(),
+        }),
+        nombreProductoMaestro: Yup.string().nullable(),
         nombreProducto: Yup.string().min(3, "Es muy corto").required("Nombre es requerido!"),
-        unidadMedida: Yup.string().required("Unidad medida es requerido!"),
-        stockMinimo: Yup.string().required("Stock minimo requerido!"),
+        stockActual: Yup.string().nullable(),
         precioCompra: Yup.number('debe ser un numero').required("Precio compra es requerido!"),
         utilidadMin: Yup.number('debe ser un numero').required("Utilidad max es requerido!"),
         precioVentaMin: Yup.number('debe ser un numero').required("Precio venta min es requerido!"),
         utilidadMax: Yup.number('debe ser un numero').required("Utilidad min es requerido!"),
         precioVentaMax: Yup.number('debe ser un numero').required("Precio venta max es requerido!"),
-        proveedorId: Yup.string().required("Proveedores es requerido!"),
-        categoriaId: Yup.number().nullable(),
+        categoria: Yup.object().shape({
+            categoriaId: Yup.number(),
+            nombre: Yup.string().min(3, "debe ser mayor a 3 caracteres"),
+            izq: Yup.number(),
+            der: Yup.number(),
+        }),
         imagenes: Yup.array().nullable(),
         atributos: Yup.array()
             .of(Yup.object().shape({
-                atributoId: Yup.string().max(3, "debe ser mayor a 3 caracteres"),
+                atributoId: Yup.string(),
                 valor: Yup.string().min(3, "debe ser mayor a 3 caracteres"),
             }))
     });
@@ -143,19 +151,9 @@ const CreateProductoModal = ({
         setValues({ ...values })
     }
     const selectFilterProductoMaestro = () => {
-        let productoMaestro = productosMaestros.find(x => { return x.productoMaestroId == values.productoMaestroId });
-        if (productoMaestro == undefined) {
-            return null;
-        }
-        return productoMaestro
+        return values.productoMaestro
     }
-    const selectFilterProveedor = () => {
-        let proveedor = proveedores.find(x => { return x.id == values.proveedoreId });
-        if (proveedor == undefined) {
-            return null;
-        }
-        return proveedor;
-    }
+
     const selectFilterCategoria = () => {
         let categoria = categorias.find(x => { return x.categoriaId == values.categoriaId })
         if (categoria == undefined) {
@@ -164,7 +162,6 @@ const CreateProductoModal = ({
         return categoria
     }
     useEffect(() => {
-
         setValues({ ...initialState, codigoProducto: codigo });
         console.log(values)
     }, [data])
@@ -195,7 +192,7 @@ const CreateProductoModal = ({
             {editProduct && data ? "Editar producto" : "Añadir producto"}
         </H2>
         <FormikProvider value={formik}  >
-            <Form autoComplete="off" noValidate onSubmit={(e) => { console.log('erroes',errors); handleSubmit(e) }}>
+            <Form autoComplete="off" noValidate onSubmit={(e) => { console.log('erroes', errors); handleSubmit(e) }}>
                 <Scrollbar style={{
                     maxHeight: 500,
                     overflow: 'auto'
@@ -232,20 +229,26 @@ const CreateProductoModal = ({
                             <Autocomplete
                                 options={productosMaestros}
                                 getOptionLabel={(options) => options.nombre}
-                                defaultValue={selectFilterProductoMaestro()}
+                                /* defaultValue={selectFilterProductoMaestro()} */
+                                isOptionEqualToValue={(option, value) => option.nombre === value.nombre}
                                 size="small"
                                 fullWidth
                                 onChange={(event, newValue) => {
                                     if (newValue != null) {
-                                        console.log(values)
-                                        console.log('select producto maestro', newValue)
-                                        setFieldValue('productoMaestroId', newValue.productoMaestroId)
-                                        setFieldValue('productoMaestroNombre', newValue.nombre)
+                                        setFieldValue('productoMaestro', newValue)
+                                        setFieldValue('nombreProductoMaestro', newValue.nombre)
                                     } else {
-                                        setFieldValue('productoMaestroId', initialState.id)
-                                        setFieldValue('productoMaestroNombre', initialState.productoMaestroNombre)
+                                        setFieldValue('nombreProductoMaestro', '')
                                     }
                                 }}
+                             /*    defaultValue={() => {
+                                    console.log(values)
+                                    return {
+                                        ProductoMaestroId:0,
+                                        nombre: '',
+                                        categoriaId: 0
+                                    }
+                                }} */
                                 renderInput={
                                     (params) =>
                                         <TextField
@@ -262,12 +265,12 @@ const CreateProductoModal = ({
                             <AppTextField
                                 fullWidth
                                 size="small"
-                                name="productoMaestroNombre"
+                                name="nombreProductoMaestro"
                                 placeholder="Nombre producto maestro"
-                                value={values.productoMaestroNombre}
+                                value={values.nombreProductoMaestro}
                                 onChange={handleChange}
-                                error={Boolean(touched.productoMaestroNombre && errors.productoMaestroNombre)}
-                                helperText={touched.productoMaestroNombre && errors.productoMaestroNombre}
+                                error={Boolean(touched.nombreProductoMaestro && errors.nombreProductoMaestro)}
+                                helperText={touched.nombreProductoMaestro && errors.nombreProductoMaestro}
                             />
                         </Grid>
                         <Grid item sm={12} xs={12}>
@@ -284,53 +287,17 @@ const CreateProductoModal = ({
                             />
                         </Grid>
                         <Grid item sm={4} xs={12}>
-                            <H6 mb={1}>Stock minimo</H6>
+                            <H6 mb={1}>Stock Actual</H6>
                             <AppTextField
                                 fullWidth
                                 size="small"
-                                name="stockMinimo"
+                                name="stockActual"
                                 type="number"
-                                placeholder="Stock minimo"
-                                value={values.stockMinimo}
+                                placeholder="Stock actual"
+                                value={values.stockActual}
                                 onChange={handleChange}
-                                error={Boolean(touched.stockMinimo && errors.stockMinimo)}
-                                helperText={touched.stockMinimo && errors.stockMinimo}
-                            />
-                        </Grid>
-                        <Grid item sm={4} xs={12}>
-                            <H6 mb={1}>Unidad Medida</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
-                                name="unidadMedida"
-                                placeholder="Unidad Medida"
-                                value={values.unidadMedida}
-                                onChange={handleChange}
-                                error={Boolean(touched.unidadMedida && errors.unidadMedida)}
-                                helperText={touched.unidadMedida && errors.unidadMedida}
-                            />
-                        </Grid>
-                        <Grid item sm={4} xs={12}>
-
-                        </Grid>
-                        <Grid item sm={4} xs={12}>
-                            <H6 mb={1}>Precio compra</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
-                                name="precioCompra"
-                                type="number"
-                                placeholder="precio compra"
-                                value={values.precioCompra}
-                                onChange={handleChange}
-                                onKeyUp={
-                                    (e) => {
-                                        //calcularUtilidadMin()
-                                        console.log(e.target.value)
-                                    }
-                                }
-                                error={Boolean(touched.precioCompra && errors.precioCompra)}
-                                helperText={touched.precioCompra && errors.precioCompra}
+                                error={Boolean(touched.stockActual && errors.stockActual)}
+                                helperText={touched.stockActual && errors.stockActual}
                             />
                         </Grid>
                         <Grid item sm={4} xs={12}>
@@ -376,6 +343,24 @@ const CreateProductoModal = ({
                             />
                         </Grid>
                         <Grid item sm={4} xs={12}>
+                            <H6 mb={1}>Precio compra</H6>
+                            <AppTextField
+                                fullWidth
+                                size="small"
+                                name="precioCompra"
+                                type="number"
+                                placeholder="precio compra"
+                                value={values.precioCompra}
+                                onChange={handleChange}
+                                onKeyUp={
+                                    (e) => {
+                                        //calcularUtilidadMin()
+                                        console.log(e.target.value)
+                                    }
+                                }
+                                error={Boolean(touched.precioCompra && errors.precioCompra)}
+                                helperText={touched.precioCompra && errors.precioCompra}
+                            />
                         </Grid>
                         <Grid item sm={4} xs={12}>
                             <H6 mb={1}>% Utilidad max</H6>
@@ -417,34 +402,6 @@ const CreateProductoModal = ({
                                 helperText={touched.PrecioVentaMax && errors.PrecioVentaMax}
                             />
                         </Grid>
-
-                        <Grid item sm={12} xs={12}>
-                            <H6 mb={1}>Proveedor</H6>
-                            <Autocomplete
-                                id="proveedor"
-                                fullWidth
-                                defaultValue={selectFilterProveedor()}
-                                options={proveedores}
-                                getOptionLabel={(options) => options.nombreProveedor}
-                                size="small"
-                                onChange={(event, newValue) => {
-                                    if (newValue != null) {
-                                        setFieldValue('proveedorId', newValue.id)
-                                    } else {
-                                        setFieldValue('proveedorId', initialState.id)
-                                    }
-                                }}
-                                renderInput={
-                                    (params) =>
-                                        <TextField
-                                            {...params}
-                                            value={values.proveedorId}
-                                            label="Seleccione una proveedores"
-                                            error={Boolean(touched.proveedorId && errors.proveedorId)}
-                                            helperText={touched.proveedorId && errors.proveedorId}
-                                        />}
-                            />
-                        </Grid>
                         <Grid item sm={12} xs={12}>
                             <H6 mb={1}>Categoria</H6>
                             <Autocomplete
@@ -456,12 +413,13 @@ const CreateProductoModal = ({
                                 size="small"
                                 onChange={async (event, newValue) => {
                                     if (newValue != null) {
-                                        console.log('obteniendo caTEGORIA', newValue.categoriaId)
                                         await ApiObtenerAtributo(newValue.categoriaId);
-                                        setFieldValue('categoriaId', newValue.categoriaId);
+                                        setFieldValue('categoria', newValue);
                                     } else {
-                                        setFieldValue('categoriaId', initialState.id)
+                                        setFieldValue('categoria', initialState)
+                                        setFieldValue('atributos', [])
                                     }
+                                    console.log(event)
                                 }}
                                 renderInput={
                                     (params) =>
