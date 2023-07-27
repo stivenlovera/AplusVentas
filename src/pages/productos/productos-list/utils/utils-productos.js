@@ -16,17 +16,24 @@ export const initialStateProducto = {
   codigoProducto: '',
   codigoBarra: '',
   nombreProducto: '',
-  productoMaestroNombre: '',
-  productoMaestroId: 0,
-  unidadMedida: '',
+  productoMaestroNombre:'',
+  productoMaestro:{
+    productoMaestroId:0,
+    nombre:'',
+    categoriaId:''
+  },
   precioCompra: 0,
   utilidadMin: 0,
-  stockMinimo: 0,
+  stockActual: 0,
   precioVentaMin: 0,
   utilidadMax: 0,
   precioVentaMax: 0,
-  proveedorId: '',
-  categoriaId: '',
+  categoria:{
+    categoriaId:0,
+    nombre:'',
+    izq:0,
+    der:0
+  },
   imagenes: [],
   atributos: []
 };

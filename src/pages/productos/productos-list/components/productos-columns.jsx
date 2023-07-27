@@ -32,22 +32,19 @@ const ProductosColumns = [
         Cell: ({
             row
         }) => {
+            const [openModal, setOpenModal] = useState(false);
             const style = {
                 fontSize: 19,
                 transition: "color 0.3s",
                 color: row.isSelected ? "white" : "text.disabled"
             };
             const [editar, setEditar] = useState({
-                codigo: '',
-                proveedores: [],
                 categorias: [],
                 productosMaestros: [],
                 initialState: initialStateProducto
             })
-            const [openModal, setOpenModal] = useState(false);
             /*Api */
             const onEditarProducto = async () => {
-                setOpenModal(true)
                 const { data, message, status } = await Request({
                     endPoint: `${process.env.REACT_APP_API}api/Producto/editar/${row.original.productoId}`,
                     initialValues: [],
@@ -56,22 +53,16 @@ const ProductosColumns = [
                     showSuccess: false
                 });
                 if (!!status) {
-                    console.log('recibiendo data', data.producto)
                     setEditar({
-                        codigo: data.producto.codigoProducto,
                         categorias: data.categorias,
-                        proveedores: data.proveedores,
                         productosMaestros: data.productosMaestros,
                         initialState: data.producto
                     });
                     setOpenModal(true);
                 }
-                else {
-                    setOpenModal(false)
-                }
             }
             useEffect(() => {
-
+                
             }, [openModal])
 
             return <Fragment>

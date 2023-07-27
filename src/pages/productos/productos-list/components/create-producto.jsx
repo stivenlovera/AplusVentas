@@ -14,7 +14,8 @@ import { useContext, useEffect, useState } from "react";
 import { readUploadedFileAsText } from "utils/convertoToBase64";
 import * as Yup from "yup"; // component props interface
 import { Request } from "utils/http";
-import { set } from "lodash";
+import { initialStateProducto } from "../utils/utils-productos";
+import { initial } from "lodash";
 
 // styled components
 const StyledAppModal = styled(AppModal)(({
@@ -61,7 +62,7 @@ const CreateProductoModal = ({
         codigoProducto: Yup.string().min(3, "Es muy corto").required("Codigo es requerido!"),
         codigoBarra: Yup.string().min(3, "Es muy corto").required("Codigo barra es requerido!"),
         productoMaestro: Yup.object().shape({
-            ProductoMaestroId: Yup.number(),
+            productoMaestroId: Yup.number(),
             nombre: Yup.string(),
             categoriaId: Yup.number(),
         }),
@@ -161,10 +162,6 @@ const CreateProductoModal = ({
         }
         return categoria
     }
-    useEffect(() => {
-        setValues({ ...initialState, codigoProducto: codigo });
-        console.log(values)
-    }, [data])
 
     const ApiObtenerAtributo = async (categoriaId) => {
         const { data, message, status } = await Request({
@@ -187,6 +184,11 @@ const CreateProductoModal = ({
             })
         }
     }
+    useEffect(() => {
+        setValues({ ...initialState, nombreProductoMaestro: initialState.productoMaestro.nombre })
+        console.log('Al iniciar', values, initialState)
+    }, [open])
+
     return <StyledAppModal open={open} handleClose={onClose}>
         <H2 marginBottom={2}>
             {editProduct && data ? "Editar producto" : "Añadir producto"}
@@ -225,11 +227,10 @@ const CreateProductoModal = ({
                             />
                         </Grid>
                         <Grid item sm={12} xs={12}>
-                            <H6 mb={1}>Selecciones producto maestro</H6>
+                            <H6 mb={1}>Seleccione un producto maestro</H6>
                             <Autocomplete
                                 options={productosMaestros}
                                 getOptionLabel={(options) => options.nombre}
-                                /* defaultValue={selectFilterProductoMaestro()} */
                                 isOptionEqualToValue={(option, value) => option.nombre === value.nombre}
                                 size="small"
                                 fullWidth
@@ -241,14 +242,13 @@ const CreateProductoModal = ({
                                         setFieldValue('nombreProductoMaestro', '')
                                     }
                                 }}
-                             /*    defaultValue={() => {
-                                    console.log(values)
+                                defaultValue={() => {
                                     return {
-                                        ProductoMaestroId:0,
-                                        nombre: '',
-                                        categoriaId: 0
+                                        productoMaestroId: initialState.productoMaestro.productoMaestroId,
+                                        nombre: initialState.productoMaestro.nombre,
+                                        categoriaId: initialState.productoMaestro.categoriaId,
                                     }
-                                }} */
+                                }}
                                 renderInput={
                                     (params) =>
                                         <TextField
