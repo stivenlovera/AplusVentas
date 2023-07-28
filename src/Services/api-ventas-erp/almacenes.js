@@ -16,3 +16,6 @@ export const UpdateRolService = (id) => {
 export const DeleteRolService = (id) => {
     return `${process.env.REACT_APP_API}api/almacen/${id}`;
 }
+export const GetProductsService = (id) => {
+    return `${process.env.REACT_APP_API}api/almacen/obtenerProductos/${id}`;
+}

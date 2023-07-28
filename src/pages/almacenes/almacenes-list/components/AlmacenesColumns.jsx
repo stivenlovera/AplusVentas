@@ -1,7 +1,18 @@
-import { Edit } from "@mui/icons-material";
+import { Edit, Warehouse } from "@mui/icons-material";
 import { Box, IconButton, Rating } from "@mui/material";
 import { Fragment, useState } from "react";
 import ModalAlmacen from "./modal-almacen/modal-almacen";
+import ModalProductosAlmacen from "./modal-producto-almacen/modal-producto-almacen";
+import { UseAlmacen } from "./hooks/useAlmacen";
+import CustomTable from "page-sections/admin-ecommerce/CustomTable";
+import ProductosAlmacenColumns from "./modal-producto-almacen/producto-almacen-column";
+import FlexBox from "components/flexbox/FlexBox";
+import IconWrapper from "components/IconWrapper";
+import ShoppingBasket from "icons/ShoppingBasket";
+import { H5 } from "components/Typography";
+
+
+
 const AlamacenesColumns = [
     {
         Header: "Codigo",
@@ -22,6 +33,32 @@ const AlamacenesColumns = [
             row
         }) => {
             const [openModal, setOpenModal] = useState(false);
+            const [openModalProductos, setOpenModalProductos] = useState(false);
+            const [productos, setProductos] = useState([]);
+            const abrirProductos = async (setOpenModalProductos,id,setProductos) =>{
+                const {GetProductosAlmacen} = UseAlmacen();
+                const {store,status} = await GetProductosAlmacen(id);
+                setProductos(store);
+                setOpenModalProductos(true);
+            }
+            const listarProductos = 
+            productos.map(producto => <>
+                    {/* {row.original.nombreAlmacen}
+                    {row.original.dirrecion}
+                    {row.original.codigoAlmacen} */}
+                <FlexBox gap={0.5} alignItems="center">
+                    <IconWrapper>
+                    <ShoppingBasket sx={{
+                        color: "primary.main"
+                    }} />
+                    </IconWrapper>
+                    <H5>{row.original.nombreAlmacen}</H5>
+                </FlexBox>
+                <CustomTable  columnShape={ProductosAlmacenColumns} data={productos}>
+
+                </CustomTable>
+                </>    
+            );
             return <Fragment>
                 <IconButton onClick={() => setOpenModal(true)}>
                     <Edit sx={{
@@ -29,7 +66,16 @@ const AlamacenesColumns = [
                         color: "text.disabled"
                     }} />
                 </IconButton>
+                <IconButton onClick={() => {abrirProductos(setOpenModalProductos,row.original.id,setProductos)}}>
+                    <Warehouse sx={{
+                        fontSize: 18,
+                        color: "text.disabled"
+                    }} />
+                </IconButton>
                 <ModalAlmacen editProduct open={openModal}  data={row.original} onClose={() => setOpenModal(false)} />
+                <ModalProductosAlmacen almacenId={row.original.id} open={openModalProductos}  onClose={() => setOpenModalProductos(false)} >
+                    {listarProductos} 
+                </ModalProductosAlmacen>
             </Fragment>;
         }
     }];
