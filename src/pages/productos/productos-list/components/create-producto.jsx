@@ -15,7 +15,6 @@ import { readUploadedFileAsText } from "utils/convertoToBase64";
 import * as Yup from "yup"; // component props interface
 import { Request } from "utils/http";
 import { initialStateProducto } from "../utils/utils-productos";
-import { initial } from "lodash";
 
 // styled components
 const StyledAppModal = styled(AppModal)(({
@@ -66,7 +65,7 @@ const CreateProductoModal = ({
             nombre: Yup.string(),
             categoriaId: Yup.number(),
         }),
-        nombreProductoMaestro: Yup.string().nullable(),
+        productoMaestroNombre: Yup.string().nullable(),
         nombreProducto: Yup.string().min(3, "Es muy corto").required("Nombre es requerido!"),
         stockActual: Yup.string().nullable(),
         precioCompra: Yup.number('debe ser un numero').required("Precio compra es requerido!"),
@@ -185,8 +184,7 @@ const CreateProductoModal = ({
         }
     }
     useEffect(() => {
-        setValues({ ...initialState, nombreProductoMaestro: initialState.productoMaestro.nombre })
-        console.log('Al iniciar', values, initialState)
+        setValues({ ...initialState, productoMaestroNombre: initialState.productoMaestro.nombre })
     }, [open])
 
     return <StyledAppModal open={open} handleClose={onClose}>
@@ -237,9 +235,9 @@ const CreateProductoModal = ({
                                 onChange={(event, newValue) => {
                                     if (newValue != null) {
                                         setFieldValue('productoMaestro', newValue)
-                                        setFieldValue('nombreProductoMaestro', newValue.nombre)
+                                        setFieldValue('productoMaestroNombre', newValue.nombre)
                                     } else {
-                                        setFieldValue('nombreProductoMaestro', '')
+                                        setFieldValue('productoMaestroNombre', '')
                                     }
                                 }}
                                 defaultValue={() => {
@@ -255,8 +253,8 @@ const CreateProductoModal = ({
                                             {...params}
                                             value={values.productoMaestroNombre}
                                             label="Selecione un producto maestro (opcional)"
-                                            error={Boolean(touched.productoMaestroNombre && errors.productoMaestroNombre)}
-                                            helperText={touched.productoMaestroNombre && errors.productoMaestroNombre}
+                                            error={Boolean(touched.productoMaestro && errors.productoMaestro)}
+                                            helperText={touched.productoMaestro && errors.productoMaestro}
                                         />}
                             />
                         </Grid>
@@ -265,12 +263,12 @@ const CreateProductoModal = ({
                             <AppTextField
                                 fullWidth
                                 size="small"
-                                name="nombreProductoMaestro"
+                                name="productoMaestroNombre"
                                 placeholder="Nombre producto maestro"
-                                value={values.nombreProductoMaestro}
+                                value={values.productoMaestroNombre}
                                 onChange={handleChange}
-                                error={Boolean(touched.nombreProductoMaestro && errors.nombreProductoMaestro)}
-                                helperText={touched.nombreProductoMaestro && errors.nombreProductoMaestro}
+                                error={Boolean(touched.productoMaestroNombre && errors.productoMaestroNombre)}
+                                helperText={touched.productoMaestroNombre && errors.productoMaestroNombre}
                             />
                         </Grid>
                         <Grid item sm={12} xs={12}>
@@ -408,7 +406,6 @@ const CreateProductoModal = ({
                                 fullWidth
                                 id="categoria"
                                 options={categorias}
-                                defaultValue={selectFilterCategoria}
                                 getOptionLabel={(options) => options.nombre}
                                 size="small"
                                 onChange={async (event, newValue) => {
@@ -419,7 +416,14 @@ const CreateProductoModal = ({
                                         setFieldValue('categoria', initialState)
                                         setFieldValue('atributos', [])
                                     }
-                                    console.log(event)
+                                }}
+                                defaultValue={() => {
+                                    return {
+                                        categoriaId: initialState.categoria.categoriaId,
+                                        nombre: initialState.categoria.nombre,
+                                        der: initialState.categoria.der,
+                                        izq: initialState.categoria.izq
+                                    }
                                 }}
                                 renderInput={
                                     (params) =>

@@ -69,24 +69,35 @@ const CreateOrdenInicial = () => {
     } = useAutocompleteMetodoPago();
 
     const [OrdenCompra, setOrderCompra] = useState({
-        ordenCompra: {
+        id: 0,
+        fecha: '',
+        descripcion: '',
+        codigoOrden: '',
+        nombreUsuario: '',
+        proveedor: {
             id: 0,
-            descripcion: '',
-            fecha: 0,
-            codigoOrden: '',
-            VProveedoreId: '',
+            codigoProveedor: '',
             nombreProveedor: '',
-            montoliteral: '',
-            total: 0,
-            telefono: '',
-            asientoId: '',
-            usuario: '',
-            nit: '',
-            nombreAsiento: '',
-            productos: []
+            dirrecion: '',
+            contacto: '',
+            telefono: 0,
         },
-        proveedores: [],
-        asientos: [],
+        montoliteral: '',
+        stockActual: 0,
+        total: 0,
+        estadoId: 0,
+        asiento: {
+            tipoAsientoId: 0,
+            asientoId: 0,
+            nombreTipoAsiento: '',
+            nombreAsiento: ''
+        },
+        usuario: {
+            usuarioId: 0,
+            usuario: '',
+            nombre: '',
+            apellido: '',
+        },
         productos: []
     })
 
@@ -139,17 +150,27 @@ const CreateOrdenInicial = () => {
         fecha: Yup.string().required(),
         descripcion: Yup.string().required('Descripcion es requerida'),
         codigoOrden: Yup.string().required('Codigo es requerido'),
+        nombreUsuario: Yup.string(),
+        nit: Yup.string(),
+        telefono: Yup.string(),
         proveedor: Yup.object().shape({
             id: Yup.number(),
-            codigoProveedor: Yup.string(),
-            nombreProveedor: Yup.string(),
-            nit: Yup.string(),
-            telefono: Yup.string()
+            codigoProveedor: Yup.string().nullable(),
+            nombreProveedor: Yup.string().nullable(),
+            contacto: Yup.string().nullable(),
+            telefono: Yup.string().nullable()
 
         }),
         montoliteral: Yup.string().nullable(),
+        stockActual: Yup.number(),
+        estadoId: Yup.number(),
         total: Yup.number().required(),
-        asientoId: Yup.number().required('Seleccione forma pago'),
+        asiento: Yup.object().shape({
+            tipoAsientoId: Yup.number(),
+            asientoId: Yup.string(),
+            nombreTipoAsiento: Yup.string().nullable(),
+            nombreAsiento: Yup.string().nullable()
+        }),
         usuario: Yup.object().shape({
             nombre: Yup.string(),
             apellido: Yup.string(),
@@ -160,8 +181,8 @@ const CreateOrdenInicial = () => {
                 productoId: Yup.number(),
                 cantidad: Yup.number(),
                 stock: Yup.number(),
-                codigoProducto: Yup.string(),
-                nombreProducto: Yup.string(),
+                codigoProducto: Yup.string().nullable(),
+                nombreProducto: Yup.string().nullable(),
                 precioCompra: Yup.number(),
                 precioTotal: Yup.number(),
             })
@@ -169,7 +190,7 @@ const CreateOrdenInicial = () => {
     });
 
     const formProducto = useFormik({
-        initialValues: OrdenCompra.ordenCompra,
+        initialValues: OrdenCompra,
         validationSchema,
         //enableReinitialize: true,
         onSubmit: async (valores) => {
@@ -213,13 +234,8 @@ const CreateOrdenInicial = () => {
             showSuccess: false
         });
         if (!!status) {
-            const { asientos, proveedores, productos, ordenCompra } = data
-            setValues({
-                ...OrdenCompra.ordenCompra,
-                codigoOrden: ordenCompra.codigoOrden,
-                usuario: ordenCompra.usuario,
-                fecha: moment().format('DD/MM/yyy')
-            });
+            console.log('DATA ENTRANTE', data)
+            setValues({ ...data, nombreUsuario: data.usuario.nombre });
         }
         setLoading(false)
     }
@@ -328,12 +344,12 @@ const CreateOrdenInicial = () => {
                                         <AppTextField
                                             fullWidth
                                             size="small"
-                                            name="usuario"
+                                            name="nombreUsuario"
                                             placeholder="Usuario"
-                                            value={values.usuario}
+                                            value={values.nombreUsuario}
                                             onChange={handleChange}
-                                            error={Boolean(touched.usuario && errors.usuario)}
-                                            helperText={touched.usuario && errors.usuario}
+                                            error={Boolean(touched.nombreUsuario && errors.nombreUsuario)}
+                                            helperText={touched.nombreUsuario && errors.nombreUsuario}
                                             disabled={true}
                                         />
                                     </Grid>
@@ -362,18 +378,21 @@ const CreateOrdenInicial = () => {
                                             isOptionEqualToValue={isOptionEqualToValueProveedor}
                                             getOptionLabel={getOptionLabelProveedor}
                                             handleChange={handleChange}
-                                            name={'VProveedoreId'}
-                                            value={values.VProveedoreId}
+                                            name={'values.proveedor'}
+                                            value={values.proveedor}
                                             onChange={(e, value) => {
                                                 if (value != null) {
                                                     console.log(value)
-                                                    setFieldValue('VProveedoreId', value.id)
+                                                    setFieldValue('telefono', value.telefono)
                                                 }
                                             }}
                                             defaultValue={() => {
                                                 return {
-                                                    id: values.VProveedoreId,
-                                                    nombreProveedor: values.nombreProveedor,
+                                                    id: values.proveedor.id,
+                                                    codigoProveedor: values.proveedor.codigoProveedor,
+                                                    nombreProveedor: values.proveedor.nombreProveedor,
+                                                    contacto: values.proveedor.contacto,
+                                                    telefono: values.proveedor.telefono,
                                                 }
                                             }}
                                         />
@@ -426,8 +445,8 @@ const CreateOrdenInicial = () => {
                                             }}
                                             defaultValue={() => {
                                                 return {
-                                                    asientoId: values.asientoId,
-                                                    nombreAsiento: values.nombreProveedor
+                                                    asientoId: values.asiento.asientoId,
+                                                    nombreAsiento: values.asiento.nombreAsiento
                                                 }
                                             }}
                                         />
