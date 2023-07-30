@@ -37,6 +37,7 @@ const CreateModalProcesar = ({
     onClose,
 }) => {
     const navigate = useNavigate();
+    console.log('data procesar pago', data)
     const { ApiStoreProceso } = UseStoreProcesoPago(data.orderCompra.id, moment().format('YYYY-MM-DD'));
     const handlerStoreProceso = async () => {
         await ApiStoreProceso();
@@ -71,18 +72,18 @@ const CreateModalProcesar = ({
                                         <H6 fontSize={12}> {data.orderCompra.codigoOrden}</H6>
                                     </Stack>
                                 </FlexBetween>
-                                <Typography variant='body1' style={{fontWeight:'bold'}} color="text.secondary">
+                                <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
                                     Fecha Registro: {" "}
                                     <Span sx={{
                                         color: "text.primary",
                                         fontSize: 15,
                                         fontWeight: 400
                                     }}>
-                                         {data.orderCompra.fechaCreacion}
+                                        {data.orderCompra.fechaCreacion}
                                     </Span>
                                 </Typography>
                                 <br />
-                                <Typography variant='body1' style={{fontWeight:'bold'}} color="text.secondary">
+                                <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
                                     Descripcion: {" "}
                                     <Span sx={{
                                         color: "text.primary",
@@ -92,7 +93,7 @@ const CreateModalProcesar = ({
                                         {'sdasdasd '}
                                     </Span>
                                 </Typography>
-                                <Typography variant='body1' style={{fontWeight:'bold'}} color="text.secondary">
+                                <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
                                     Proveedor: {" "}
                                     <Span sx={{
                                         color: "text.primary",
@@ -102,7 +103,7 @@ const CreateModalProcesar = ({
                                         {data.orderCompra.vProveedoreId}
                                     </Span>
                                 </Typography>
-                                <Typography variant='body1' style={{fontWeight:'bold'}} color="text.secondary">
+                                <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
                                     NIT: {" "}
                                     <Span sx={{
                                         color: "text.primary",
@@ -112,7 +113,7 @@ const CreateModalProcesar = ({
                                         {data.orderCompra.nit}
                                     </Span>
                                 </Typography>
-                                <Typography variant='body1' style={{fontWeight:'bold'}} color="text.secondary">
+                                <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
                                     Tipo pago: {" "}
                                     <Span sx={{
                                         color: "text.primary",

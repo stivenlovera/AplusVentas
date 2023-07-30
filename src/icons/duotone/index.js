@@ -29,6 +29,7 @@ import FileCircleQuestion from "./FileCircleQuestion";
 import UserList from "./UserList"; // eslint-disable-next-line import/no-anonymous-default-export
 import SettingsIcon from '@mui/icons-material/Settings';
 import RuleIcon from '@mui/icons-material/Rule';
+import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 export default {
   AdminEcommerce,
   ArrowLeftToLine,
@@ -60,5 +61,6 @@ export default {
   PersonChalkboard,
   PersonCircleCheck,
   RuleIcon,
-  SettingsIcon
+  SettingsIcon,
+  CurrencyExchangeIcon
 };

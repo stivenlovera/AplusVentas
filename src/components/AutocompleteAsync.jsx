@@ -17,7 +17,9 @@ const AutocompleteAsync = ({
     name,
     value,
     onChange,
-    defaultValue
+    defaultValue,
+    helperText,
+    errors
 }) => {
     React.useEffect(() => {
 
@@ -36,11 +38,10 @@ const AutocompleteAsync = ({
             loading={loading}
             defaultValue={defaultValue}
             onChange={onChange}
-            //onChange={handleChange}
             renderInput={(params) => (
                 <TextField
-                  /*   error={true}
-                    helperText={'error'} */
+                    error={errors}
+                    helperText={helperText}
                     name={name}
                     value={value}
                     {...params}

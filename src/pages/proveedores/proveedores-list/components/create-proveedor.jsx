@@ -90,8 +90,8 @@ const CreateProveedorModal = ({
                             placeholder="Nit"
                             value={values.nit}
                             onChange={handleChange}
-                            error={Boolean(touched.nombreProveedor && errors.nit)}
-                            helperText={touched.nombreProveedor && errors.nit} />
+                            error={Boolean(touched.nit && errors.nit)}
+                            helperText={touched.nit && errors.nit} />
                     </Grid>
                     <Grid item sm={6} xs={12}>
                         <H6 mb={1}>Nombre</H6>

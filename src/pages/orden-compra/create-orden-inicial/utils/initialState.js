@@ -12,7 +12,7 @@ export const initialStateProveedor = {
         nit: '',
         nombreProveedor: '',
         contacto: '',
-        telefono: 0,
+        telefono: '',
     },
     montoliteral: '',
     stockActual: 0,

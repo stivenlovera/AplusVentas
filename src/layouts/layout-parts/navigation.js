@@ -88,6 +88,11 @@ export const navigations = [
     label: 'Contabilidad'
   },
   {
+    name: 'Movimientos',
+    path: '/dashboard/movimientos',
+    icon: duotone.CurrencyExchangeIcon,
+  },
+  {
     name: 'Plan cuentas',
     path: '/dashboard/saas',
     icon: duotone.TodoList,

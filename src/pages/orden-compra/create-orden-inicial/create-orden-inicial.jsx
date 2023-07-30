@@ -127,7 +127,7 @@ const CreateOrdenInicial = () => {
             id: Yup.number().min(1, 'Descripcion es requerida').required('Descripcion es requerida'),
             nit: Yup.string().nullable(),
             codigoProveedor: Yup.string().nullable(),
-            nombreProveedor: Yup.string().nullable(),
+            nombreProveedor: Yup.string().required('Seleccione un proveedor'),
             contacto: Yup.string().nullable(),
             telefono: Yup.string().nullable()
         }),
@@ -195,6 +195,7 @@ const CreateOrdenInicial = () => {
         });
         console.log(status)
         if (!!status) {
+            ApiPreviewPago(data)
             setModalPreguntar(true)
             //navigate('/dashboard/orden-compra-list')
         }
@@ -357,6 +358,8 @@ const CreateOrdenInicial = () => {
                                             handleChange={handleChange}
                                             name={'values.proveedor.id'}
                                             value={values.proveedor}
+                                            errors={Boolean(touched.proveedor?.nombreProveedor && errors.proveedor?.nombreProveedor)}
+                                            helperText={touched.proveedor?.nombreProveedor && errors.proveedor?.nombreProveedor}
                                             onChange={(e, value) => {
                                                 if (value != null) {
                                                     setFieldValue('proveedor', value);
