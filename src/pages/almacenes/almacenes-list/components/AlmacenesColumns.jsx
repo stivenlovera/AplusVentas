@@ -41,11 +41,8 @@ const AlamacenesColumns = [
                 setProductos(store);
                 setOpenModalProductos(true);
             }
-            const listarProductos = 
-            productos.map(producto => <>
-                    {/* {row.original.nombreAlmacen}
-                    {row.original.dirrecion}
-                    {row.original.codigoAlmacen} */}
+            const listarProductos = (
+             <>
                 <FlexBox gap={0.5} alignItems="center">
                     <IconWrapper>
                     <ShoppingBasket sx={{
@@ -54,9 +51,7 @@ const AlamacenesColumns = [
                     </IconWrapper>
                     <H5>{row.original.nombreAlmacen}</H5>
                 </FlexBox>
-                <CustomTable  columnShape={ProductosAlmacenColumns} data={productos}>
-
-                </CustomTable>
+                <CustomTable  columnShape={ProductosAlmacenColumns} data={productos} hidePagination/>
                 </>    
             );
             return <Fragment>

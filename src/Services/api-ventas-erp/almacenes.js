@@ -19,3 +19,7 @@ export const DeleteRolService = (id) => {
 export const GetProductsService = (id) => {
     return `${process.env.REACT_APP_API}api/almacen/obtenerProductos/${id}`;
 }
+export const GetProductsListService = () => {
+    return `${process.env.REACT_APP_API}api/almacen/obtenerListadoProductosAlmacen`;
+}
+
