@@ -28,7 +28,7 @@ const Venta = Loadable(lazy(() => import("./pages/venta/lista-ventas/list-venta"
 const VentaCreate = Loadable(lazy(() => import("./pages/venta/create-venta/create-venta")));
 const PermisoList = Loadable(lazy(() => import("./pages/permisos-roles/list-permisos-roles")));
 const Login = Loadable(lazy(() => import("./pages/login/login")));
-const Movimientos = Loadable(lazy(() => import("./pages/movimientos/lista-movimientos")));
+const Movimientos = Loadable(lazy(() => import("./pages/movimientos/lista-movimientos2")));
 const Error = Loadable(lazy(() => import("./pages/404")));
 
 const ActiveLayout = ({ nombreCompleto }) => {
