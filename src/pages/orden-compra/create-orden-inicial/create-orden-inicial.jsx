@@ -193,7 +193,6 @@ const CreateOrdenInicial = () => {
             showSuccess: true,
             values: valores
         });
-        console.log(status)
         if (!!status) {
             ApiPreviewPago(data)
             setModalPreguntar(true)
@@ -215,7 +214,6 @@ const CreateOrdenInicial = () => {
         }
         setLoading(false)
     }
-
 
     const EditarOrdenCompra = async () => {
         const { data, message, status } = await Request({
