@@ -14,6 +14,19 @@ export const UseAsiento = () => {
       status: !!status
     };
   }
+  const ListVenta = async () => {
+    const { data, message, status } = await Request({
+      endPoint: `${process.env.REACT_APP_API}api/asiento/venta`,
+      initialValues: [],
+      method: 'get',
+      showError: true,
+      showSuccess: false
+    });
+    return {
+      lista: data,
+      status: !!status
+    };
+  }
   const Create = async () => {
     const { data, message, status } = await Request({
       endPoint: `${process.env.REACT_APP_API}api/asiento/create`,
@@ -84,6 +97,7 @@ export const UseAsiento = () => {
 
   return {
     List,
+    ListVenta,
     Create,
     Store,
     Editar,

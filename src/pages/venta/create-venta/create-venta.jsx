@@ -4,7 +4,7 @@ import Scrollbar from 'components/ScrollBar'
 import { H5, H6 } from 'components/Typography'
 import FlexBox from 'components/flexbox/FlexBox'
 import AppTextField from 'components/input-fields/AppTextField'
-import { FormikProvider, useFormik, Form } from "formik";
+import { FormikProvider, useFormik, Form, FieldArray } from "formik";
 import * as Yup from "yup"; // component props interface
 import Add from 'icons/Add'
 import ShoppingBasket from 'icons/ShoppingBasket'
@@ -26,6 +26,8 @@ import AutocompleteAsync from 'components/AutocompleteAsync'
 import { UseCotizacion } from './hooks/useCotizacion'
 import { initialCotizacion } from './utils/fakeVenta'
 import { initialStateCliente } from 'pages/clientes/clientes-list/components/cliente-fake'
+import { useAutocompleteMetodoPagoVenta } from 'pages/orden-compra/create-orden-inicial/hooks/useAutocompleteMetodoPago'
+import CotizacionProducto from './components/CotizacionProducto/cotizacion-producto'
 
 const CreateVenta = () => {
     const [estado, setEstado] = useState({
@@ -50,7 +52,6 @@ const CreateVenta = () => {
     //clientes
     const { Create, Store, Editar, Update } = UseCotizacion()
 
-
     const {
         LoadListaCliente,
         getOptionLabelCliente,
@@ -61,31 +62,32 @@ const CreateVenta = () => {
         refreshListaCliente,
     } = useAutocompleteCliente();
 
-    const handleAddItem = () => {
-        items.push({
-            id: 0,
-            codigoProducto: 0,
-            nombreProducto: '',
-            precioUnitario: 0,
-            precioTotal: 0
+    const {
+        LoadListaMetodoPago,
+        getOptionLabelMetodoPago,
+        isOptionEqualToValueMetodoPago,
+        listaMetodoPago,
+        loadingAutoCompleteMetodoPago,
+        openAutoCompleteMetodoPago,
+        refresListaMetodoPago,
+    } = useAutocompleteMetodoPagoVenta();
 
+    const handleAddItem = () => {
+        values.productos.push({
+            productoId: 0,
+            cantidad: 0,
+            stock: 0,
+            codigoProducto: '',
+            nombreProducto: '',
+            precioCompra: 0,
+            precioTotal: 0,
         });
-        setItems([...items]);
-        values.productos = items;
+        setItems({ ...values });
+        console.log(values)
     };
     const handleDeleteItem = id => {
         setItems(items => items.filter(item => item.id !== id));
     };
-
-    const onCalculoTotal = () => {
-        let resultado = 0;
-        items.map((item) => {
-            resultado += item.precioTotal;
-        })
-        setFieldValue('total', resultado)
-        setFieldValue('montoliteral', numeroALetras(resultado));
-        console.log(resultado, numeroALetras(resultado))
-    }
 
     const validationSchema = Yup.object().shape({
         id: Yup.number().required(),
@@ -117,18 +119,18 @@ const CreateVenta = () => {
             tipoAsientoId: Yup.number(),
             asientoId: Yup.string(),
             nombreTipoAsiento: Yup.string().nullable(),
-            nombreAsiento: Yup.string().nullable()
+            nombreAsiento: Yup.string().required('Tipo de pago requerido'),
         }),
         usuario: Yup.string().required(),
         nit: Yup.string().required('Nit es requerido!'),
         productos: Yup.array().of(
             Yup.object().shape({
                 productoId: Yup.number(),
-                cantidad: Yup.number(),
+                cantidad: Yup.number().required('Cantidad es requerida'),
                 stock: Yup.number(),
                 codigoProducto: Yup.string().nullable(),
-                nombreProducto: Yup.string().nullable(),
-                precioCompra: Yup.number(),
+                nombreProducto: Yup.string().required('Selecione producto'),
+                precioCompra: Yup.number().required('Precio compra es requerido'),
                 precioTotal: Yup.number(),
             })
         )
@@ -176,7 +178,23 @@ const CreateVenta = () => {
     }
 
     //////////////////////////////
-
+    const onCantidad = (e, i) => {
+        setFieldValue(`productos[${i}].cantidad`, e.target.value);
+        const nuevo = parseInt(e.target.value == '' ? 0 : e.target.value) * parseFloat(values.productos[i].precioCompra);
+        setFieldValue(`productos[${i}].precioTotal`, nuevo);
+        onCalculoTotal(nuevo, i)
+    }
+    const onCalculoTotal = (total, i) => {
+        let resultado = 0;
+        values.productos.map((item, index) => {
+            if (index != i) {
+                resultado += item.precioTotal;
+            }
+        })
+        resultado += total;
+        setFieldValue('total', resultado)
+        setFieldValue('montoliteral', numeroALetras(resultado));
+    }
     const Iniciar = async () => {
         if (id == 'create') {
             const { create, status } = await Create();
@@ -195,14 +213,6 @@ const CreateVenta = () => {
     useEffect(() => {
         Iniciar()
     }, [])
-    /* 
-        useEffect(() => {
-            if (values.codigoVenta == '') {
-                load()
-            }
-            setActualizarTableContext(false);
-    
-        }, [values, ventaId, actualizarTable]) */
 
     /*handler procesar */
     const handlerButtonProcesar = () => {
@@ -210,7 +220,6 @@ const CreateVenta = () => {
 
         }
     }
-
     const onOpenRecibir = () => {
         setModalRecibir(true)
     }
@@ -227,7 +236,7 @@ const CreateVenta = () => {
             </Backdrop>
             <Box pt={2} pb={4}>
                 <FormikProvider value={formCotizacion}>
-                    <Form onSubmit={(e) => { console.log(values); console.log(errors); handleSubmit(e) }}>
+                    <Form onSubmit={(e) => { console.log(values); console.log('errores', errors); handleSubmit(e) }}>
                         <HeadingWrapper justifyContent="space-between" alignItems="center">
                             <FlexBox gap={0.5} alignItems="center">
                                 <IconWrapper>
@@ -363,43 +372,33 @@ const CreateVenta = () => {
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <H6 mb={1}>Metodo Pago</H6>
-                                        <Autocomplete
-                                            fullWidth
-                                            getOptionLabel={(options) => options.nombreAsiento}
-                                            //defaultValue={optionPlanCuenta[0]}
-                                            options={asientos}
-                                            //autoSelect={true}
-                                            //inputValue={inputValue}
-                                            value={selectAsiento}
-                                            size="small"
-                                            isOptionEqualToValue={(option, value) => {
-                                                if (value) {
-                                                    return (option.value === value.value)
+                                        <AutocompleteAsync
+                                            label={'Selecione Metodo de pago'}
+                                            options={listaMetodoPago}
+                                            loading={loadingAutoCompleteMetodoPago}
+                                            open={openAutoCompleteMetodoPago}
+                                            onOpen={LoadListaMetodoPago}
+                                            onClose={refresListaMetodoPago}
+                                            isOptionEqualToValue={isOptionEqualToValueMetodoPago}
+                                            getOptionLabel={getOptionLabelMetodoPago}
+                                            handleChange={handleChange}
+                                            name={'asiento'}
+                                            value={values.asiento}
+                                            errors={Boolean(touched.asiento?.nombreAsiento && errors.asiento?.nombreAsiento)}
+                                            helperText={touched.asiento?.nombreAsiento && errors.asiento?.nombreAsiento}
+                                            onChange={(e, value) => {
+                                                if (value != null) {
+                                                    setFieldValue('asiento', value)
                                                 } else {
-                                                    return false;
+                                                    setFieldValue('asiento', initialCotizacion.asiento)
                                                 }
                                             }}
-                                            onChange={(event, newValue) => {
-                                                if (newValue != null) {
-                                                    setSelectAsiento(newValue);
-                                                    setValues({
-                                                        ...values,
-                                                        asientoId: newValue.id,
-                                                        nombreAsiento: newValue.nombreAsiento
-                                                    });
-                                                } else {
-                                                    setItems([...items]);
+                                            defaultValue={() => {
+                                                return {
+                                                    asientoId: values.asiento.asientoId,
+                                                    nombreAsiento: values.asiento.nombreAsiento
                                                 }
                                             }}
-
-                                            renderInput={
-                                                (params) => <TextField
-                                                    {...params}
-                                                    label="Selecione Metodo pago"
-                                                    error={Boolean(touched.asientoId && errors.asientoId)}
-                                                    helperText={touched.asientoId && errors.asientoId}
-                                                />
-                                            }
                                         />
                                     </Grid>
                                     <Grid item xxs={12} sm={6}>
@@ -447,109 +446,83 @@ const CreateVenta = () => {
                                                                 <HeadTableCell>Acciones</HeadTableCell>
                                                             </TableRow>
                                                         </TableHead>
+                                                        <FieldArray name="productos" render={(arrayProducto) => {
+                                                            return (
+                                                                <TableBody >
+                                                                    {
+                                                                        values.productos && values.productos.length > 0 ? (
+                                                                            values.productos.map((producto, index) => {
+                                                                                return (
+                                                                                    <CotizacionProducto key={index}
+                                                                                        dataAcction={{
+                                                                                            delete: () => {
+                                                                                                arrayProducto.remove(index)
+                                                                                            }
+                                                                                        }}
+                                                                                        dataCantidad={{
+                                                                                            name: `productos[${index}].cantidad`,
+                                                                                            value: values.productos[index].cantidad,
+                                                                                            label: "Cantidad",
+                                                                                            handleChange: (e) => {
+                                                                                                onCantidad(e, index);
+                                                                                            }
 
-                                                        <TableBody>
-                                                            {items.map((item, i) => <TableRow key={i}>
-                                                                <BodyTableCell>
-                                                                    <AppTextField
-                                                                        fullWidth
-                                                                        size="small"
-                                                                        name="codigoProducto"
-                                                                        label="Codigo"
-                                                                        value={items[i].codigoProducto}
-                                                                    />
-                                                                </BodyTableCell>
+                                                                                        }}
+                                                                                        dataCodigoProducto={
+                                                                                            {
+                                                                                                name: `productos[${index}].codigoProducto`,
+                                                                                                value: values.productos[index].codigoProducto,
+                                                                                                label: "codigo Producto"
+                                                                                            }
+                                                                                        }
+                                                                                        dataPrecioCompra={
+                                                                                            {
+                                                                                                name: `productos[${index}].precioCompra`,
+                                                                                                value: values.productos[index].precioCompra,
+                                                                                                label: "Precio compra",
+                                                                                                handleChange: (e) => {
+                                                                                                    //onprecioCompra(e, index);
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                        dataProducto={
+                                                                                            {
+                                                                                                name: `productos[${index}].productoId`,
+                                                                                                value: values.productos[index].productoId,
+                                                                                                label: "Selecione un producto",
+                                                                                                helperText: touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto,
+                                                                                                error: Boolean(touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto),
+                                                                                                handleChange: (e, value) => {
+                                                                                                    if (value != null) {
+                                                                                                        console.log('producto ====>', value)
+                                                                                                        setFieldValue(`productos[${index}].codigoProducto`, value.codigoProducto)
+                                                                                                        setFieldValue(`productos[${index}].nombreProducto`, value.nombreProducto)
+                                                                                                        setFieldValue(`productos[${index}].precioCompra`, value.precioCompra)
 
-                                                                <BodyTableCell>
-                                                                    <Autocomplete
-                                                                        fullWidth
-                                                                        getOptionLabel={(options) => options.nombreProducto}
-                                                                        options={productos}
-                                                                        value={items[i] ? items[i] : null}
-                                                                        size="small"
-                                                                        isOptionEqualToValue={(option, value) => {
-                                                                            if (value) {
-                                                                                return (option.value === value.value)
-                                                                            } else {
-                                                                                return false;
-                                                                            }
-                                                                        }}
-                                                                        onChange={(event, newValue) => {
-                                                                            if (newValue != null) {
-                                                                                console.log(newValue)
-                                                                                items[i].codigoProducto = newValue.codigoProducto;
-                                                                                items[i].precioUnitario = newValue.precioVentaMax;
-                                                                                items[i].id = newValue.id;
-                                                                                items[i].nombreProducto = newValue.nombreProducto;
-                                                                                setItems([...items]);
-                                                                                console.log(items)
-                                                                            } else {
-
-                                                                            }
-                                                                        }}
-                                                                        renderInput={
-                                                                            (params) => <TextField
-                                                                                {...params}
-                                                                                label="Selecione producto"
-                                                                            />
-                                                                        }
-                                                                    />
-                                                                </BodyTableCell>
-                                                                <BodyTableCell>
-                                                                    <AppTextField
-                                                                        fullWidth
-                                                                        size="small"
-                                                                        id="cantidad"
-                                                                        name="cantidad"
-                                                                        value={items[i].cantidad}
-                                                                        label="Cantidad"
-                                                                        onChange={(e) => {
-                                                                            console.log('on change', e.target.value);
-                                                                            items[i].cantidad = (e.target.value);
-                                                                            items[i].precioTotal = parseInt(items[i].cantidad == '' ? 0 : items[i].cantidad) * parseFloat(items[i].precioUnitario);
-                                                                            setItems([...items]);
-                                                                            onCalculoTotal()
-                                                                        }}
-                                                                        type={'number'}
-                                                                    />
-                                                                </BodyTableCell>
-                                                                <BodyTableCell>
-                                                                    <AppTextField
-                                                                        fullWidth
-                                                                        size="small"
-                                                                        id="precioUnitario"
-                                                                        name="precioUnitario"
-                                                                        label="Precio unitario"
-                                                                        value={items[i].precioUnitario}
-                                                                        onChange={(e) => {
-                                                                            console.log('on change', e.target.value);
-                                                                            items[i].precioUnitario = (e.target.value);
-                                                                            items[i].precioTotal = parseInt(items[i].cantidad == '' ? 0 : items[i].cantidad) * parseFloat(items[i].precioUnitario == '' ? 0 : items[i].precioUnitario);
-                                                                            setItems([...items]);
-                                                                            onCalculoTotal()
-                                                                        }}
-                                                                        type={'number'}
-                                                                    />
-                                                                </BodyTableCell>
-                                                                <BodyTableCell>
-                                                                    <AppTextField
-                                                                        fullWidth
-                                                                        size="small"
-                                                                        name="precioTotal"
-                                                                        label="Precio total"
-                                                                        onBlur={() => { }}
-                                                                        value={items[i].precioTotal}
-                                                                    />
-                                                                </BodyTableCell>
-                                                                <BodyTableCell>
-                                                                    <IconButton onClick={() => handleDeleteItem(item.id)}>
-                                                                        <Delete sx={{
-                                                                            color: "text.disabled"
-                                                                        }} />
-                                                                    </IconButton>
-                                                                </BodyTableCell>
-                                                            </TableRow>)}
-                                                        </TableBody>
+                                                                                                    } else {
+                                                                                                        setFieldValue(`productos[${index}].cantidad`, 0)
+                                                                                                        setFieldValue(`productos[${index}].codigoProducto`, '')
+                                                                                                        setFieldValue(`productos[${index}].nombreProducto`, '')
+                                                                                                        setFieldValue(`productos[${index}].precioCompra`, '')
+                                                                                                        setFieldValue(`productos[${index}].precioTotal`, 0)
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                        dataPrecioTotal={
+                                                                                            {
+                                                                                                name: `productos[${index}].precioTotal`,
+                                                                                                value: values.productos[index].precioTotal,
+                                                                                                label: "Precio total",
+                                                                                            }
+                                                                                        }
+                                                                                    />
+                                                                                )
+                                                                            })) : null
+                                                                    }
+                                                                </TableBody >
+                                                            )
+                                                        }} />
                                                     </Table>
                                                 </Scrollbar>
                                             </Box>

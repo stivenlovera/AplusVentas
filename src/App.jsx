@@ -32,7 +32,6 @@ const App = () => {
   useEffect(() => {
     if (token) {
       loadAuthenticacion();
-      
     } else {
       updateToken(false)
     }
