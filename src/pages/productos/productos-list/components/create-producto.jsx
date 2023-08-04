@@ -14,7 +14,6 @@ import { useContext, useEffect, useState } from "react";
 import { readUploadedFileAsText } from "utils/convertoToBase64";
 import * as Yup from "yup"; // component props interface
 import { Request } from "utils/http";
-import { initialStateProducto } from "../utils/utils-productos";
 
 // styled components
 const StyledAppModal = styled(AppModal)(({
@@ -51,7 +50,7 @@ const CreateProductoModal = ({
     onClose,
     editProduct
 }) => {
-    const { codigo, categorias, productosMaestros, initialState } = data;
+    const { codigoProducto, categorias, productosMaestros, initialState } = data;
     const [context, setContext] = useContext(Context);
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [selectProductoMaestro, setSelectProductoMaestro] = useState(null)

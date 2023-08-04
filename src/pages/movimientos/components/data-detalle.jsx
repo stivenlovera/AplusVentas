@@ -1,26 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Paper from '@mui/material/Paper';
 import {
     Grid,
     Table,
     TableHeaderRow,
 } from '@devexpress/dx-react-grid-material-ui';
+import { UseMovimiento } from '../hooks/use-movimiento';
 
-const TableDetalle = () => {
+const TableDetalle = ({
+    codigo,
+    asientoId
+}) => {
+    const { ListGeneralCuenta } = UseMovimiento();
     const [columns] = useState([
         { name: 'codigoCuenta', title: 'Codigo cuenta' },
-        { name: 'cuenta', title: 'Nombre Cuenta' },
+        { name: 'nombreCuenta', title: 'Nombre Cuenta' },
         { name: 'debe', title: 'Debe' },
         { name: 'haber', title: 'Haber' },
     ]);
-    const [rows] = useState([
-        {
-            codigoCuenta: "con factura",
-            cuenta: "cuenta por pagar",
-            debe: "0",
-            haber: "500"
-        }
-    ]);
+    const [rows, setRow] = useState([]);
+    const inizializando = async () => {
+        const { lista } = await ListGeneralCuenta({
+            codigo,
+            asientoId
+        });
+        setRow(lista)
+    }
+    useEffect(() => {
+        inizializando()
+    }, [])
 
     return (
         <Paper>

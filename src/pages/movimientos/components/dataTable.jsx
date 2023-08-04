@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Paper from '@mui/material/Paper';
 import {
     RowDetailState, PagingState,
@@ -16,24 +16,31 @@ import {
 } from '@devexpress/dx-react-grid-material-ui';
 import { Box } from '@mui/material';
 import TableDetalle from './data-detalle';
+import { UseMovimiento } from '../hooks/use-movimiento';
 
-const RowDetail = ({ row }) => (
-    <Box sx={{ margin: 2 }} >
-        <TableDetalle></TableDetalle>
-    </Box>
-);
+const RowDetail = ({ row }) => {
+    return (
+        < Box sx={{ margin: 2 }
+        } >
+            <TableDetalle asientoId={row.asientoId} codigo={row.codigo}/>
+        </Box >
+    )
+};
 
 const DateTable = () => {
+
+    const { ListGeneral } = UseMovimiento();
+
     const [columns] = useState([
         { name: 'codigo', title: 'Codigo' },
         { name: 'fecha', title: 'Fecha' },
         { name: 'descripcion', title: 'Descripcion' },
-        { name: 'cliente', title: 'Cliente' },
+        { name: 'para', title: 'Dirigido a' },
         { name: 'total', title: 'Total' },
         { name: 'metodoPago', title: 'Metodo de Pago' },
-        { name: 'usuario', title: 'Usuario' }
+        { name: 'realizado', title: 'Usuario' }
     ]);
-    const [rows] = useState([{
+    const [rows, setRow] = useState([{
         codigo: "OC#0",
         fecha: "30/07/2023",
         descripcion: "Compra demo",
@@ -43,6 +50,13 @@ const DateTable = () => {
         usuario: "Stiven Lovera"
     }]);
     const [expandedRowIds, setExpandedRowIds] = useState([2, 5]);
+    const inizializando = async () => {
+        const { lista } = await ListGeneral();
+        setRow(lista)
+    }
+    useEffect(() => {
+        inizializando()
+    }, [])
 
     return (
         <Paper>
@@ -51,7 +65,7 @@ const DateTable = () => {
                 columns={columns}
             >
                 <RowDetailState
-                    defaultExpandedRowIds={[2, 5]}
+                    defaultExpandedRowIds={[/* 2, 5 */]}
                 />
                 <Table />
                 <TableRowDetail
@@ -70,7 +84,7 @@ const DateTable = () => {
                 />
                 <IntegratedPaging />
                 <PagingPanel />
-                
+
             </Grid>
 
         </Paper>
