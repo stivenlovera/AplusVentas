@@ -28,6 +28,7 @@ import { initialCotizacion } from './utils/fakeVenta'
 import { initialStateCliente } from 'pages/clientes/clientes-list/components/cliente-fake'
 import { useAutocompleteMetodoPagoVenta } from 'pages/orden-compra/create-orden-inicial/hooks/useAutocompleteMetodoPago'
 import CotizacionProducto from './components/CotizacionProducto/cotizacion-producto'
+import { useSnackbar } from "notistack";
 
 const CreateVenta = () => {
     const [estado, setEstado] = useState({
@@ -35,7 +36,7 @@ const CreateVenta = () => {
         nombre: 'Editar cotizacion'
     })
     const [loading, setLoading] = useState(true)
-
+    const { enqueueSnackbar } = useSnackbar();
     const [actualizarTable, setActualizarTableContext] = useState(false);
     const { id } = useParams();
     const { t } = useTranslation();
@@ -91,7 +92,7 @@ const CreateVenta = () => {
 
     const validationSchema = Yup.object().shape({
         id: Yup.number().required(),
-        fecha: Yup.string().required(),
+        fechaCreacion: Yup.string().required(),
         descripcion: Yup.string().required('Descripcion es requerida'),
         codigoVenta: Yup.string().required('Codigo es requerido'),
         vCliente: Yup.object().shape({
@@ -126,14 +127,14 @@ const CreateVenta = () => {
         productos: Yup.array().of(
             Yup.object().shape({
                 productoId: Yup.number(),
-                cantidad: Yup.number().required('Cantidad es requerida'),
+                cantidad: Yup.number().min(1, 'Debe ser mayor a 0').required('Cantidad es requerida'),
                 stock: Yup.number(),
                 codigoProducto: Yup.string().nullable(),
                 nombreProducto: Yup.string().required('Selecione producto'),
                 precioCompra: Yup.number().required('Precio compra es requerido'),
                 precioTotal: Yup.number(),
             })
-        )
+        ).min(1, 'Debe haber almenos 1 producto')
     });
 
     const formCotizacion = useFormik({
@@ -144,7 +145,7 @@ const CreateVenta = () => {
             if (id == 'create') {
                 let ventaId = await ApiStore();
                 if (ventaId > 0) {
-                    console.log(ventaId)
+                    console.log('esta  en create')
                     setVentaId(ventaId);
                     await ApiPreviewPago(ventaId)
                     setActualizarTableContext(true)
@@ -198,7 +199,6 @@ const CreateVenta = () => {
     const Iniciar = async () => {
         if (id == 'create') {
             const { create, status } = await Create();
-            console.log('COTIZACION NUEVA', create);
             setValues(create);
             setLoading(false)
             setEstado({
@@ -236,7 +236,13 @@ const CreateVenta = () => {
             </Backdrop>
             <Box pt={2} pb={4}>
                 <FormikProvider value={formCotizacion}>
-                    <Form onSubmit={(e) => { console.log(values); console.log('errores', errors); handleSubmit(e) }}>
+                    <Form onSubmit={(e) => {
+                        if (errors.productos) {
+                            enqueueSnackbar('Debe haber almenos 1 producto', { variant: 'error' })
+                        }
+                        console.log(values); console.log('errores', errors);
+                        handleSubmit(e)
+                    }}>
                         <HeadingWrapper justifyContent="space-between" alignItems="center">
                             <FlexBox gap={0.5} alignItems="center">
                                 <IconWrapper>
@@ -272,7 +278,7 @@ const CreateVenta = () => {
                                         <AppTextField
                                             fullWidth
                                             size="small"
-                                            name="fecha"
+                                            name="fechaCreacion"
                                             placeholder="Fecha"
                                             value={values.fechaCreacion}
                                             onChange={handleChange}
@@ -465,14 +471,17 @@ const CreateVenta = () => {
                                                                                             label: "Cantidad",
                                                                                             handleChange: (e) => {
                                                                                                 onCantidad(e, index);
-                                                                                            }
-
+                                                                                            },
+                                                                                            error: Boolean(touched.productos?.[index]?.cantidad && errors.productos?.[index]?.cantidad),
+                                                                                            helperText: touched.productos?.[index]?.cantidad && errors.productos?.[index]?.cantidad
                                                                                         }}
                                                                                         dataCodigoProducto={
                                                                                             {
                                                                                                 name: `productos[${index}].codigoProducto`,
                                                                                                 value: values.productos[index].codigoProducto,
-                                                                                                label: "codigo Producto"
+                                                                                                label: "codigo Producto",
+                                                                                                error: Boolean(touched.productos?.[index]?.codigoProducto && errors.productos?.[index]?.codigoProducto),
+                                                                                                helperText: touched.productos?.[index]?.codigoProducto && errors.productos?.[index]?.codigoProducto
                                                                                             }
                                                                                         }
                                                                                         dataPrecioCompra={
@@ -482,7 +491,9 @@ const CreateVenta = () => {
                                                                                                 label: "Precio compra",
                                                                                                 handleChange: (e) => {
                                                                                                     //onprecioCompra(e, index);
-                                                                                                }
+                                                                                                },
+                                                                                                error: Boolean(touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra),
+                                                                                                helperText: touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra
                                                                                             }
                                                                                         }
                                                                                         dataProducto={
@@ -514,6 +525,8 @@ const CreateVenta = () => {
                                                                                                 name: `productos[${index}].precioTotal`,
                                                                                                 value: values.productos[index].precioTotal,
                                                                                                 label: "Precio total",
+                                                                                                error: Boolean(touched.productos?.[index]?.precioTotal && errors.productos?.[index]?.precioTotal),
+                                                                                                helperText: touched.productos?.[index]?.precioTotal && errors.productos?.[index]?.precioTotal
                                                                                             }
                                                                                         }
                                                                                     />

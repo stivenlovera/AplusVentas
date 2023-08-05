@@ -62,6 +62,8 @@ const CotizacionProducto = ({
                     value={dataCantidad.value}
                     onChange={dataCantidad.handleChange}
                     type={'number'}
+                    error={dataCantidad.error}
+                    helperText={dataCantidad.helperText}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -74,6 +76,8 @@ const CotizacionProducto = ({
                     value={dataPrecioCompra.value}
                     onChange={dataPrecioCompra.handleChange}
                     type={'number'}
+                    error={dataPrecioCompra.error}
+                    helperText={dataPrecioCompra.helperText}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -84,6 +88,8 @@ const CotizacionProducto = ({
                     name={dataPrecioTotal.name}
                     label={dataPrecioTotal.label}
                     value={dataPrecioTotal.value}
+                    error={dataPrecioTotal.error}
+                    helperText={dataPrecioTotal.helperText}
                 />
             </BodyTableCell>
             <BodyTableCell>
