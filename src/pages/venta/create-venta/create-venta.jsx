@@ -12,13 +12,9 @@ import { BodyTableCell, HeadTableCell } from 'page-sections/accounts/account/com
 import { HeadingWrapper } from 'pages/admin-ecommerce/product-management'
 import React, { useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Delete from 'icons/Delete'
 import { useParams } from 'react-router-dom';
 import numeroALetras from 'convertir-numero-a-letras-mexico';
-import { UseCreateVenta } from './hooks/UseCreateVenta'
-import { UseStoreVenta } from './hooks/UseStoreVenta'
 import ModalPreguntarPagoVenta from './components/pregunta-pago-venta/preguntar-pago-venta'
-import { UsePreviewPagoVenta } from './hooks/UsePreviewPagoVenta'
 import ProcesarPagoVentaModal from './components/ProcesarPagoModal/ProcesarPagoModal'
 import CreateClienteVenta from './components/create-cliente/CreateClienteVenta'
 import { useAutocompleteCliente } from './hooks/useAutocompleteCliente'
@@ -37,22 +33,17 @@ const CreateVenta = () => {
     })
     const [loading, setLoading] = useState(true)
     const { enqueueSnackbar } = useSnackbar();
-    const [actualizarTable, setActualizarTableContext] = useState(false);
     const { id } = useParams();
     const { t } = useTranslation();
-    const [items, setItems] = useState([]);
-    const [selectAsiento, setSelectAsiento] = useState(null);
     const [modalProcesar, setModalProcesar] = useState(false);
-    const [modalRecibir, setModalRecibir] = useState(false);
-    const [buttonProcesar, setButtonProcesar] = useState(true);
     const [opencliente, setOpencliente] = useState(false)
     const [ventaId, setVentaId] = useState(0)
+    const [viewPreviewPago, setViewPreviewPago] = useState(initialCotizacion)
 
     const [modalPreguntar, setModalPreguntar] = useState(false)
-
     //clientes
-    const { Create, Store, Editar, Update } = UseCotizacion()
-
+    const { Create, Store, PreviewPago, ProcesarPago, Editar, Update } = UseCotizacion()
+    //auto complete
     const {
         LoadListaCliente,
         getOptionLabelCliente,
@@ -80,14 +71,10 @@ const CreateVenta = () => {
             stock: 0,
             codigoProducto: '',
             nombreProducto: '',
-            precioCompra: 0,
+            precioUnitario: 0,
             precioTotal: 0,
         });
-        setItems({ ...values });
-        console.log(values)
-    };
-    const handleDeleteItem = id => {
-        setItems(items => items.filter(item => item.id !== id));
+        setValues({ ...values })
     };
 
     const validationSchema = Yup.object().shape({
@@ -122,6 +109,10 @@ const CreateVenta = () => {
             nombreTipoAsiento: Yup.string().nullable(),
             nombreAsiento: Yup.string().required('Tipo de pago requerido'),
         }),
+        estado: Yup.object().shape({
+            id: Yup.number().nullable(),
+            nombreEstadoVenta: Yup.string().nullable(),
+        }),
         usuario: Yup.string().required(),
         nit: Yup.string().required('Nit es requerido!'),
         productos: Yup.array().of(
@@ -131,7 +122,7 @@ const CreateVenta = () => {
                 stock: Yup.number(),
                 codigoProducto: Yup.string().nullable(),
                 nombreProducto: Yup.string().required('Selecione producto'),
-                precioCompra: Yup.number().required('Precio compra es requerido'),
+                precioUnitario: Yup.number().required('Precio unitario es requerido'),
                 precioTotal: Yup.number(),
             })
         ).min(1, 'Debe haber almenos 1 producto')
@@ -143,19 +134,15 @@ const CreateVenta = () => {
         //enableReinitialize: true,
         onSubmit: async (values) => {
             if (id == 'create') {
-                let ventaId = await ApiStore();
-                if (ventaId > 0) {
+                const { status, store } = await Store(values);
+                if (status) {
                     console.log('esta  en create')
-                    setVentaId(ventaId);
-                    await ApiPreviewPago(ventaId)
-                    setActualizarTableContext(true)
-                    setButtonProcesar(false);
+                    setVentaId(store);
                     setModalPreguntar(true);
                 }
             }
         }
     });
-
     const {
         values,
         errors,
@@ -168,20 +155,10 @@ const CreateVenta = () => {
         setValues,
         onSubmit
     } = formCotizacion;
-
-    const { ApiCrearVenta, asientos, create, clientes, productos } = UseCreateVenta();
-    const { ApiStore } = UseStoreVenta(values)
-    const { ApiPreviewPago, previewPago } = UsePreviewPagoVenta(ventaId)
-
-    const load = async () => {
-        await ApiCrearVenta();
-        setValues(create);
-    }
-
     //////////////////////////////
     const onCantidad = (e, i) => {
         setFieldValue(`productos[${i}].cantidad`, e.target.value);
-        const nuevo = parseInt(e.target.value == '' ? 0 : e.target.value) * parseFloat(values.productos[i].precioCompra);
+        const nuevo = parseInt(e.target.value == '' ? 0 : e.target.value) * parseFloat(values.productos[i].precioUnitario);
         setFieldValue(`productos[${i}].precioTotal`, nuevo);
         onCalculoTotal(nuevo, i)
     }
@@ -214,20 +191,20 @@ const CreateVenta = () => {
         Iniciar()
     }, [])
 
-    /*handler procesar */
-    const handlerButtonProcesar = () => {
-        if (id == 'true') {
+    //handler procesar  preview pago
+    const onEmitirPago = () => {
+        setModalProcesar(true);
+        setModalPreguntar(false)
+        onPreviewPago()
+    }
 
-        }
-    }
-    const onOpenRecibir = () => {
-        setModalRecibir(true)
-    }
-    const onCloseRecibir = () => {
-        setModalRecibir(false)
+    const onPreviewPago = async () => {
+        const { venta, status } = await PreviewPago(ventaId);
+        setViewPreviewPago(venta);
     }
     return (
         <>
+
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={loading}
@@ -484,16 +461,16 @@ const CreateVenta = () => {
                                                                                                 helperText: touched.productos?.[index]?.codigoProducto && errors.productos?.[index]?.codigoProducto
                                                                                             }
                                                                                         }
-                                                                                        dataPrecioCompra={
+                                                                                        dataprecioUnitario={
                                                                                             {
-                                                                                                name: `productos[${index}].precioCompra`,
-                                                                                                value: values.productos[index].precioCompra,
+                                                                                                name: `productos[${index}].precioUnitario`,
+                                                                                                value: values.productos[index].precioUnitario,
                                                                                                 label: "Precio compra",
                                                                                                 handleChange: (e) => {
-                                                                                                    //onprecioCompra(e, index);
+                                                                                                    //onprecioUnitario(e, index);
                                                                                                 },
-                                                                                                error: Boolean(touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra),
-                                                                                                helperText: touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra
+                                                                                                error: Boolean(touched.productos?.[index]?.precioUnitario && errors.productos?.[index]?.precioUnitario),
+                                                                                                helperText: touched.productos?.[index]?.precioUnitario && errors.productos?.[index]?.precioUnitario
                                                                                             }
                                                                                         }
                                                                                         dataProducto={
@@ -505,16 +482,17 @@ const CreateVenta = () => {
                                                                                                 error: Boolean(touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto),
                                                                                                 handleChange: (e, value) => {
                                                                                                     if (value != null) {
-                                                                                                        console.log('producto ====>', value)
+                                                                                                    
+                                                                                                        setFieldValue(`productos[${index}].productoId`, value.productoId)
                                                                                                         setFieldValue(`productos[${index}].codigoProducto`, value.codigoProducto)
                                                                                                         setFieldValue(`productos[${index}].nombreProducto`, value.nombreProducto)
-                                                                                                        setFieldValue(`productos[${index}].precioCompra`, value.precioCompra)
+                                                                                                        setFieldValue(`productos[${index}].precioUnitario`, value.precioVentaMax)
 
                                                                                                     } else {
                                                                                                         setFieldValue(`productos[${index}].cantidad`, 0)
                                                                                                         setFieldValue(`productos[${index}].codigoProducto`, '')
                                                                                                         setFieldValue(`productos[${index}].nombreProducto`, '')
-                                                                                                        setFieldValue(`productos[${index}].precioCompra`, '')
+                                                                                                        setFieldValue(`productos[${index}].precioUnitario`, '')
                                                                                                         setFieldValue(`productos[${index}].precioTotal`, 0)
                                                                                                     }
                                                                                                 }
@@ -579,26 +557,6 @@ const CreateVenta = () => {
                                     <Grid item sm={4} xs={12}>
                                         <Button
                                             variant="contained"
-                                            color='success'
-                                            endIcon={<Add />}
-                                            disabled={buttonProcesar}
-                                            onClick={() => { setModalProcesar(true) }}
-                                        >
-                                            {t("Procesar pago")}
-                                        </Button>
-                                    </Grid>
-                                    <Grid item sm={4} xs={12}>
-                                        <Button
-                                            variant="contained"
-                                            endIcon={<Add />}
-                                            onClick={onOpenRecibir}
-                                        >
-                                            {t("Recibir")}
-                                        </Button>
-                                    </Grid>
-                                    <Grid item sm={4} xs={12}>
-                                        <Button
-                                            variant="contained"
                                             endIcon={<Add />}
                                             type='submit'
                                         >
@@ -610,8 +568,16 @@ const CreateVenta = () => {
                         </Grid>
                     </Form>
                 </FormikProvider>
-                <ProcesarPagoVentaModal open={modalProcesar} data={previewPago} ></ProcesarPagoVentaModal>
-                <ModalPreguntarPagoVenta onPago={() => { setModalProcesar(true); setModalPreguntar(false) }} open={modalPreguntar} />
+                <ProcesarPagoVentaModal
+                    open={modalProcesar}
+                    data={viewPreviewPago}
+                    onSubmit={(data)=>{}}
+                />
+                <ModalPreguntarPagoVenta
+                    onPago={() => { onEmitirPago() }}
+                    data={ventaId}
+                    open={modalPreguntar}
+                />
                 <CreateClienteVenta
                     openModal={opencliente}
                     onClose={() => { setOpencliente(false) }}

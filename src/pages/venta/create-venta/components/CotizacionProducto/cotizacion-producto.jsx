@@ -11,7 +11,7 @@ const CotizacionProducto = ({
     dataProducto,
     dataStock,
     dataCantidad,
-    dataPrecioCompra,
+    dataprecioUnitario,
     dataPrecioTotal,
     dataAcction
 }) => {
@@ -71,13 +71,13 @@ const CotizacionProducto = ({
                     fullWidth
                     size="small"
                     id="precioVenta"
-                    name={dataPrecioCompra.name}
-                    label={dataPrecioCompra.label}
-                    value={dataPrecioCompra.value}
-                    onChange={dataPrecioCompra.handleChange}
+                    name={dataprecioUnitario.name}
+                    label={dataprecioUnitario.label}
+                    value={dataprecioUnitario.value}
+                    onChange={dataprecioUnitario.handleChange}
                     type={'number'}
-                    error={dataPrecioCompra.error}
-                    helperText={dataPrecioCompra.helperText}
+                    error={dataprecioUnitario.error}
+                    helperText={dataprecioUnitario.helperText}
                 />
             </BodyTableCell>
             <BodyTableCell>

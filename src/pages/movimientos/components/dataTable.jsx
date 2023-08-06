@@ -22,7 +22,7 @@ const RowDetail = ({ row }) => {
     return (
         < Box sx={{ margin: 2 }
         } >
-            <TableDetalle asientoId={row.asientoId} codigo={row.codigo}/>
+            <TableDetalle asientoId={row.asientoId} codigo={row.codigo} />
         </Box >
     )
 };
@@ -30,7 +30,15 @@ const RowDetail = ({ row }) => {
 const DateTable = () => {
 
     const { ListGeneral } = UseMovimiento();
-
+    const [tableColumnExtensions] = useState([
+        { columnName: 'codigo', width: 150, wordWrapEnabled: true },
+        { columnName: 'fecha', width: 180, wordWrapEnabled: true },
+        { columnName: 'descripcion', width: 180, wordWrapEnabled: true },
+        { columnName: 'para', wordWrapEnabled: true },
+        { columnName: 'total', width: 80, wordWrapEnabled: true },
+        { columnName: 'metodoPago', width: 200, wordWrapEnabled: true },
+        { columnName: 'realizado', wordWrapEnabled: true }
+    ]);
     const [columns] = useState([
         { name: 'codigo', title: 'Codigo' },
         { name: 'fecha', title: 'Fecha' },
@@ -64,10 +72,10 @@ const DateTable = () => {
                 rows={rows}
                 columns={columns}
             >
+                <Table columnExtensions={tableColumnExtensions} />
                 <RowDetailState
                     defaultExpandedRowIds={[/* 2, 5 */]}
                 />
-                <Table />
                 <TableRowDetail
                     contentComponent={RowDetail}
                 />

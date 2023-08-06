@@ -82,29 +82,30 @@ export const UseCotizacion = () => {
             status: !!status
         };
     }
-    const PreviewPago = async (id) => {
+    const PreviewPago = async (ventaId) => {
         const { data, message, status } = await Request({
-            endPoint: `${process.env.REACT_APP_API}api/venta/preview-pago/${id}`,
+            endPoint: `${process.env.REACT_APP_API}api/venta/preview-pago/${ventaId}`,
             initialValues: [],
-            method: 'delete',
+            method: 'get',
             showError: true,
             showSuccess: false
         });
         return {
-            delete: data,
+            venta: data,
             status: !!status
         };
     }
-    const procesarPago = async (id) => {
+    const ProcesarPago = async (id, fecha) => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/venta/procesar-pago/${id}`,
             initialValues: [],
-            method: 'delete',
+            method: 'post',
+            values: { fecha },
             showError: true,
-            showSuccess: false
+            showSuccess: true
         });
         return {
-            delete: data,
+            resultado: data,
             status: !!status
         };
     }
@@ -117,6 +118,6 @@ export const UseCotizacion = () => {
         Update,
         Delete,
         PreviewPago,
-        procesarPago
+        ProcesarPago
     }
 }

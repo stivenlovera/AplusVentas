@@ -7,7 +7,10 @@ export const initialCotizacion = {
     descripcion: '',
     codigoVenta: '',
     vCliente: initialStateCliente,
-    montoliteral: '',
+    estado: {
+        id: 0,
+        nombreEstadoVenta: ''
+    },
     total: 0,
     asiento: {
         tipoAsientoId: 0,
@@ -20,5 +23,20 @@ export const initialCotizacion = {
     telefono: '',
     fechaCreacion: '',
     montoliteral: '',
+    productos: []
+}
+export const initialPreviewVenta = {
+    id: 0,
+    codigoOrden: '',
+    fechaCreacion: '',
+    codigoVenta: '',
+    vClienteId: '',
+    nit: '',
+    total: 0,
+    asientoId: 0,
+    estado: {
+        id: 0,
+        nombreEstadoVenta: ''
+    },
     productos: []
 }

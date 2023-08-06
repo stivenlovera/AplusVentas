@@ -7,10 +7,10 @@ import FlexBetween from 'components/flexbox/FlexBetween';
 import FlexBox from 'components/flexbox/FlexBox';
 import DownloadTo from 'icons/DownloadTo';
 import { BodyTableCell, HeadTableCell } from 'page-sections/accounts/account/common/StyledComponents';
-import React from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 import { useNavigate } from "react-router-dom";
-import { UseStoreProcesoPagoVenta } from './hooks/useProcesarPagoVenta';
+import { UseCotizacion } from '../../hooks/useCotizacion';
 
 // styled components
 const StyledSmall = styled(Small)(({
@@ -35,18 +35,24 @@ const ProcesarPagoVentaModal = ({
     open,
     data,
     onClose,
+    onSubmit
 }) => {
+    console.log('entrada a pago ', data)
     const navigate = useNavigate();
-    const { ApiStoreProceso } = UseStoreProcesoPagoVenta(data.venta.id, moment().format('YYYY-MM-DD'));
+
+    const { ProcesarPago } = UseCotizacion();
     const handlerStoreProceso = async () => {
-        await ApiStoreProceso();
-        navigate('/dashboard/venta');
-        return onClose;
+        const { resultado, status } = await ProcesarPago(data.id, moment().format('YYYY-MM-DD'));
+        if (status) {
+            navigate('/dashboard/venta');
+            handlerClose()
+        }
     }
     const handlerClose = async () => {
         navigate('/dashboard/venta');
         return onClose;
     }
+
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     return (
         <StyledAppModal open={open} handleClose={onClose} >
@@ -68,21 +74,21 @@ const ProcesarPagoVentaModal = ({
                                     </Box>
                                     <Stack textAlign="right">
                                         <H3>Venta</H3>
-                                        <H6 fontSize={12}> {data.venta.codigoOrden}</H6>
+                                        <H6 fontSize={12}> {data.codigoOrden}</H6>
                                     </Stack>
                                 </FlexBetween>
-                                <Typography variant='body1' style={{fontWeight:'bold'}} color="text.secondary">
+                                <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
                                     Fecha Registro: {" "}
                                     <Span sx={{
                                         color: "text.primary",
                                         fontSize: 15,
                                         fontWeight: 400
                                     }}>
-                                         {data.venta.fechaCreacion}
+                                        {data.fechaCreacion}
                                     </Span>
                                 </Typography>
                                 <br />
-                                <Typography variant='body1' style={{fontWeight:'bold'}} color="text.secondary">
+                                <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
                                     Descripcion: {" "}
                                     <Span sx={{
                                         color: "text.primary",
@@ -92,34 +98,34 @@ const ProcesarPagoVentaModal = ({
                                         {'sdasdasd '}
                                     </Span>
                                 </Typography>
-                                <Typography variant='body1' style={{fontWeight:'bold'}} color="text.secondary">
+                                <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
                                     Proveedor: {" "}
                                     <Span sx={{
                                         color: "text.primary",
                                         fontSize: 15,
                                         fontWeight: 400
                                     }}>
-                                        {data.venta.vClienteId}
+                                        {data.vCliente.nombreCompletoCliente}
                                     </Span>
                                 </Typography>
-                                <Typography variant='body1' style={{fontWeight:'bold'}} color="text.secondary">
+                                <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
                                     NIT: {" "}
                                     <Span sx={{
                                         color: "text.primary",
                                         fontSize: 15,
                                         fontWeight: 400
                                     }}>
-                                        {data.venta.nit}
+                                        {data.vCliente.numeroDocumento}
                                     </Span>
                                 </Typography>
-                                <Typography variant='body1' style={{fontWeight:'bold'}} color="text.secondary">
+                                <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
                                     Tipo pago: {" "}
                                     <Span sx={{
                                         color: "text.primary",
                                         fontSize: 15,
                                         fontWeight: 400
                                     }}>
-                                        {data.venta.asientoId}
+                                        {data.asiento.nombreAsiento}
                                     </Span>
                                 </Typography>
                                 <Table sx={{
@@ -151,7 +157,7 @@ const ProcesarPagoVentaModal = ({
                                 <Stack mt={3} spacing={1} maxWidth={200} marginLeft="auto">
                                     <FlexBetween>
                                         <Tiny fontWeight={500}>Total:</Tiny>
-                                        <H6 sx={{ pr: 12 }}>{data.venta.total}</H6>
+                                        <H6 sx={{ pr: 12 }}>{data.total}</H6>
                                     </FlexBetween>
                                 </Stack>
                                 <Stack direction="row" justifyContent="flex-end" mt={4} spacing={2}>
@@ -170,8 +176,14 @@ const ProcesarPagoVentaModal = ({
                             <Button fullWidth variant="outlined" onClick={handlerClose}>
                                 Cancelar
                             </Button>
-                            <Button fullWidth type="button" variant="contained" onClick={handlerStoreProceso}>
-                                Registrar pago
+                            <Button
+                                fullWidth
+                                type="button"
+                                variant="contained"
+                                onClick={handlerStoreProceso}
+                                disabled={data.estado.id == 2 ? true : false}
+                            >
+                                {data.estado.id == 2 ? 'Venta ya fue registrada' : 'Registrar venta'}
                             </Button>
                         </FlexBox>
                     </Grid>

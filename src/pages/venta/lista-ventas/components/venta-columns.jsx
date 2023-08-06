@@ -1,11 +1,13 @@
 import { Edit } from "@mui/icons-material";
 import { Box, IconButton, Rating } from "@mui/material";
 import { Fragment, useState } from "react";
-//import CreateOrdenCompraModal from "./create-orden-compra";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Delete from "icons/Delete";
 import { Small } from "components/Typography";
-//import { UsePreviewOrdenCompraRecibir } from "pages/orden-compra/recibir/hooks/usePreviewRecibir";
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
+import ProcesarPagoVentaModal from "pages/venta/create-venta/components/ProcesarPagoModal/ProcesarPagoModal";
+import { UseCotizacion } from "pages/venta/create-venta/hooks/useCotizacion";
+import { initialCotizacion } from "pages/venta/create-venta/utils/fakeVenta";
 const VentaColumns = [
     {
         Header: "codigo venta",
@@ -45,7 +47,7 @@ const VentaColumns = [
     },
     {
         Header: "Precio total",
-        accessor: "total"
+        accessor: "precioTotal"
     },
     {
         Header: "Acciones",
@@ -58,41 +60,47 @@ const VentaColumns = [
                 transition: "color 0.3s",
                 color: row.isSelected ? "white" : "text.disabled"
             };
-            const [tipo, setTipo] = useState('');
-            const [openModal, setOpenModal] = useState(false);
+            const [viewPreviewPago, setViewPreviewPago] = useState(initialCotizacion);
+            const [modalPreview, setmodalPreview] = useState(false)
+            const { PreviewPago } = UseCotizacion();
+
+            const onPreviewPago = async () => {
+                const { venta, status } = await PreviewPago(row.original.id);
+                console.log('data de venta', venta)
+                setmodalPreview(true)
+                setViewPreviewPago(venta);
+            }
+
+            const [openModalEliminar, setOpenModalEliminar] = useState(false);
             /*Modal recibir producto */
-            const [modalRecibir, setModalRecibir] = useState(false);
-            const onCloseRecibir = () => {
-                setModalRecibir(false)
-            }
-
-            //const { ApiPreviewPago, previewPago, almacenes } = UsePreviewOrdenCompraRecibir();
-
-            const hanlerOpenModalRecibir = async () => {
-                /* console.log(row.original.id)
-                console.log(almacenes)
-                await ApiPreviewPago(row.original.id)
-                setModalRecibir(true) */
-            }
             return (
                 <Fragment>
-                    <IconButton onClick={() => setOpenModal(true)}>
+                    <IconButton onClick={() => onPreviewPago()}>
+                        <PointOfSaleIcon sx={{
+                            fontSize: 18,
+                            color: "text.disabled"
+                        }} />
+                    </IconButton>
+                    <IconButton onClick={() => {}}>
                         <VisibilityIcon sx={{
                             fontSize: 18,
                             color: "text.disabled"
                         }} />
                     </IconButton>
-                    <IconButton onClick={() => setOpenModal(true)}>
+                    <IconButton onClick={() =>{} }>
                         <Edit sx={{
                             fontSize: 18,
                             color: "text.disabled"
                         }} />
                     </IconButton>
-                    <IconButton onClick={() => setOpenModal(true)}>
+                    <IconButton onClick={() => setOpenModalEliminar(true)}>
                         <Delete sx={style} />
                     </IconButton>
-                    {/* <RecibirProducto data={previewPago} almacenes={almacenes} onClose={onCloseRecibir} open={modalRecibir} /> */}
-                    {/* <CreateOrdenCompraModal editProduct open={openModal} data={row.original} onClose={() => setOpenModal(false)} /> */}
+                    <ProcesarPagoVentaModal
+                        open={modalPreview}
+                        data={viewPreviewPago}
+                        onClose={() => { setmodalPreview(false) }}
+                    />
                 </Fragment>
             );
         }
