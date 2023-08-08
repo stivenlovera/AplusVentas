@@ -7,8 +7,7 @@ import FlexBetween from 'components/flexbox/FlexBetween';
 import FlexBox from 'components/flexbox/FlexBox';
 import DownloadTo from 'icons/DownloadTo';
 import { BodyTableCell, HeadTableCell } from 'page-sections/accounts/account/common/StyledComponents';
-import React from 'react';
-import { UseStoreProcesoPago } from './hooks/useStorePago';
+import React, { useEffect } from 'react';
 import moment from 'moment';
 import { useNavigate } from "react-router-dom";
 
@@ -35,12 +34,11 @@ const CreateModalProcesar = ({
     open,
     data,
     onClose,
+    onSubmit
 }) => {
     const navigate = useNavigate();
-    console.log('data procesar pago', data)
-    const { ApiStoreProceso } = UseStoreProcesoPago(data.orderCompra.id, moment().format('YYYY-MM-DD'));
     const handlerStoreProceso = async () => {
-        await ApiStoreProceso();
+        onSubmit(data.id)
         navigate('/dashboard/orden-compra-list');
         return onClose;
     }
@@ -49,6 +47,11 @@ const CreateModalProcesar = ({
         return onClose;
     }
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
+
+    useEffect(() => {
+        console.log('PROCESAR',data)
+    }, [data])
+    
     return (
         <StyledAppModal open={open} handleClose={onClose} >
             <H2 marginBottom={2}>
@@ -69,7 +72,7 @@ const CreateModalProcesar = ({
                                     </Box>
                                     <Stack textAlign="right">
                                         <H3>Orden compra</H3>
-                                        <H6 fontSize={12}> {data.orderCompra.codigoOrden}</H6>
+                                        <H6 fontSize={12}> {data.codigoOrden}</H6>
                                     </Stack>
                                 </FlexBetween>
                                 <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
@@ -79,7 +82,7 @@ const CreateModalProcesar = ({
                                         fontSize: 15,
                                         fontWeight: 400
                                     }}>
-                                        {data.orderCompra.fechaCreacion}
+                                        {moment(data.fechaCreacion).format('DD/MM/yyyy')}
                                     </Span>
                                 </Typography>
                                 <br />
@@ -90,7 +93,7 @@ const CreateModalProcesar = ({
                                         fontSize: 15,
                                         fontWeight: 400
                                     }}>
-                                        {'sdasdasd '}
+                                        {data.descripcion}
                                     </Span>
                                 </Typography>
                                 <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
@@ -100,7 +103,7 @@ const CreateModalProcesar = ({
                                         fontSize: 15,
                                         fontWeight: 400
                                     }}>
-                                        {data.orderCompra.vProveedoreId}
+                                        {data.proveedor.nombreProveedor}
                                     </Span>
                                 </Typography>
                                 <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
@@ -110,7 +113,7 @@ const CreateModalProcesar = ({
                                         fontSize: 15,
                                         fontWeight: 400
                                     }}>
-                                        {data.orderCompra.nit}
+                                        {data.proveedor.nit}
                                     </Span>
                                 </Typography>
                                 <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
@@ -120,7 +123,7 @@ const CreateModalProcesar = ({
                                         fontSize: 15,
                                         fontWeight: 400
                                     }}>
-                                        {data.orderCompra.asientoId}
+                                        {data.asiento.nombreAsiento}
                                     </Span>
                                 </Typography>
                                 <Table sx={{
@@ -152,7 +155,7 @@ const CreateModalProcesar = ({
                                 <Stack mt={3} spacing={1} maxWidth={200} marginLeft="auto">
                                     <FlexBetween>
                                         <Tiny fontWeight={500}>Total:</Tiny>
-                                        <H6 sx={{ pr: 12 }}>{data.orderCompra.total}</H6>
+                                        <H6 sx={{ pr: 12 }}>{data.total}</H6>
                                     </FlexBetween>
                                 </Stack>
                                 <Stack direction="row" justifyContent="flex-end" mt={4} spacing={2}>

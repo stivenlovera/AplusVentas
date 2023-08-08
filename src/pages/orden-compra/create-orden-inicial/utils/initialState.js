@@ -1,4 +1,4 @@
-export const initialStateProveedor = {
+export const initialStateOrdenCompra = {
     id: 0,
     fecha: '',
     descripcion: '',

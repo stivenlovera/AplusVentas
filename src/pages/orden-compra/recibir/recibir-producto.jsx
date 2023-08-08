@@ -11,10 +11,9 @@ import React, { useEffect, useState } from 'react';
 
 import moment from 'moment';
 import { useNavigate } from "react-router-dom";
-import { UseStoreProcesoPago } from '../procesar/hooks/useStorePago';
 import AppTextField from 'components/input-fields/AppTextField';
 import { DatePicker } from '@mui/x-date-pickers';
-import { UseStoreRecibir } from './hooks/useStoreRecibir';
+import { UseOrdenCompra } from '../create-orden-inicial/hooks/useOrdenCompra';
 
 // styled components
 const StyledSmall = styled(Small)(({
@@ -44,11 +43,8 @@ const RecibirProducto = ({
   const navigate = useNavigate();
 
   const [productos, setProductos] = useState([])
-
-  const { ApiStoreEntradaAlamacen } = UseStoreRecibir(data.orderCompra.id, productos);
-
+  const { CreateAlmacen, StoreAlmacen } = UseOrdenCompra();
   const handlerStoreProceso = async () => {
-    await ApiStoreEntradaAlamacen();
     return onClose();
     //navigate('/dashboard/orden-compra-list')
   }
@@ -71,9 +67,6 @@ const RecibirProducto = ({
     );
     console.log(NuevoValores)
     setProductos(NuevoValores);
-    return () => {
-
-    }
   }, [data])
 
   return (
@@ -96,7 +89,7 @@ const RecibirProducto = ({
                   </Box>
                   <Stack textAlign="right">
                     <H3>Orden compra</H3>
-                    <H6 fontSize={12}> {data.orderCompra.codigoOrden}</H6>
+                    <H6 fontSize={12}> khjkhjk</H6>
                   </Stack>
                 </FlexBetween>
                 <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
@@ -106,7 +99,7 @@ const RecibirProducto = ({
                     fontSize: 15,
                     fontWeight: 400
                   }}>
-                    {data.orderCompra.fechaCreacion}
+                    hjkhjk
                   </Span>
                 </Typography>
                 <br />
@@ -127,7 +120,7 @@ const RecibirProducto = ({
                     fontSize: 15,
                     fontWeight: 400
                   }}>
-                    {data.orderCompra.vProveedoreId}
+                    jhkhjkhj
                   </Span>
                 </Typography>
                 <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
@@ -137,7 +130,7 @@ const RecibirProducto = ({
                     fontSize: 15,
                     fontWeight: 400
                   }}>
-                    {data.orderCompra.nit}
+                    DSDASDASD
                   </Span>
                 </Typography>
                 <Typography variant='body1' style={{ fontWeight: 'bold' }} color="text.secondary">
@@ -147,7 +140,7 @@ const RecibirProducto = ({
                     fontSize: 15,
                     fontWeight: 400
                   }}>
-                    {data.orderCompra.asientoId}
+                    jhkhjkh
                   </Span>
                 </Typography>
                 <Table sx={{
@@ -242,7 +235,7 @@ const RecibirProducto = ({
                 <Stack mt={3} spacing={1} maxWidth={200} marginLeft="auto">
                   <FlexBetween>
                     <Tiny fontWeight={500}>Total:</Tiny>
-                    <H6 sx={{ pr: 5 }}>{data.orderCompra.total}</H6>
+                    <H6 sx={{ pr: 5 }}>sassssssss</H6>
                   </FlexBetween>
                 </Stack>
 

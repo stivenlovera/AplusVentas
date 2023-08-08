@@ -50,9 +50,6 @@ const ActiveLayout = ({ nombreCompleto }) => {
 };
 
 const routes = (user, token) => {
-  if (token) {
-    console.log('bloquear login', user, token)
-  }
   if (token) { // true si hay token
     return [
       {

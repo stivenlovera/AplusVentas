@@ -13,12 +13,8 @@ import { HeadingWrapper } from 'pages/admin-ecommerce/product-management'
 import React, { useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import CreateModalProcesar from '../procesar/procesar'
-import Delete from 'icons/Delete'
-import { UseCreateOrdenCompra } from './hooks/useCreateOrdenCompra'
 import { useParams } from 'react-router-dom';
-import { UseStoreOrdenCompra } from './hooks/useStoreOrderCompra'
 import numeroALetras from 'convertir-numero-a-letras-mexico';
-import { UsePreviewOrdenCompraPago } from '../procesar/hooks/usePreviewPago'
 import RecibirProducto from '../recibir/recibir-producto'
 import CreateModalPreguntar from '../pregunta/pregunta'
 import { Request } from 'utils/http'
@@ -29,7 +25,8 @@ import { useAutocompleteProveedor } from './hooks/useAutocompleteProveedor'
 import { useAutocompleteMetodoPago } from './hooks/useAutocompleteMetodoPago'
 import { useNavigate } from "react-router-dom";
 import OrdenProducto from './components/orden-productos/ordenProducto'
-import { initialStateProveedor } from './utils/initialState'
+import { initialStateOrdenCompra } from './utils/initialState'
+import { UseOrdenCompra } from './hooks/useOrdenCompra'
 
 const CreateOrdenInicial = () => {
     const navigate = useNavigate();
@@ -41,13 +38,13 @@ const CreateOrdenInicial = () => {
     const [loading, setLoading] = useState(true)
     const { id } = useParams();
     const { t } = useTranslation();
-    const [items, setItems] = useState([]);
-    const [selectAsiento, setSelectAsiento] = useState(null);
     const [modalProcesar, setModalProcesar] = useState(false);
     const [modalRecibir, setModalRecibir] = useState(false);
     const [openModalProveedor, setOpenModalProveedor] = useState(false);
     const [modalPreguntar, setModalPreguntar] = useState(false);
-
+    const [compraId, setcompraId] = useState(0)
+    const [OrdenCompra, setOrderCompra] = useState(initialStateOrdenCompra)
+    const [previewPago, setPreviewPago] = useState(initialStateOrdenCompra)
     //proveedores
     const {
         LoadListaProveedores,
@@ -69,10 +66,7 @@ const CreateOrdenInicial = () => {
         refresListaMetodoPago,
     } = useAutocompleteMetodoPago();
 
-    const [OrdenCompra, setOrderCompra] = useState(initialStateProveedor)
-
     const handleAddItem = () => {
-        console.log(values)
         values.productos.push({
             productoId: 0,
             cantidad: 0,
@@ -83,12 +77,8 @@ const CreateOrdenInicial = () => {
         });
         setValues({ ...values })
     };
-    const handleDeleteItem = (i) => {
-        console.log(i)
-        values.productos.splice(i, 1);
-        console.log(values)
-        setValues({ ...values })
-    };
+
+    const { Create, Store, Editar, Update, CreateAlmacen, StoreAlmacen, PreviewPago, ProcesarPago } = UseOrdenCompra();
 
     const onCalculoTotal = (total, i) => {
         let resultado = 0;
@@ -111,7 +101,6 @@ const CreateOrdenInicial = () => {
     const onprecioCompra = (e, i) => {
         setFieldValue(`productos[${i}].precioCompra`, e.target.value);
         const nuevo = parseInt(e.target.value == '' ? 0 : e.target.value) * parseFloat(values.productos[i].cantidad);
-        console.log(nuevo)
         setFieldValue(`productos[${i}].precioTotal`, nuevo);
         onCalculoTotal(nuevo, i)
     }
@@ -139,7 +128,7 @@ const CreateOrdenInicial = () => {
             tipoAsientoId: Yup.number(),
             asientoId: Yup.string(),
             nombreTipoAsiento: Yup.string().nullable(),
-            nombreAsiento: Yup.string().nullable()
+            nombreAsiento: Yup.string().required('Metodo de pago es requerido'),
         }),
         usuario: Yup.object().shape({
             nombre: Yup.string(),
@@ -149,11 +138,11 @@ const CreateOrdenInicial = () => {
         productos: Yup.array().of(
             Yup.object().shape({
                 productoId: Yup.number(),
-                cantidad: Yup.number(),
+                cantidad: Yup.number().min(1, 'Debe ser mayor a 0').required('Cantidad es requerida'),
                 stock: Yup.number(),
                 codigoProducto: Yup.string().nullable(),
-                nombreProducto: Yup.string().nullable(),
-                precioCompra: Yup.number(),
+                nombreProducto: Yup.string().required('Nombre producto es requerido'),
+                precioCompra: Yup.number().min(1, 'Debe ser mayor a 0').required('Precio compra es requerida'),
                 precioTotal: Yup.number(),
             })
         )
@@ -165,7 +154,7 @@ const CreateOrdenInicial = () => {
         //enableReinitialize: true,
         onSubmit: async (valores) => {
             valores.fecha = moment().format('yyyy-MM-DD')
-            StoreOrdenCompra(valores)
+            await StoreOrdenCompra(valores)
         }
     });
 
@@ -182,35 +171,36 @@ const CreateOrdenInicial = () => {
         onSubmit
     } = formProducto;
 
-    const { ApiPreviewPago, previewPago } = UsePreviewOrdenCompraPago(1)
-
-    const StoreOrdenCompra = async (valores) => {
-        const { data, message, status } = await Request({
-            endPoint: `${process.env.REACT_APP_API}api/orden-compra`,
-            initialValues: [],
-            method: 'post',
-            showError: true,
-            showSuccess: true,
-            values: valores
-        });
+    const onPreviewPago = async (compraId) => {
+        const { status, venta } = await PreviewPago(compraId)
         if (!!status) {
-            ApiPreviewPago(data)
+            console.log('View procesar pago', venta)
+            setPreviewPago(venta)
+        }
+    }
+    const onStorePreviewPago = async (compraId) => {
+        const { status, resultado } = await ProcesarPago(compraId, moment())
+        if (!!status) {
+            setModalPreguntar(false);
+        }
+    }
+    const StoreOrdenCompra = async (valores) => {
+        const { store, status } = await Store(valores);
+        if (!!status) {
+            console.log(store);
+            setcompraId(store)
             setModalPreguntar(true)
-            //navigate('/dashboard/orden-compra-list')
+        }
+        else {
+
         }
         setLoading(false)
     }
     const CreateOrdenCompra = async () => {
-        const { data, message, status } = await Request({
-            endPoint: `${process.env.REACT_APP_API}api/orden-compra/create`,
-            initialValues: [],
-            method: 'get',
-            showError: true,
-            showSuccess: false
-        });
+        const { data, status } = await Create();
         if (!!status) {
             console.log('DATA ENTRANTE', data)
-            setValues({ ...data, nombreUsuario: data.usuario.nombre });
+            setValues({ ...data, nombreUsuario: data.usuario.nombre, fecha: moment(data.fecha).format('DD/MM/yyyy') });
         }
         setLoading(false)
     }
@@ -230,7 +220,7 @@ const CreateOrdenInicial = () => {
                 nombreProveedor: 'demo provedor',
                 codigoOrden: ordenCompra.codigoOrden,
                 usuario: ordenCompra.usuario,
-                fecha: moment().format('DD/MM/yyy')
+                fecha: moment().format('dd/MM/yyyy')
             });
         }
         setLoading(false)
@@ -249,12 +239,8 @@ const CreateOrdenInicial = () => {
     }
     useEffect(() => {
         Iniciar()
-    }, [])
+    }, [compraId, previewPago])
 
-    /*handler procesar */
-    const onOpenRecibir = () => {
-        setModalRecibir(true)
-    }
     const onCloseRecibir = () => {
         setModalRecibir(false)
     }
@@ -367,7 +353,7 @@ const CreateOrdenInicial = () => {
                                                 } else {
                                                     setFieldValue('telefono', '');
                                                     setFieldValue('nit', '')
-                                                    setFieldValue('proveedor', initialStateProveedor.proveedor);
+                                                    setFieldValue('proveedor', initialStateOrdenCompra.proveedor);
                                                 }
                                             }}
                                             defaultValue={() => {
@@ -420,13 +406,15 @@ const CreateOrdenInicial = () => {
                                             isOptionEqualToValue={isOptionEqualToValueMetodoPago}
                                             getOptionLabel={getOptionLabelMetodoPago}
                                             handleChange={handleChange}
-                                            name={'asientoId'}
-                                            value={values.asientoId}
+                                            name={'asiento'}
+                                            value={values.asiento}
+                                            errors={Boolean(touched.asiento?.nombreAsiento && errors.asiento?.nombreAsiento)}
+                                            helperText={touched.asiento?.nombreAsiento && errors.asiento?.nombreAsiento}
                                             onChange={(e, value) => {
                                                 if (value != null) {
                                                     setFieldValue('asiento', value)
                                                 } else {
-                                                    setFieldValue('asiento', initialStateProveedor.asiento)
+                                                    setFieldValue('asiento', initialStateOrdenCompra.asiento)
                                                 }
                                             }}
                                             defaultValue={() => {
@@ -507,8 +495,9 @@ const CreateOrdenInicial = () => {
                                                                                             label: "Cantidad",
                                                                                             handleChange: (e) => {
                                                                                                 onCantidad(e, index);
-                                                                                            }
-
+                                                                                            },
+                                                                                            error: Boolean(touched.productos?.[index]?.cantidad && errors.productos?.[index]?.cantidad),
+                                                                                            helperText: touched.productos?.[index]?.cantidad && errors.productos?.[index]?.cantidad
                                                                                         }}
                                                                                         dataCodigoProducto={
                                                                                             {
@@ -524,21 +513,23 @@ const CreateOrdenInicial = () => {
                                                                                                 label: "Precio compra",
                                                                                                 handleChange: (e) => {
                                                                                                     onprecioCompra(e, index);
-                                                                                                }
+                                                                                                },
+                                                                                                error: Boolean(touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra),
+                                                                                                helperText: touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra
                                                                                             }
                                                                                         }
                                                                                         dataProducto={
                                                                                             {
-                                                                                                name: `productos[${index}].productoId`,
-                                                                                                value: values.productos[index].productoId,
+                                                                                                name: `productos[${index}]`,
+                                                                                                value: values.productos[index],
                                                                                                 label: "Selecione un producto",
                                                                                                 handleChange: (e, value) => {
                                                                                                     if (value != null) {
-                                                                                                        console.log(value)
-                                                                                                        setFieldValue(`productos[${index}].productoId`, value.productoId)
-                                                                                                        setFieldValue(`productos[${index}].codigoProducto`, value.codigoProducto)
+                                                                                                        setFieldValue(`productos[${index}]`, value)
                                                                                                     }
-                                                                                                }
+                                                                                                },
+                                                                                                error: Boolean(touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto),
+                                                                                                helperText: touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto
                                                                                             }
                                                                                         }
                                                                                         dataStock={
@@ -604,32 +595,16 @@ const CreateOrdenInicial = () => {
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} sm={12}>
                                         <FlexBox justifyContent="flex-start" gap={2} marginTop={2}>
-                                            {/*   <Button
-                                                variant="contained"
-                                                color='success'
-                                                fullWidth
-                                                endIcon={<Add />}
-                                                disabled={buttonProcesar}
-                                                onClick={() => { setModalProcesar(true) }}
-                                            >
-                                                {t("Procesar pago")}
-                                            </Button> */}
-                                            {/* <Button
-                                                fullWidth
-                                                variant="contained"
-                                                endIcon={<Add />}
-                                                onClick={onOpenRecibir}
-                                                disabled
-                                            >
-                                                {t("Recibir")}
-                                            </Button> */}
-                                            <Button
-                                                variant="contained"
-                                                /*  endIcon={<Add />} */
-                                                type='submit'
-                                            >
-                                                {t("Guardar")}
-                                            </Button>
+                                            <Grid item xs={12} sm={4}>
+                                                <Button
+                                                    fullWidth
+                                                    variant="contained"
+                                                    /*  endIcon={<Add />} */
+                                                    type='submit'
+                                                >
+                                                    {t("Guardar")}
+                                                </Button>
+                                            </Grid>
                                         </FlexBox>
                                     </Grid>
                                 </Grid>
@@ -637,9 +612,9 @@ const CreateOrdenInicial = () => {
                         </Grid>
                     </Form>
                 </FormikProvider>
-                <CreateModalProcesar open={modalProcesar} data={previewPago} ></CreateModalProcesar>
-                <CreateModalPreguntar onPago={() => { setModalPreguntar(true); setModalProcesar(true); }} open={modalPreguntar} />
-                <RecibirProducto data={previewPago} onClose={onCloseRecibir} open={modalRecibir} />
+                <CreateModalProcesar open={modalProcesar} data={previewPago} onSubmit={onStorePreviewPago} ></CreateModalProcesar>
+                <CreateModalPreguntar onPago={() => { setModalPreguntar(true); setModalProcesar(true); onPreviewPago(compraId) }} open={modalPreguntar} />
+                {/* <RecibirProducto data={previewPago} onClose={onCloseRecibir} open={modalRecibir} /> */}
                 <CreateProveedorCompra
                     openModal={openModalProveedor}
                     onClose={() => { setOpenModalProveedor(false) }}
