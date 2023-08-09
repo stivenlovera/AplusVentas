@@ -65,7 +65,6 @@ const RecibirProducto = ({
       })
     }
     );
-    console.log(NuevoValores)
     setProductos(NuevoValores);
   }, [data])
 

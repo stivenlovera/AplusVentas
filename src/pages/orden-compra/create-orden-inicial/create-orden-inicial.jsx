@@ -214,13 +214,16 @@ const CreateOrdenInicial = () => {
             showSuccess: true
         });
         if (!!status) {
-            const { asientos, proveedores, productos, ordenCompra } = data
+            console.log('State entrada de datos', data)
             setValues({
-                ...ordenCompra,
-                nombreProveedor: 'demo provedor',
-                codigoOrden: ordenCompra.codigoOrden,
-                usuario: ordenCompra.usuario,
-                fecha: moment().format('dd/MM/yyyy')
+                ...data, proveedor: {
+                    id: data.proveedor.id,
+                    nit: data.proveedor.nit,
+                    codigoProveedor:  data.proveedor.codigoProveedor,
+                    nombreProveedor: data.proveedor.nombreProveedor,
+                    contacto: data.proveedor.contacto,
+                    telefono: data.proveedor.telefono,
+                }
             });
         }
         setLoading(false)
@@ -234,7 +237,7 @@ const CreateOrdenInicial = () => {
             })
         }
         else {
-            EditarOrdenCompra()
+            EditarOrdenCompra();
         }
     }
     useEffect(() => {
@@ -357,8 +360,9 @@ const CreateOrdenInicial = () => {
                                                 }
                                             }}
                                             defaultValue={() => {
+                                                console.log('render', values.proveedor)
                                                 return {
-                                                    id: values.proveedor.id,
+                                                    id: 0,
                                                     nit: values.proveedor.nit,
                                                     codigoProveedor: values.proveedor.codigoProveedor,
                                                     nombreProveedor: values.proveedor.nombreProveedor,

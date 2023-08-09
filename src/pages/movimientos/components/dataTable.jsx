@@ -28,7 +28,6 @@ const RowDetail = ({ row }) => {
 };
 
 const DateTable = () => {
-
     const { ListGeneral } = UseMovimiento();
     const [tableColumnExtensions] = useState([
         { columnName: 'codigo', width: 150, wordWrapEnabled: true },
