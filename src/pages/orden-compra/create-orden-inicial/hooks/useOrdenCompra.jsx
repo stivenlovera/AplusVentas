@@ -57,11 +57,11 @@ export const UseOrdenCompra = () => {
     }
     const Update = async (values) => {
         const { data, message, status } = await Request({
-            endPoint: `${process.env.REACT_APP_API}api/orden-compra/update/${values.id}`,
+            endPoint: `${process.env.REACT_APP_API}api/orden-compra/${values.id}`,
             initialValues: [],
             method: 'put',
             showError: true,
-            showSuccess: false,
+            showSuccess: true,
             values: values
         });
         return {
@@ -69,13 +69,13 @@ export const UseOrdenCompra = () => {
             status: !!status
         };
     }
-    const Delete = async (compraId) => {
+    const onDelete = async (ventaId) => {
         const { data, message, status } = await Request({
-            endPoint: `${process.env.REACT_APP_API}api/orden-compra/${compraId}`,
+            endPoint: `${process.env.REACT_APP_API}api/orden-compra/${ventaId}`,
             initialValues: [],
             method: 'delete',
             showError: true,
-            showSuccess: false
+            showSuccess: true
         });
         return {
             delete: data,
@@ -142,7 +142,7 @@ export const UseOrdenCompra = () => {
         Store,
         Editar,
         Update,
-        Delete,
+        onDelete,
         PreviewPago,
         ProcesarPago,
         CreateAlmacen,

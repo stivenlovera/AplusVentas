@@ -30,9 +30,9 @@ import { UseOrdenCompra } from './hooks/useOrdenCompra'
 
 const CreateOrdenInicial = () => {
     const navigate = useNavigate();
-
     const [estado, setEstado] = useState({
         modificar: true,
+        estadoId: 0,
         nombre: 'Editar orden compra'
     })
     const [loading, setLoading] = useState(true)
@@ -70,6 +70,7 @@ const CreateOrdenInicial = () => {
         values.productos.push({
             productoId: 0,
             cantidad: 0,
+            stock: 0,
             codigoProducto: '',
             nombreProducto: '',
             precioCompra: 0,
@@ -153,8 +154,15 @@ const CreateOrdenInicial = () => {
         validationSchema,
         //enableReinitialize: true,
         onSubmit: async (valores) => {
-            valores.fecha = moment().format('yyyy-MM-DD')
-            await StoreOrdenCompra(valores)
+            console.log('ESTADO ACTUAL', valores)
+            if (estado.modificar) {
+                valores.fecha = moment().format('yyyy-MM-DD')
+                await UpdateOrdenCompra(valores);
+            }
+            else {
+                valores.fecha = moment().format('yyyy-MM-DD')
+                await StoreOrdenCompra(valores)
+            }
         }
     });
 
@@ -191,8 +199,14 @@ const CreateOrdenInicial = () => {
             setcompraId(store)
             setModalPreguntar(true)
         }
-        else {
-
+        setLoading(false)
+    }
+    const UpdateOrdenCompra = async (valores) => {
+        const { update, status } = await Update(valores);
+        if (!!status) {
+            console.log(update);
+            setcompraId(update)
+            setModalPreguntar(true)
         }
         setLoading(false)
     }
@@ -211,19 +225,13 @@ const CreateOrdenInicial = () => {
             initialValues: [],
             method: 'get',
             showError: true,
-            showSuccess: true
+            showSuccess: false
         });
         if (!!status) {
-            console.log('State entrada de datos', data)
+            setEstado({ ...estado, estadoId: data.estadoId })
             setValues({
-                ...data, proveedor: {
-                    id: data.proveedor.id,
-                    nit: data.proveedor.nit,
-                    codigoProveedor:  data.proveedor.codigoProveedor,
-                    nombreProveedor: data.proveedor.nombreProveedor,
-                    contacto: data.proveedor.contacto,
-                    telefono: data.proveedor.telefono,
-                }
+                ...data,
+                fecha: moment(data.fecha).format("DD/MM/yyyy")
             });
         }
         setLoading(false)
@@ -233,6 +241,7 @@ const CreateOrdenInicial = () => {
             CreateOrdenCompra();
             setEstado({
                 modificar: false,
+                estadoId: 0,
                 nombre: 'Crear orden compra'
             })
         }
@@ -242,11 +251,8 @@ const CreateOrdenInicial = () => {
     }
     useEffect(() => {
         Iniciar()
-    }, [compraId, previewPago])
+    }, [compraId, previewPago, estado.estado])
 
-    const onCloseRecibir = () => {
-        setModalRecibir(false)
-    }
     return (
         <>
             <Backdrop
@@ -329,6 +335,7 @@ const CreateOrdenInicial = () => {
                                             onChange={handleChange}
                                             error={Boolean(touched.descripcion && errors.descripcion)}
                                             helperText={touched.descripcion && errors.descripcion}
+                                            disabled={estado.estadoId == 2 ? true : false}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
@@ -359,17 +366,19 @@ const CreateOrdenInicial = () => {
                                                     setFieldValue('proveedor', initialStateOrdenCompra.proveedor);
                                                 }
                                             }}
-                                            defaultValue={() => {
-                                                console.log('render', values.proveedor)
-                                                return {
-                                                    id: 0,
-                                                    nit: values.proveedor.nit,
-                                                    codigoProveedor: values.proveedor.codigoProveedor,
-                                                    nombreProveedor: values.proveedor.nombreProveedor,
-                                                    contacto: values.proveedor.contacto,
-                                                    telefono: values.proveedor.telefono,
+                                            defaultValue={
+                                                () => {
+                                                    return {
+                                                        id: 0,
+                                                        nit: values.proveedor.nit,
+                                                        codigoProveedor: values.proveedor.codigoProveedor,
+                                                        nombreProveedor: values.proveedor.nombreProveedor,
+                                                        contacto: values.proveedor.contacto,
+                                                        telefono: values.proveedor.telefono,
+                                                    }
                                                 }
-                                            }}
+                                            }
+                                            disabled={estado.estadoId == 2 ? true : false}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
@@ -383,6 +392,7 @@ const CreateOrdenInicial = () => {
                                             onChange={handleChange}
                                             error={Boolean(touched.nit && errors.nit)}
                                             helperText={touched.nit && errors.nit}
+                                            disabled={estado.estadoId == 2 ? true : false}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
@@ -396,6 +406,7 @@ const CreateOrdenInicial = () => {
                                             onChange={handleChange}
                                             error={Boolean(touched.telefono && errors.telefono)}
                                             helperText={touched.telefono && errors.telefono}
+                                            disabled={estado.estadoId == 2 ? true : false}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
@@ -415,6 +426,7 @@ const CreateOrdenInicial = () => {
                                             errors={Boolean(touched.asiento?.nombreAsiento && errors.asiento?.nombreAsiento)}
                                             helperText={touched.asiento?.nombreAsiento && errors.asiento?.nombreAsiento}
                                             onChange={(e, value) => {
+                                                console.log(value)
                                                 if (value != null) {
                                                     setFieldValue('asiento', value)
                                                 } else {
@@ -424,20 +436,36 @@ const CreateOrdenInicial = () => {
                                             defaultValue={() => {
                                                 return {
                                                     asientoId: values.asiento.asientoId,
-                                                    nombreAsiento: values.asiento.nombreAsiento
+                                                    nombreAsiento: values.asiento.nombreAsiento,
+                                                    nombreTipoAsiento: values.asiento.nombreAsiento,
+                                                    tipoAsientoId: values.asiento.tipoAsientoId
                                                 }
                                             }}
+                                            disabled={estado.estadoId == 2 ? true : false}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         <H6 mb={1}>Cree un producto</H6>
-                                        <Button fullWidth variant="contained" endIcon={<Add />} onClick={() => { }}>
+                                        <Button
+                                            fullWidth
+                                            variant="contained"
+                                            endIcon={<Add />}
+                                            onClick={() => { }}
+                                            disabled={estado.estadoId == 2 ? true : false}
+                                        >
                                             {t("Crea un producto")}
                                         </Button>
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         <H6 mb={1}>Cree un proveedor</H6>
-                                        <Button fullWidth variant="contained" endIcon={<Add />} onClick={() => { setOpenModalProveedor(true); }}>
+                                        <Button
+                                            fullWidth
+                                            variant="contained"
+                                            endIcon={<Add />}
+                                            onClick={() => { setOpenModalProveedor(true); }}
+                                            disabled={estado.estadoId == 2 ? true : false}
+
+                                        >
                                             {t("Crea un proveedor")}
                                         </Button>
                                     </Grid>
@@ -462,6 +490,7 @@ const CreateOrdenInicial = () => {
                                                         endIcon={<Add />}
                                                         color='success'
                                                         onClick={handleAddItem}
+                                                        disabled={estado.estadoId == 2 ? true : false}
                                                     >
                                                         {t("Añadir item")}
                                                     </Button>
@@ -501,7 +530,8 @@ const CreateOrdenInicial = () => {
                                                                                                 onCantidad(e, index);
                                                                                             },
                                                                                             error: Boolean(touched.productos?.[index]?.cantidad && errors.productos?.[index]?.cantidad),
-                                                                                            helperText: touched.productos?.[index]?.cantidad && errors.productos?.[index]?.cantidad
+                                                                                            helperText: touched.productos?.[index]?.cantidad && errors.productos?.[index]?.cantidad,
+                                                                                            disabled: estado.estadoId == 2 ? true : false
                                                                                         }}
                                                                                         dataCodigoProducto={
                                                                                             {
@@ -519,7 +549,8 @@ const CreateOrdenInicial = () => {
                                                                                                     onprecioCompra(e, index);
                                                                                                 },
                                                                                                 error: Boolean(touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra),
-                                                                                                helperText: touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra
+                                                                                                helperText: touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra,
+                                                                                                disabled: estado.estadoId == 2 ? true : false
                                                                                             }
                                                                                         }
                                                                                         dataProducto={
@@ -528,12 +559,23 @@ const CreateOrdenInicial = () => {
                                                                                                 value: values.productos[index],
                                                                                                 label: "Selecione un producto",
                                                                                                 handleChange: (e, value) => {
+                                                                                                    console.log('selected producto', value)
                                                                                                     if (value != null) {
                                                                                                         setFieldValue(`productos[${index}]`, value)
                                                                                                     }
                                                                                                 },
                                                                                                 error: Boolean(touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto),
-                                                                                                helperText: touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto
+                                                                                                helperText: touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto,
+                                                                                                defaultValues: {
+                                                                                                    productoId: 0,
+                                                                                                    cantidad: 0,
+                                                                                                    stock: 0,
+                                                                                                    codigoProducto: '',
+                                                                                                    nombreProducto: 'demo',
+                                                                                                    precioCompra: 0,
+                                                                                                    precioTotal: 0,
+                                                                                                },
+                                                                                                disabled: estado.estadoId == 2 ? true : false
                                                                                             }
                                                                                         }
                                                                                         dataStock={
@@ -603,8 +645,8 @@ const CreateOrdenInicial = () => {
                                                 <Button
                                                     fullWidth
                                                     variant="contained"
-                                                    /*  endIcon={<Add />} */
                                                     type='submit'
+                                                    disabled={estado.estadoId == 2 ? true : false}
                                                 >
                                                     {t("Guardar")}
                                                 </Button>

@@ -9,6 +9,8 @@ import RecibirProducto from "pages/orden-compra/recibir/recibir-producto";
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import { UsePreviewOrdenCompraRecibir } from "pages/orden-compra/recibir/hooks/usePreviewRecibir";
 import { Link } from "react-router-dom";
+import ModalDelete from "components/modal-delete/modal-delete";
+import { UseOrdenCompra } from "pages/orden-compra/create-orden-inicial/hooks/useOrdenCompra";
 const OrdenCompraColumns = [
     {
         Header: "Codigo",
@@ -63,10 +65,12 @@ const OrdenCompraColumns = [
                 transition: "color 0.3s",
                 color: row.isSelected ? "white" : "text.disabled"
             };
-            const [tipo, setTipo] = useState('');
 
+            const { onDelete } = UseOrdenCompra();
+
+            const [openModalDelete, setOpenModalDelete] = useState(false);
             const [openModal, setOpenModal] = useState(false);
-
+            
             /*Modal recibir producto */
             const [modalRecibir, setModalRecibir] = useState(false);
             const onCloseRecibir = () => {
@@ -76,11 +80,16 @@ const OrdenCompraColumns = [
             const { ApiPreviewPago, previewPago, almacenes } = UsePreviewOrdenCompraRecibir();
 
             const hanlerOpenModalRecibir = async () => {
-                console.log(row.original.id)
-                console.log(almacenes)
                 await ApiPreviewPago(row.original.id)
                 setModalRecibir(true)
             }
+            const onDeleteProducto = async () => {
+                const { status } = await onDelete(row.original.id)
+                if (status) {
+                    setOpenModalDelete(false)
+                }
+            }
+            
             return (
                 <Fragment>
                     <IconButton onClick={hanlerOpenModalRecibir}>
@@ -101,11 +110,17 @@ const OrdenCompraColumns = [
                             color: "text.disabled"
                         }} />
                     </Link>
-                    <IconButton onClick={() => setOpenModal(true)}>
+                    <IconButton onClick={() => setOpenModalDelete(true)}>
                         <Delete sx={style} />
                     </IconButton>
                     <RecibirProducto data={previewPago} almacenes={almacenes} onClose={onCloseRecibir} open={modalRecibir} />
                     <CreateOrdenCompraModal editProduct open={openModal} data={row.original} onClose={() => setOpenModal(false)} />
+                    <ModalDelete
+                        disabledButton={false}
+                        onClose={() => setOpenModalDelete(false)}
+                        onSave={onDeleteProducto}
+                        open={openModalDelete}
+                    />
                 </Fragment>
             );
         }

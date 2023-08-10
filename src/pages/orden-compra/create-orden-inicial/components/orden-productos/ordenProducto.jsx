@@ -53,6 +53,8 @@ const OrdenProducto = ({
                     onChange={dataProducto.handleChange}
                     helperText={dataProducto.helperText}
                     errors={dataProducto.error}
+                    defaultValue={dataProducto.defaultValue}
+                    disabled={dataProducto.disabled}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -74,6 +76,7 @@ const OrdenProducto = ({
                     error={dataCantidad.error}
                     helperText={dataCantidad.helperText}
                     type={'number'}
+                    disabled={dataProducto.disabled}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -88,6 +91,7 @@ const OrdenProducto = ({
                     error={dataPrecioCompra.error}
                     helperText={dataPrecioCompra.helperText}
                     type={'number'}
+                    disabled={dataProducto.disabled}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -100,7 +104,7 @@ const OrdenProducto = ({
                 />
             </BodyTableCell>
             <BodyTableCell>
-                <IconButton onClick={dataAcction.delete}>
+                <IconButton onClick={dataAcction.delete} disabled={dataProducto.disabled}>
                     <Delete sx={{
                         color: "text.disabled"
                     }} />
