@@ -2,6 +2,7 @@ import LoadingScreen from "components/LoadingScreen";
 import { ContextUser } from "contexts/ContextUser";
 import useSettings from "hooks/useSettings";
 import DashboardLayoutV3 from "layouts/layout-v3/DashboardLayout";
+import { element } from "prop-types";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
@@ -21,6 +22,7 @@ const ClasificacionList = Loadable(lazy(() => import("./pages/Clasificacion/clas
 const CreateOrden = Loadable(lazy(() => import("./pages/orden-compra/create-orden/create-orden")));
 const PaginaInicial = Loadable(lazy(() => import("./pages/pagina-inicial/pagina-inicial")));
 const Configuracion = Loadable(lazy(() => import("./pages/configuracion-inicial/configuracion/configuracion")));
+const AlmacenProducto = Loadable(lazy(() => import("./pages/almacenes/almacen-producto/almacen-producto")));
 
 const LearningManagement = Loadable(lazy(() => import("./pages/dashboards/learning-management"))); // account
 const CreateOrdenInicial = Loadable(lazy(() => import("./pages/orden-compra/create-orden-inicial/create-orden-inicial")));
@@ -153,21 +155,25 @@ const dashboardRoutes = [
     path: "orden-inicial/:id",
     element: <CreateOrdenInicial />
   },
-{
-  path: "orden-inicial/editar/:id",
+  {
+    path: "orden-inicial/editar/:id",
     element: <CreateOrdenInicial />
-},
-{
-  path: "venta",
+  },
+  {
+    path: "venta",
     element: <Venta />
-},
-{
-  path: "venta-create/:id",
+  },
+  {
+    path: "venta-create/:id",
     element: <VentaCreate />
-},
+  },
   {
     path: "movimientos",
     element: <Movimientos />
+  },
+  {
+    path: "almacen/:id",
+    element: < AlmacenProducto />
   }
 ];
 export default routes;
