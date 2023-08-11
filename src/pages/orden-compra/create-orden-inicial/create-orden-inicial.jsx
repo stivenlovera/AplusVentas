@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next'
 import CreateModalProcesar from '../procesar/procesar'
 import { useParams } from 'react-router-dom';
 import numeroALetras from 'convertir-numero-a-letras-mexico';
-import RecibirProducto from '../recibir/recibir-producto'
 import CreateModalPreguntar from '../pregunta/pregunta'
 import { Request } from 'utils/http'
 import moment from 'moment';

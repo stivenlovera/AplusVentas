@@ -8,6 +8,7 @@ import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import ProcesarPagoVentaModal from "pages/venta/create-venta/components/ProcesarPagoModal/ProcesarPagoModal";
 import { UseCotizacion } from "pages/venta/create-venta/hooks/useCotizacion";
 import { initialCotizacion } from "pages/venta/create-venta/utils/fakeVenta";
+import { Link } from "react-router-dom";
 const VentaColumns = [
     {
         Header: "codigo venta",
@@ -81,18 +82,18 @@ const VentaColumns = [
                             color: "text.disabled"
                         }} />
                     </IconButton>
-                    <IconButton onClick={() => {}}>
+                    <IconButton onClick={() => { }}>
                         <VisibilityIcon sx={{
                             fontSize: 18,
                             color: "text.disabled"
                         }} />
                     </IconButton>
-                    <IconButton onClick={() =>{} }>
+                    <Link to={`/dashboard/venta-create/${row.original.id}`}>
                         <Edit sx={{
                             fontSize: 18,
                             color: "text.disabled"
                         }} />
-                    </IconButton>
+                    </Link>
                     <IconButton onClick={() => setOpenModalEliminar(true)}>
                         <Delete sx={style} />
                     </IconButton>

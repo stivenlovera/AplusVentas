@@ -25,6 +25,7 @@ import { initialStateCliente } from 'pages/clientes/clientes-list/components/cli
 import { useAutocompleteMetodoPagoVenta } from 'pages/orden-compra/create-orden-inicial/hooks/useAutocompleteMetodoPago'
 import CotizacionProducto from './components/CotizacionProducto/cotizacion-producto'
 import { useSnackbar } from "notistack";
+import moment from 'moment';
 
 const CreateVenta = () => {
     const [estado, setEstado] = useState({
@@ -176,7 +177,7 @@ const CreateVenta = () => {
     const Iniciar = async () => {
         if (id == 'create') {
             const { create, status } = await Create();
-            setValues(create);
+            setValues({...create, fechaCreacion:moment().format('DD/MM/yyyy')});
             setLoading(false)
             setEstado({
                 modificar: false,
@@ -458,7 +459,7 @@ const CreateVenta = () => {
                                                                                                 value: values.productos[index].codigoProducto,
                                                                                                 label: "codigo Producto",
                                                                                                 error: Boolean(touched.productos?.[index]?.codigoProducto && errors.productos?.[index]?.codigoProducto),
-                                                                                                helperText: touched.productos?.[index]?.codigoProducto && errors.productos?.[index]?.codigoProducto
+                                                                                                helperText: touched.productos?.[index]?.codigoProducto && errors.productos?.[index]?.codigoProducto,
                                                                                             }
                                                                                         }
                                                                                         dataprecioUnitario={
@@ -481,14 +482,15 @@ const CreateVenta = () => {
                                                                                                 helperText: touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto,
                                                                                                 error: Boolean(touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto),
                                                                                                 handleChange: (e, value) => {
+                                                                                                    console.log(value)
                                                                                                     if (value != null) {
-                                                                                                    
                                                                                                         setFieldValue(`productos[${index}].productoId`, value.productoId)
                                                                                                         setFieldValue(`productos[${index}].codigoProducto`, value.codigoProducto)
                                                                                                         setFieldValue(`productos[${index}].nombreProducto`, value.nombreProducto)
                                                                                                         setFieldValue(`productos[${index}].precioUnitario`, value.precioVentaMax)
-
+                                                                                                        setFieldValue(`productos[${index}].stock`, 0)
                                                                                                     } else {
+                                                                                                        setFieldValue(`productos[${index}].productoId`, 0)
                                                                                                         setFieldValue(`productos[${index}].cantidad`, 0)
                                                                                                         setFieldValue(`productos[${index}].codigoProducto`, '')
                                                                                                         setFieldValue(`productos[${index}].nombreProducto`, '')
