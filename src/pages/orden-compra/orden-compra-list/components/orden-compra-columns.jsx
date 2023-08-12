@@ -89,7 +89,6 @@ const OrdenCompraColumns = [
                     setOpenModalDelete(false)
                 }
             }
-            
             return (
                 <Fragment>
                     <IconButton onClick={hanlerOpenModalRecibir}>

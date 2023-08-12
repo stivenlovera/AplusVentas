@@ -60,7 +60,7 @@ export const UseAlmacen = () => {
       initialValues: [],
       method: 'put',
       showError: true,
-      showSuccess: false,
+      showSuccess: true,
       values: values
     });
     return {
@@ -74,20 +74,62 @@ export const UseAlmacen = () => {
       initialValues: [],
       method: 'delete',
       showError: true,
-      showSuccess: false
+      showSuccess: true
     });
     return {
       delete: data,
       status: !!status
     };
   }
-
+  const onAlmacenProducto = async (idAlmacen) => {
+    const { data, message, status } = await Request({
+      endPoint: `${process.env.REACT_APP_API}api/almacen/obtenerProductos/${idAlmacen}`,
+      initialValues: [],
+      method: 'get',
+      showError: true,
+      showSuccess: false
+    });
+    return {
+      almacen: data,
+      status: !!status
+    };
+  }
+  const onProductoAlmacen = async (id) => {
+    const { data, message, status } = await Request({
+      endPoint: `${process.env.REACT_APP_API}api/almacen/obtenerListadoProductosAlmacen`,
+      initialValues: [],
+      method: 'get',
+      showError: true,
+      showSuccess: false
+    });
+    return {
+      productos: data,
+      status: !!status
+    };
+  }
+  const onMovimientoAlmacen = async (values) => {
+    const { data, message, status } = await Request({
+      endPoint: `${process.env.REACT_APP_API}api/almacen/movimientoAlmacen`,
+      initialValues: [],
+      method: 'post',
+      showError: true,
+      showSuccess: false,
+      values: values
+    });
+    return {
+      data: data,
+      status: !!status
+    };
+  }
   return {
     onList,
     onCreate,
     onStore,
     onEditar,
     onUpdate,
-    onDelete
+    onDelete,
+    onProductoAlmacen,
+    onAlmacenProducto,
+    onMovimientoAlmacen
   }
 }

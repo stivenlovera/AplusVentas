@@ -1,36 +1,145 @@
-import { Button, Paper, TableContainer } from '@mui/material'
+import { Backdrop, Button, Card, CircularProgress, TableContainer } from '@mui/material'
+import { Grid as GridMaterial } from '@mui/material'
 import { Box } from '@mui/system'
 import IconWrapper from 'components/IconWrapper'
-import { H5 } from 'components/Typography'
+import { H4, H5, H6 } from 'components/Typography'
 import FlexBox from 'components/flexbox/FlexBox'
-import Add from 'icons/Add'
-import ShoppingBasket from 'icons/ShoppingBasket'
+import InventoryIcon from '@mui/icons-material/Inventory';
 import { HeadingWrapper } from 'pages/admin-ecommerce/product-management'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { UseAlmacen } from '../hooks/useAlmacenes'
+import { useParams } from 'react-router-dom';
+import { initialAlmacen } from '../utils/almacen'
+import Paper from '@mui/material/Paper';
+import {
+    RowDetailState, PagingState,
+    IntegratedSorting,
+    SortingState,
+    IntegratedPaging,
+    DataTypeProvider,
+    SearchState,
+    IntegratedFiltering
+} from '@devexpress/dx-react-grid';
+import {
+    Grid,
+    Table,
+    TableHeaderRow,
+    TableRowDetail,
+    PagingPanel,
+    SearchPanel,
+    Toolbar
 
+} from '@devexpress/dx-react-grid-material-ui';
 const AlmacenProducto = () => {
+    const { id } = useParams();
+    const [loading, setLoading] = useState(true)
+    const [almacen, setAlmacen] = useState(initialAlmacen);
+
+    const { onMovimientoAlmacen, onProductoAlmacen, onAlmacenProducto, onEditar } = UseAlmacen();
+
+    /*TABLE  */
+    const [tableColumnExtensions] = useState([
+        { columnName: 'nombre', wordWrapEnabled: true, align: 'left' },
+        { columnName: 'cantidad', width: 180, wordWrapEnabled: true, align: 'left' },
+        /*       { columnName: 'id', width: 150, wordWrapEnabled: true, align: 'left' }, */
+    ]);
+    const [columns] = useState([
+        { name: 'nombre', title: 'Nombre' },
+        { name: 'cantidad', title: 'Cantidad' },
+        /*       { name: 'id', title: 'Acciones' }, */
+    ]);
+    const [rows, setRow] = useState([]);
+
+    /*Eventos */
+    const inizializeLista = async () => {
+        console.log('initial state ', id)
+        const { almacen, status } = await onAlmacenProducto(id);
+        console.log(almacen);
+        setLoading(false);
+    }
+    const inizializeAlmacen = async () => {
+        const { edit, status } = await onEditar(id);
+        setAlmacen(edit)
+        setLoading(false);
+    }
+    useEffect(() => {
+        inizializeLista();
+        inizializeAlmacen();
+    }, [])
+
     return (
-        <Box pt={2} pb={4}>
-            <HeadingWrapper justifyContent="space-between" alignItems="center">
-                <FlexBox gap={0.5} alignItems="center">
-                    <IconWrapper>
-                        <ShoppingBasket sx={{
-                            color: "primary.main"
-                        }} />
-                    </IconWrapper>
-                    <H5>Almacen</H5>
-                </FlexBox>
-                <Link to={'/dashboard/orden-inicial/create'}>
-                    <Button variant="contained" endIcon={<Add />} >
-                        Mover
-                    </Button>
-                </Link>
-            </HeadingWrapper>
-            <TableContainer component={Paper}>
-                
-            </TableContainer>
-        </Box>
+        <>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={loading}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
+
+            <Box pt={2} pb={4}>
+                <HeadingWrapper justifyContent="space-between" alignItems="center">
+                    <FlexBox gap={0.5} alignItems="center">
+                        <IconWrapper>
+                            <InventoryIcon sx={{
+                                color: "primary.main"
+                            }} />
+                        </IconWrapper>
+                        <H5>Almacen | {almacen.nombreAlmacen}</H5>
+                    </FlexBox>
+                    <Link to={'/dashboard/orden-inicial/create'}>
+
+                    </Link>
+
+                </HeadingWrapper>
+                <Card sx={{
+                    padding: 4
+                }}>
+                    <GridMaterial container mt={0}>
+                        <GridMaterial item md={4} xs={6}>
+                            <H6 color="text.secondary">Codigo</H6>
+                            <H5 fontWeight={500}>{almacen.codigoAlmacen}</H5>
+                        </GridMaterial>
+                        <GridMaterial item md={4} xs={6}>
+                            <H6 color="text.secondary">Direccion</H6>
+                            <H5 fontWeight={500}>{almacen.dirrecion}</H5>
+                        </GridMaterial>
+                    </GridMaterial>
+                </Card>
+                <br />
+                <Paper>
+                    <Grid
+                        rows={rows}
+                        columns={columns}
+                    >
+                        {/* data format */}
+                        {/*   <CurrencyTypeProvider
+                            for={currencyColumns}
+                        /> */}
+                        {/* sort columns*/}
+                        <SortingState
+                            defaultSorting={[{ columnName: 'nombre', direction: 'asc' }]}
+                        />
+                        <IntegratedSorting />
+                        {/* paggin */}
+                        <PagingState
+                            defaultCurrentPage={0}
+                            pageSize={5}
+                        />
+                        <IntegratedPaging />
+                        <PagingPanel />
+                        {/* buscador */}
+                        <SearchState defaultValue="" />
+                        <IntegratedFiltering />
+                        <Toolbar />
+                        <SearchPanel />
+                        {/* table */}
+                        <Table columnExtensions={tableColumnExtensions} />
+                        <TableHeaderRow showSortingControls />
+                    </Grid>
+                </Paper>
+            </Box>
+        </>
     )
 }
 

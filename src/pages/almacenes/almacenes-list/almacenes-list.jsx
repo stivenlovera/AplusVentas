@@ -1,11 +1,12 @@
 import { Add } from "@mui/icons-material";
-import { Box, Button, styled } from "@mui/material";
+import { Box, Button, IconButton, styled } from "@mui/material";
 import FlexBox from "components/flexbox/FlexBox";
 import IconWrapper from "components/IconWrapper";
-import SearchInput from "components/input-fields/SearchInput";
+import DeleteIcon from '@mui/icons-material/Delete';
+import InventoryIcon from '@mui/icons-material/Inventory';
 import ShoppingBasket from "icons/ShoppingBasket";
 import { H5 } from "components/Typography";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ModalAlmacen from "./components/modal-almacen/modal-almacen";
 
@@ -14,17 +15,26 @@ import {
   RowDetailState, PagingState,
   IntegratedSorting,
   SortingState,
-  IntegratedPaging
+  IntegratedPaging,
+  DataTypeProvider,
+  SearchState,
+  IntegratedFiltering
 } from '@devexpress/dx-react-grid';
 import {
   Grid,
   Table,
   TableHeaderRow,
   TableRowDetail,
-  PagingPanel
+  PagingPanel,
+  Toolbar,
+  SearchPanel
 
 } from '@devexpress/dx-react-grid-material-ui';
 import { UseAlmacen } from "../hooks/useAlmacenes";
+import Edit from "icons/Edit";
+import { Link } from "react-router-dom";
+import { initialAlmacen } from "../utils/almacen";
+import ModalDelete from "components/modal-delete/modal-delete";
 
 export const HeadingWrapper = styled(FlexBox)(({
   theme
@@ -42,56 +52,111 @@ export const HeadingWrapper = styled(FlexBox)(({
   }
 }));
 
-const RowDetail = ({ row }) => {
-  return (
-    <Box
-      sx={{ margin: 2 }}
-    >
-
-    </Box >
-  )
-};
-
 const AlmacenesList = () => {
   const {
     t
   } = useTranslation();
-  const [openModal, setOpenModal] = useState(false);
+  const [openModalAlmacen, setOpenModalAlmacen] = useState(false);
+  const [openModalDelete, setOpenModalDelete] = useState(false)
   const [btnCreate, setBtnCreate] = useState(false);
-  const { onList } = UseAlmacen();
+  const [almacen, setAlmacen] = useState(initialAlmacen);
+  const [editar, setEditar] = useState(false)
+  const { onList, onStore, onCreate, onUpdate, onEditar, onDelete } = UseAlmacen();
 
   const [tableColumnExtensions] = useState([
-    { columnName: 'codigo', width: 150, wordWrapEnabled: true },
-    { columnName: 'fecha', width: 180, wordWrapEnabled: true },
-    { columnName: 'descripcion', width: 180, wordWrapEnabled: true },
-    { columnName: 'para', wordWrapEnabled: true },
-    { columnName: 'total', width: 80, wordWrapEnabled: true },
-    { columnName: 'metodoPago', width: 200, wordWrapEnabled: true },
-    { columnName: 'realizado', wordWrapEnabled: true }
+    { columnName: 'nombreAlmacen', width: 200, wordWrapEnabled: true, align: 'left' },
+    { columnName: 'codigoAlmacen', width: 180, wordWrapEnabled: true, align: 'left' },
+    { columnName: 'dirrecion', wordWrapEnabled: true, align: 'left' },
+    { columnName: 'id', width: 150, wordWrapEnabled: true, align: 'left' },
   ]);
   const [columns] = useState([
-    { name: 'codigo', title: 'Codigo' },
-    { name: 'fecha', title: 'Fecha' },
-    { name: 'descripcion', title: 'Descripcion' },
-    { name: 'para', title: 'Dirigido a' },
-    { name: 'total', title: 'Total' },
-    { name: 'metodoPago', title: 'Metodo de Pago' },
-    { name: 'realizado', title: 'Usuario' }
+    { name: 'nombreAlmacen', title: 'Nombre' },
+    { name: 'codigoAlmacen', title: 'Codigo' },
+    { name: 'dirrecion', title: 'Dirrecion' },
+    { name: 'id', title: 'Acciones' },
   ]);
-  const [rows, setRow] = useState([{
-    codigo: "OC#0",
-    fecha: "30/07/2023",
-    descripcion: "Compra demo",
-    cliente: "Rojer Martinez",
-    total: "3600",
-    metodoPago: "Con factura",
-    usuario: "Stiven Lovera"
-  }]);
-  const [expandedRowIds, setExpandedRowIds] = useState([2, 5]);
+  const [rows, setRow] = useState([]);
+
+  const [currencyColumns] = useState(['id']);
+  const CurrencyFormatter = ({ value, row }) => {
+    return (
+      <Fragment>
+        <Link to={`/dashboard/almacen/${row.id}`}>
+          <IconButton >
+            <InventoryIcon sx={{
+              fontSize: 18,
+              color: "text.disabled"
+            }} />
+          </IconButton>
+        </Link>
+        <IconButton onClick={() => { handlerEditar(row) }}>
+          <Edit sx={{
+            fontSize: 18,
+            color: "text.disabled"
+          }} />
+        </IconButton>
+        <IconButton onClick={() => { handlerDelete(row) }}>
+          <DeleteIcon sx={{
+            fontSize: 18,
+            color: "text.disabled"
+          }} />
+        </IconButton>
+      </Fragment>
+    )
+  };
+
+  const CurrencyTypeProvider = props => (
+    <DataTypeProvider
+      formatterComponent={CurrencyFormatter}
+      {...props}
+    />
+  );
+
+  /*EVENTO DE DE LISTA */
   const inizializando = async () => {
     const { lista } = await onList();
     setRow(lista)
   }
+  const handlerCreate = async () => {
+    const { create, status } = await onCreate();
+    if (status) {
+      setAlmacen(create)
+      setOpenModalAlmacen(true)
+    }
+  }
+  const handlerEditar = async (data) => {
+    setEditar(true);
+    setAlmacen(data);
+    setOpenModalAlmacen(true)
+  }
+  const handlerSubmit = async (values) => {
+    if (editar) {
+      const { update, status } = await onUpdate(values);
+      if (status) {
+        setEditar(false);
+        setOpenModalAlmacen(false);
+        inizializando()
+      }
+    } else {
+      const { store, status } = await onStore(values);
+      if (status) {
+        setOpenModalAlmacen(false);
+        inizializando()
+      }
+    }
+  }
+  const handlerDelete = (row) => {
+    setAlmacen(row)
+    setOpenModalDelete(true)
+  }
+  const onDeleteAlmacen = async (data) => {
+    const { status } = await onDelete(data.id)
+    if (status) {
+      setOpenModalDelete(false);
+      inizializando()
+    }
+  }
+
   useEffect(() => {
     inizializando()
   }, [])
@@ -109,7 +174,8 @@ const AlmacenesList = () => {
       <Button
         variant="contained"
         endIcon={<Add />}
-        onClick={() => { }} disabled={btnCreate}
+        onClick={handlerCreate}
+        disabled={btnCreate}
       >
         {t("Añadir Almacen")}
       </Button>
@@ -119,19 +185,16 @@ const AlmacenesList = () => {
         rows={rows}
         columns={columns}
       >
-        <Table columnExtensions={tableColumnExtensions} />
-        <RowDetailState
-          defaultExpandedRowIds={[/* 2, 5 */]}
-        />
-        <TableRowDetail
-          contentComponent={RowDetail}
+
+        {/* data format */}
+        <CurrencyTypeProvider
+          for={currencyColumns}
         />
         {/* sort columns*/}
         <SortingState
           defaultSorting={[{ columnName: 'city', direction: 'asc' }]}
         />
         <IntegratedSorting />
-        <TableHeaderRow showSortingControls />
         {/* paggin */}
         <PagingState
           defaultCurrentPage={0}
@@ -139,11 +202,29 @@ const AlmacenesList = () => {
         />
         <IntegratedPaging />
         <PagingPanel />
+        {/* buscador */}
+        <SearchState defaultValue="" />
+        <IntegratedFiltering />
+        <Toolbar />
+        <SearchPanel />
+        {/* table */}
+        <Table columnExtensions={tableColumnExtensions} />
+        <TableHeaderRow showSortingControls />
       </Grid>
     </Paper>
     <ModalAlmacen
-      open={openModal}
-      onClose={() => { }}
+      open={openModalAlmacen}
+      data={almacen}
+      editProduct={editar}
+      onClose={() => { setOpenModalAlmacen(false) }}
+      onSubmit={handlerSubmit}
+    />
+    <ModalDelete
+      disabledButton={false}
+      onClose={() => setOpenModalDelete(false)}
+      onSave={onDeleteAlmacen}
+      open={openModalDelete}
+      data={almacen}
     />
   </Box>;
 };

@@ -44,7 +44,7 @@ const ModalDelete = ({
                             <Button fullWidth variant="outlined" onClick={onClose}>
                                 Cancelar
                             </Button>
-                            <Button color='error' fullWidth variant="contained" disabled={disabledButton} onClick={onSave} >
+                            <Button color='error' fullWidth variant="contained" disabled={disabledButton} onClick={() => { onSave(data) }} >
                                 Eliminar
                             </Button>
                         </FlexBox>
