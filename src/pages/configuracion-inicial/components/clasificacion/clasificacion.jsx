@@ -1,29 +1,24 @@
 import { Card, Divider, Grid } from '@mui/material'
-import { H5, H6 } from 'components/Typography'
+import { H3, H5, H6 } from 'components/Typography'
+import FlexBetween from 'components/flexbox/FlexBetween'
 import AppTextField from 'components/input-fields/AppTextField'
 import React from 'react'
 
 const Clasificacion = () => {
     return (
         <Card sx={{
-            padding: 3,
-            mb: 3
+            padding: 2
         }}>
-            <Grid item xs={12}>
-                <H5 mb={3}>Clasificacion</H5>
+            <Grid item xs={12} spacing={1}>
+                <FlexBetween>
+                    <H3>Clasificacion</H3>
+                </FlexBetween>
                 <Divider sx={{
                     my: 2
                 }} />
-                <H6 mb={1}>Clasificacion</H6>
-                <AppTextField
-                    fullWidth size="small"
-                    name="codigoCliente"
-                    placeholder="Nombre negocio"
-                //value={values.codigoCliente}
-                //onChange={handleChange}
-                //error={Boolean(touched.codigoCliente && errors.codigoCliente)}
-                //helperText={touched.codigoCliente && errors.codigoCliente}
-                />
+                <H6 mb={1} style={{ paddingLeft: 15 }}>Categorias</H6>
+                <H6 mb={1} style={{ paddingLeft: 30 }}>Sub categoria</H6>
+                <H6 mb={1} style={{ paddingLeft: 45, color: 'blue' }}>Productos</H6>
             </Grid>
         </Card>
     )
