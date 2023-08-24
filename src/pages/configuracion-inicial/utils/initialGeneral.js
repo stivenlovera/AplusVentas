@@ -3,6 +3,7 @@ export const initialGeneral= {
     nombreEmpresa: '',
     direccion: '',
     usuario_id: '',
+    nombrePropietario:'',
     email: '',
     telefono: '',
     dominio: '',

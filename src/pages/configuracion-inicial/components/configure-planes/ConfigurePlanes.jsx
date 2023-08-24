@@ -18,41 +18,6 @@ const ConfigurePlanes = () => {
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
                         <H6 mb={1}>Configurar plan cuenta cliente</H6>  
-                       {/*  <Autocomplete
-                            fullWidth
-                            getOptionLabel={(optionTipoAsiento) => optionTipoAsiento.nombreTipoAsiento}
-                            options={optionTipoAsiento}
-                            autoSelect={true}
-                            value={select ? select : null}
-                            size="small"
-                            isOptionEqualToValue={(option, value) => {
-                                if (value) {
-                                    console.log('obtener select ')
-                                    return (option.value === value.value)
-                                } else {
-                                    console.log('obtener select vacio')
-                                    return false;
-                                }
-                            }}
-                            onChange={(event, newValue) => {
-                                if (newValue != null) {
-                                    setSelect(newValue);
-                                    setValues({ ...values, tipoAsientoId: newValue.id, nombreTipoAsiento: newValue.nombreTipoAsiento })
-                                    console.log(newValue)
-                                } else {
-                                    setSelect(null);
-                                }
-                            }}
-
-                            renderInput={
-                                (params) => <TextField
-                                    {...params}
-                                    label="Pertenece a"
-                                    error={Boolean(touched.nombreTipoAsiento && errors.nombreTipoAsiento)}
-                                    helperText={touched.nombreTipoAsiento && errors.nombreTipoAsiento}
-                                />
-                            }
-                        /> */}
                     </Grid>
                     <Grid item xs={6}>
                         <H6 mb={1}>Proveedores</H6>
@@ -60,10 +25,6 @@ const ConfigurePlanes = () => {
                             fullWidth size="small"
                             name="codigoCliente"
                             placeholder="Nombre negocio"
-                        //value={values.codigoCliente}
-                        //onChange={handleChange}
-                        //error={Boolean(touched.codigoCliente && errors.codigoCliente)}
-                        //helperText={touched.codigoCliente && errors.codigoCliente}
                         />
                     </Grid>
                     <Grid item xs={6}>
@@ -72,10 +33,6 @@ const ConfigurePlanes = () => {
                             fullWidth size="small"
                             name="codigoCliente"
                             placeholder="Nombre negocio"
-                        //value={values.codigoCliente}
-                        //onChange={handleChange}
-                        //error={Boolean(touched.codigoCliente && errors.codigoCliente)}
-                        //helperText={touched.codigoCliente && errors.codigoCliente}
                         />
                     </Grid>
                     <Grid item xs={6}>
@@ -84,10 +41,6 @@ const ConfigurePlanes = () => {
                             fullWidth size="small"
                             name="codigoCliente"
                             placeholder="Nombre negocio"
-                        //value={values.codigoCliente}
-                        //onChange={handleChange}
-                        //error={Boolean(touched.codigoCliente && errors.codigoCliente)}
-                        //helperText={touched.codigoCliente && errors.codigoCliente}
                         />
                     </Grid>
                 </Grid>

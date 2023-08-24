@@ -32,9 +32,9 @@ const Configuracion = () => {
         <Grid item md={12} xs={12}>
           <PlanCuentasList />
         </Grid>
-        <Grid item md={12} xs={12}>
+        {/* <Grid item md={12} xs={12}>
           <ConfigurePlanes />
-        </Grid>
+        </Grid> */}
         <Grid item md={8} xs={12}>
           <ProcesosList />
         </Grid>

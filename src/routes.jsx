@@ -23,6 +23,9 @@ const CreateOrden = Loadable(lazy(() => import("./pages/orden-compra/create-orde
 const PaginaInicial = Loadable(lazy(() => import("./pages/pagina-inicial/pagina-inicial")));
 const Configuracion = Loadable(lazy(() => import("./pages/configuracion-inicial/configuracion/configuracion")));
 const AlmacenProducto = Loadable(lazy(() => import("./pages/almacenes/almacen-producto/almacen-producto")));
+const Almacenes = Loadable(lazy(() => import("./pages/almacenes/almacenes")));
+const Homologar = Loadable(lazy(() => import("./pages/almacenes/homologar/homologar")));
+
 
 const LearningManagement = Loadable(lazy(() => import("./pages/dashboards/learning-management"))); // account
 const CreateOrdenInicial = Loadable(lazy(() => import("./pages/orden-compra/create-orden-inicial/create-orden-inicial")));
@@ -101,7 +104,7 @@ const dashboardRoutes = [
   },
   {
     path: "almacenes-list",
-    element: <AlmacenesList />
+    element: <Almacenes />
   },
   {
     path: "productos-list",
@@ -174,6 +177,10 @@ const dashboardRoutes = [
   {
     path: "almacen/:id",
     element: < AlmacenProducto />
+  },
+  {
+    path: "almacen-homologar/:almacen/:producto",
+    element: < Homologar />
   }
 ];
 export default routes;

@@ -109,20 +109,20 @@ export const UseOrdenCompra = () => {
             status: !!status
         };
     }
-    const CreateAlmacen = async (compraId) => {
+    const onPreviewOrdeCompra = async (compraId) => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/orden-compra/preview-recibir/${compraId}`,
             initialValues: [],
             method: 'get',
             showError: true,
-            showSuccess: false
+            showSuccess: true
         });
         return {
-            venta: data,
+            compra: data,
             status: !!status
         };
     }
-    const StoreAlmacen = async (compraId, productos) => {
+    const onStoreAlmacenOrdeCompra = async (compraId, productos) => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/orden-compra/store-recibir/${compraId}`,
             initialValues: [],
@@ -132,7 +132,7 @@ export const UseOrdenCompra = () => {
             showSuccess: true
         });
         return {
-            resultado: data,
+            compra: data,
             status: !!status
         };
     }
@@ -145,7 +145,7 @@ export const UseOrdenCompra = () => {
         onDelete,
         PreviewPago,
         ProcesarPago,
-        CreateAlmacen,
-        StoreAlmacen
+        onPreviewOrdeCompra,
+        onStoreAlmacenOrdeCompra
     }
 }

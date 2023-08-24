@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Request } from "utils/http";
 
 export const UseAlmacen = () => {
@@ -131,5 +132,39 @@ export const UseAlmacen = () => {
     onProductoAlmacen,
     onAlmacenProducto,
     onMovimientoAlmacen
+  }
+}
+
+export const useAutocompleteAlmacenes = () => {
+  //Almacenes
+  const [listaAlmacenes, setlistaAlmacenes] = useState([]);
+  const [openAutoCompleteAlmacenes, setOpenAutoCompleteAlmacenes] = useState(false)
+  const [loadingAutoCompleteAlmacenes, setLoadingAutoCompleteAlmacenes] = useState(false)
+  const { onList } = UseAlmacen()
+  const LoadListaAlmacenes = async () => {
+    setLoadingAutoCompleteAlmacenes(true)
+    const { lista, status } = await onList()
+    if (status) {
+      console.log('Todos los almacenes',lista)
+      setlistaAlmacenes(lista)
+      setOpenAutoCompleteAlmacenes(true)
+    }
+    setLoadingAutoCompleteAlmacenes(false)
+  }
+  const refresListaAlmacenes = () => {
+    setOpenAutoCompleteAlmacenes(false)
+    setlistaAlmacenes([])
+  }
+  const isOptionEqualToValueAlmacenes = (option, value) => option.nombreAlmacen === value.nombreAlmacen
+  const getOptionLabelAlmacenes = (option) => option.nombreAlmacen
+
+  return {
+    listaAlmacenes,
+    openAutoCompleteAlmacenes,
+    loadingAutoCompleteAlmacenes,
+    refresListaAlmacenes,
+    isOptionEqualToValueAlmacenes,
+    getOptionLabelAlmacenes,
+    LoadListaAlmacenes
   }
 }

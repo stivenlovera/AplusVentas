@@ -16,7 +16,7 @@ export const UseGeneral = () => {
   }
   const onUpdate = async (values) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/general/${values.id}`,
+      endPoint: `${process.env.REACT_APP_API}api/general/update`,
       initialValues: [],
       method: 'put',
       showError: true,

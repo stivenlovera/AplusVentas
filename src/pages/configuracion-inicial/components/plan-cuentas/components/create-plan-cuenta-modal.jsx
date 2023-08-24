@@ -46,12 +46,12 @@ const CreatePlanCuentaModal = ({
     open,
     data,
     onClose,
-    editPlanCuenta,
+    onEnviar,
     tipo
 }) => {
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [button, setButton] = useState(false);
-    const [context, setContext] = useContext(Context);
+/*     const [context, setContext] = useContext(Context); */
     const [selectedMoneda, setSelectedMoneda] = useState("1");
 
     const handleChangeMoneda = event => {
@@ -85,28 +85,7 @@ const CreatePlanCuentaModal = ({
         initialValues: data,
         validationSchema,
         onSubmit: async (values) => {
-            setButton(true)
-            if (tipo == 'editar') {
-               /*  const open = await apiEditar();
-                if (open) {
-                    onClose()
-                    resetForm()
-                    setContext(true);
-                    setButton(false)
-                } else {
-                    setButton(false)
-                } */
-            } else {
-                const open = await ApiGuardar();
-                if (open) {
-                    onClose()
-                    resetForm()
-                    setContext(true);
-                    setButton(false)
-                } else {
-                    setButton(false)
-                }
-            }
+            onEnviar(values)
         }
     });
 
@@ -115,13 +94,10 @@ const CreatePlanCuentaModal = ({
         setValues(data);
     }, [data])
 
-    const { ApiGuardar } = UseGuardarHijoPlanCuenta(values);
-
     return <StyledAppModal open={open} handleClose={onClose}>
         <H2 marginBottom={2}>
             {tipo == 'nuevo' || tipo == 'hijo' ? "Añadir Plan cuenta" : "Editar Plan cuenta"}
         </H2>
-
         <form onSubmit={(w) => {
             console.log(errors)
             handleSubmit(w)
@@ -238,6 +214,4 @@ const CreatePlanCuentaModal = ({
         </form>
     </StyledAppModal>;
 };
-
-const images = ["/static/products/watch.png", "/static/products/camera.png", "/static/products/headphone.png"];
 export default CreatePlanCuentaModal;

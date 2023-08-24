@@ -20,7 +20,7 @@ import { UseMovimiento } from '../hooks/use-movimiento';
 
 const RowDetail = ({ row }) => {
     return (
-        < Box sx={{ margin: 2 }
+        <Box sx={{ margin: 2 }
         } >
             <TableDetalle asientoId={row.asientoId} codigo={row.codigo} />
         </Box >

@@ -32,3 +32,9 @@ export const initialStateOrdenCompra = {
     },
     productos: []
 }
+export const compraAlmacenProducto =
+{
+    ordenCompraId: 0,
+    codigoOrden:'',
+    productos: []
+}

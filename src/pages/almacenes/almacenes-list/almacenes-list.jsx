@@ -4,11 +4,10 @@ import FlexBox from "components/flexbox/FlexBox";
 import IconWrapper from "components/IconWrapper";
 import DeleteIcon from '@mui/icons-material/Delete';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import ShoppingBasket from "icons/ShoppingBasket";
 import { H5 } from "components/Typography";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import ModalAlmacen from "./components/modal-almacen/modal-almacen";
+import StoreMallDirectoryIcon from '@mui/icons-material/StoreMallDirectory';
 
 import Paper from '@mui/material/Paper';
 import {
@@ -34,7 +33,6 @@ import { UseAlmacen } from "../hooks/useAlmacenes";
 import Edit from "icons/Edit";
 import { Link } from "react-router-dom";
 import { initialAlmacen } from "../utils/almacen";
-import ModalDelete from "components/modal-delete/modal-delete";
 
 export const HeadingWrapper = styled(FlexBox)(({
   theme
@@ -161,72 +159,60 @@ const AlmacenesList = () => {
     inizializando()
   }, [])
 
-  return <Box pt={2} pb={4}>
-    <HeadingWrapper justifyContent="space-between" alignItems="center">
-      <FlexBox gap={0.5} alignItems="center">
-        <IconWrapper>
-          <ShoppingBasket sx={{
-            color: "primary.main"
-          }} />
-        </IconWrapper>
-        <H5>Almacen</H5>
-      </FlexBox>
-      <Button
-        variant="contained"
-        endIcon={<Add />}
-        onClick={handlerCreate}
-        disabled={btnCreate}
-      >
-        {t("Añadir Almacen")}
-      </Button>
-    </HeadingWrapper>
-    <Paper>
-      <Grid
-        rows={rows}
-        columns={columns}
-      >
+  return (
+    <Box pt={2} pb={4}>
+      <HeadingWrapper justifyContent="space-between" alignItems="center">
+        <FlexBox gap={0.5} alignItems="center">
+          <IconWrapper>
+            <StoreMallDirectoryIcon sx={{
+              color: "primary.main"
+            }} />
+          </IconWrapper>
+          <H5>Almacenes</H5>
+        </FlexBox>
+        <Button
+          variant="contained"
+          endIcon={<Add />}
+          onClick={handlerCreate}
+          disabled={btnCreate}
+        >
+          {t("Añadir Almacen")}
+        </Button>
+      </HeadingWrapper>
+      <Paper>
+        <Grid
+          rows={rows}
+          columns={columns}
+        >
 
-        {/* data format */}
-        <CurrencyTypeProvider
-          for={currencyColumns}
-        />
-        {/* sort columns*/}
-        <SortingState
-          defaultSorting={[{ columnName: 'city', direction: 'asc' }]}
-        />
-        <IntegratedSorting />
-        {/* paggin */}
-        <PagingState
-          defaultCurrentPage={0}
-          pageSize={5}
-        />
-        <IntegratedPaging />
-        <PagingPanel />
-        {/* buscador */}
-        <SearchState defaultValue="" />
-        <IntegratedFiltering />
-        <Toolbar />
-        <SearchPanel />
-        {/* table */}
-        <Table columnExtensions={tableColumnExtensions} />
-        <TableHeaderRow showSortingControls />
-      </Grid>
-    </Paper>
-    <ModalAlmacen
-      open={openModalAlmacen}
-      data={almacen}
-      editProduct={editar}
-      onClose={() => { setOpenModalAlmacen(false) }}
-      onSubmit={handlerSubmit}
-    />
-    <ModalDelete
-      disabledButton={false}
-      onClose={() => setOpenModalDelete(false)}
-      onSave={onDeleteAlmacen}
-      open={openModalDelete}
-      data={almacen}
-    />
-  </Box>;
+          {/* data format */}
+          <CurrencyTypeProvider
+            for={currencyColumns}
+          />
+          {/* sort columns*/}
+          <SortingState
+            defaultSorting={[{ columnName: 'city', direction: 'asc' }]}
+          />
+          <IntegratedSorting />
+          {/* paggin */}
+          <PagingState
+            defaultCurrentPage={0}
+            pageSize={5}
+          />
+          <IntegratedPaging />
+          <PagingPanel />
+          {/* buscador */}
+          <SearchState defaultValue="" />
+          <IntegratedFiltering />
+          <Toolbar />
+          <SearchPanel />
+          {/* table */}
+          <Table columnExtensions={tableColumnExtensions} />
+          <TableHeaderRow showSortingControls />
+        </Grid>
+      </Paper>
+    </Box>
+  );
 };
 
 export default AlmacenesList;

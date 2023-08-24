@@ -40,22 +40,26 @@ const AlmacenProducto = () => {
 
     /*TABLE  */
     const [tableColumnExtensions] = useState([
-        { columnName: 'nombre', wordWrapEnabled: true, align: 'left' },
-        { columnName: 'cantidad', width: 180, wordWrapEnabled: true, align: 'left' },
+        { columnName: 'producto', wordWrapEnabled: true, align: 'left' },
+        { columnName: 'cantidad', wordWrapEnabled: true, align: 'left' },
+        { columnName: 'estado', width: 180, wordWrapEnabled: true, align: 'left' },
+        { columnName: 'stockDiponible', width: 180, wordWrapEnabled: true, align: 'left' },
+        { columnName: 'detalleAlmacenId', width: 180, wordWrapEnabled: true, align: 'left' }
         /*       { columnName: 'id', width: 150, wordWrapEnabled: true, align: 'left' }, */
     ]);
     const [columns] = useState([
-        { name: 'nombre', title: 'Nombre' },
+        { name: 'producto', title: 'Producto' },
         { name: 'cantidad', title: 'Cantidad' },
-        /*       { name: 'id', title: 'Acciones' }, */
+        { name: 'estado', title: 'Estado' },
+        { name: 'stockDiponible', title: 'Stock  Disponible' },
+        { name: 'detalleAlmacenId', title: 'Acciones' },
     ]);
     const [rows, setRow] = useState([]);
 
     /*Eventos */
     const inizializeLista = async () => {
-        console.log('initial state ', id)
         const { almacen, status } = await onAlmacenProducto(id);
-        console.log(almacen);
+        setRow(almacen)
         setLoading(false);
     }
     const inizializeAlmacen = async () => {
@@ -88,9 +92,7 @@ const AlmacenProducto = () => {
                         <H5>Almacen | {almacen.nombreAlmacen}</H5>
                     </FlexBox>
                     <Link to={'/dashboard/orden-inicial/create'}>
-
                     </Link>
-
                 </HeadingWrapper>
                 <Card sx={{
                     padding: 4

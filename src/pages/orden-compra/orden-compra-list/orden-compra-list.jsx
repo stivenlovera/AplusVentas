@@ -9,7 +9,6 @@ import { H5 } from "components/Typography";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import OrdenCompraColumns from "./components/orden-compra-columns";
-import CreateOrdenCompraModal from "./components/create-orden-compra";
 import { Link } from "react-router-dom";
 import { Context } from "contexts/ContextDataTable";
 import { preProcesarOrdenCompra, searchByOrdenCompra } from "./utils/ultils-orden-compra";
@@ -38,7 +37,6 @@ const OrdenCompraList = () => {
   const [listaOrdenCompra, setListaOrdenCompra] = useState([]);
   const [filteredItem, setFilteredItem] = useState([]);
   const [searchValue, setSearchValue] = useState("");
-
   //API
   const onLoadLista = async () => {
     const { data, message, status } = await Request({

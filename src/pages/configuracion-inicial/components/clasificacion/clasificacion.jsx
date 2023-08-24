@@ -1,7 +1,6 @@
 import { Card, Divider, Grid } from '@mui/material'
 import { H3, H5, H6 } from 'components/Typography'
 import FlexBetween from 'components/flexbox/FlexBetween'
-import AppTextField from 'components/input-fields/AppTextField'
 import React from 'react'
 
 const Clasificacion = () => {
@@ -9,7 +8,7 @@ const Clasificacion = () => {
         <Card sx={{
             padding: 2
         }}>
-            <Grid item xs={12} spacing={1}>
+            <Grid item xs={12} >
                 <FlexBetween>
                     <H3>Clasificacion</H3>
                 </FlexBetween>
