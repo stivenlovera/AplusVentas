@@ -8,7 +8,7 @@ import AppTextField from "components/input-fields/AppTextField";
 import Scrollbar from "components/ScrollBar";
 import { H2, H6, Small } from "components/Typography";
 import { useFormik } from "formik";
-import DeleteIcon from "icons/DeleteIcon";
+import { useEffect } from "react";
 import * as Yup from "yup"; // component props interface
 
 // styled components
@@ -44,48 +44,39 @@ const ModalAlmacen = ({
     open,
     data,
     onClose,
-    editProduct
+    editProduct,
+    onSubmit
 }) => {
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
-    const initialValues = {
-        productName: "",
-        storeName: "",
-        price: "",
-        discountPrice: "",
-        description: "",
-        category: "",
-        tags: "",
-        stock: "",
-        sku: "",
-        images: ""
-    };
-    const validationSchema = Yup.object().shape({
-        productName: Yup.string().min(3, "Too Short").required("Product Name is Required!"),
-        storeName: Yup.string().required("Store Name is Required!"),
-        price: Yup.number().required("Price is Required!"),
-        description: Yup.string().required("Description is Required!"),
-        category: Yup.string().required("Category is Required!"),
-        stock: Yup.number().required("Stock is Required!"),
-        sku: Yup.string().required("SKU is Required!")
-    });
     const {
+        resetForm,
+        setValues,
         values,
         errors,
         handleChange,
         handleSubmit,
         touched
     } = useFormik({
-        initialValues,
-        validationSchema,
+        initialValues: data,
+        validationSchema: Yup.object().shape({
+            id: Yup.number(),
+            codigoAlmacen: Yup.string().required("Codigo es requerido!"),
+            dirrecion: Yup.string().required("Direccion es requerido!"),
+            nombreAlmacen: Yup.string().required("Nombre es requerido!")
+        }),
         onSubmit: values => {
-            console.log(values);
+            onSubmit(values)
         }
     });
+    useEffect(() => {
+        resetForm()
+        setValues(data)
+    }, [open])
+
     return <StyledAppModal open={open} handleClose={onClose}>
         <H2 marginBottom={2}>
             {editProduct && data ? "Editar Almacen" : "Añadir Almacen"}
         </H2>
-
         <form onSubmit={handleSubmit}>
             <Scrollbar style={{
                 maxHeight: downXl ? 500 : "auto"
@@ -93,29 +84,63 @@ const ModalAlmacen = ({
                 <Grid container spacing={2}>
                     <Grid item sm={6} xs={12}>
                         <H6 mb={1}>Codigo</H6>
-                        <AppTextField fullWidth size="small" name="codigo" placeholder="Codigo" value={values.productName} onChange={handleChange} error={Boolean(touched.productName && errors.productName)} helperText={touched.productName && errors.productName} />
+                        <AppTextField
+                            fullWidth
+                            size="small"
+                            name="codigoAlmacen"
+                            placeholder="Codigo"
+                            value={values.codigoAlmacen}
+                            onChange={handleChange}
+                            error={Boolean(touched.codigoAlmacen && errors.codigoAlmacen)}
+                            helperText={touched.codigoAlmacen && errors.codigoAlmacen}
+                        />
                     </Grid>
 
                     <Grid item sm={6} xs={12}>
                         <H6 mb={1}>Nombre</H6>
-                        <AppTextField fullWidth size="small" name="nombre" placeholder="Nombre" value={values.storeName} onChange={handleChange} error={Boolean(touched.storeName && errors.storeName)} helperText={touched.storeName && errors.storeName} />
+                        <AppTextField
+                            fullWidth
+                            size="small"
+                            name="nombreAlmacen"
+                            placeholder="Nombre"
+                            value={values.nombreAlmacen}
+                            onChange={handleChange}
+                            error={Boolean(touched.nombreAlmacen && errors.nombreAlmacen)}
+                            helperText={touched.nombreAlmacen && errors.nombreAlmacen}
+                        />
                     </Grid>
 
                     <Grid item xs={12}>
                         <H6 mb={1}>Dirrecion</H6>
-                        <AppTextField fullWidth multiline rows={3} name="description" placeholder="Descripcion" value={values.description} onChange={handleChange} error={Boolean(touched.description && errors.description)} helperText={touched.description && errors.description} />
+                        <AppTextField
+                            fullWidth
+                            multiline
+                            rows={3}
+                            name="dirrecion"
+                            placeholder="Direccion"
+                            value={values.dirrecion}
+                            onChange={handleChange}
+                            error={Boolean(touched.dirrecion && errors.dirrecion)}
+                            helperText={touched.dirrecion && errors.dirrecion}
+                        />
                     </Grid>
-
                 </Grid>
             </Scrollbar>
-
             <Grid container>
                 <Grid item xs={12}>
                     <FlexBox justifyContent="flex-end" gap={2} marginTop={2}>
-                        <Button fullWidth variant="outlined" onClick={onClose}>
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            onClick={onClose}
+                        >
                             Cancel
                         </Button>
-                        <Button fullWidth type="submit" variant="contained">
+                        <Button
+                            fullWidth
+                            type="submit"
+                            variant="contained"
+                        >
                             Save
                         </Button>
                     </FlexBox>
@@ -124,6 +149,4 @@ const ModalAlmacen = ({
         </form>
     </StyledAppModal>;
 };
-
-const images = ["/static/products/watch.png", "/static/products/camera.png", "/static/products/headphone.png"];
 export default ModalAlmacen;

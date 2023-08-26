@@ -71,7 +71,6 @@ const Venta = () => {
           </Link>
         </HeadingWrapper>  
         <CustomTable columnShape={VentaColumns} data={filteredItem} />
-        {/* <CreateOrdenCompraModal open={openModal} onClose={() => setOpenModal(false)} /> */}
       </Box>
     </Context.Provider>
   );

@@ -29,6 +29,7 @@ const CreateProveedorModal = ({
     const validationSchema = Yup.object().shape({
         codigoProveedor: Yup.string().min(3, "Es muy cortos").required("Codigo proveedor es requerido!"),
         nombreProveedor: Yup.string().min(3, "Es muy cortos").required("Nombre es requerido!"),
+        nit: Yup.string().required("Nit es requeido"),
         dirrecion: Yup.string().required("Dirrecion es requerido!"),
         id: Yup.number().nullable(),
         telefono: Yup.number('debe de ser un numero').required("Telefono es requerido!"),
@@ -80,7 +81,18 @@ const CreateProveedorModal = ({
                             disabled={true}
                         />
                     </Grid>
-
+                    <Grid item sm={6} xs={12}>
+                        <H6 mb={1}>Nit</H6>
+                        <AppTextField
+                            fullWidth
+                            size="small"
+                            name="nit"
+                            placeholder="Nit"
+                            value={values.nit}
+                            onChange={handleChange}
+                            error={Boolean(touched.nit && errors.nit)}
+                            helperText={touched.nit && errors.nit} />
+                    </Grid>
                     <Grid item sm={6} xs={12}>
                         <H6 mb={1}>Nombre</H6>
                         <AppTextField
@@ -93,7 +105,19 @@ const CreateProveedorModal = ({
                             error={Boolean(touched.nombreProveedor && errors.nombreProveedor)}
                             helperText={touched.nombreProveedor && errors.nombreProveedor} />
                     </Grid>
-
+                    <Grid item sm={6} xs={12}>
+                        <H6 mb={1}>Telefono</H6>
+                        <AppTextField
+                            fullWidth
+                            size="small"
+                            name="telefono"
+                            placeholder="Telefono"
+                            value={values.telefono}
+                            onChange={handleChange}
+                            type={'number'}
+                            error={Boolean(touched.telefono && errors.telefono)}
+                            helperText={touched.telefono && errors.telefono} />
+                    </Grid>
                     <Grid item xs={12}>
                         <H6 mb={1}>Dirrecion</H6>
                         <AppTextField
@@ -119,19 +143,7 @@ const CreateProveedorModal = ({
                             error={Boolean(touched.contacto && errors.contacto)}
                             helperText={touched.contacto && errors.contacto} />
                     </Grid>
-                    <Grid item sm={6} xs={12}>
-                        <H6 mb={1}>Telefono</H6>
-                        <AppTextField
-                            fullWidth
-                            size="small"
-                            name="telefono"
-                            placeholder="Telefono"
-                            value={values.telefono}
-                            onChange={handleChange}
-                            type={'number'}
-                            error={Boolean(touched.telefono && errors.telefono)}
-                            helperText={touched.telefono && errors.telefono} />
-                    </Grid>
+
                 </Grid>
             </Scrollbar>
             <Grid container>

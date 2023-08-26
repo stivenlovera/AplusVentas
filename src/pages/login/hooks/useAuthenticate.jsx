@@ -1,9 +1,5 @@
-import { CrearOrdenCompraService } from "Services/api-ventas-erp/ordenCompra";
-import { useState } from "react";
-import { useSnackbar } from "notistack";
-import { Authenticate } from "Services/api-ventas-erp/authenticate";
 
-export const UseAuthenticate = () => {
+/* export const UseAuthenticate = () => {
     const { enqueueSnackbar } = useSnackbar();
     const [user, setUser] = useState({
         usuario: '',
@@ -30,5 +26,42 @@ export const UseAuthenticate = () => {
     return {
         user,
         ApiAuthenticar
+    }
+} */
+
+import { Request } from "utils/http";
+
+export const UseAuthenticate = () => {
+
+    const GetAuthenticate = async () => {
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/Autenticacion/ObtenerDatosUsuario`,
+            initialValues: [],
+            method: 'get',
+            showError: true,
+            showSuccess: false
+        });
+        return {
+            data: data,
+            status: !!status
+        };
+    }
+    const Login = async () => {
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/Producto/create`,
+            initialValues: [],
+            method: 'get',
+            showError: true,
+            showSuccess: false
+        });
+        return {
+            create: data,
+            status: !!status
+        };
+    }
+
+    return {
+        GetAuthenticate,
+        Login
     }
 }

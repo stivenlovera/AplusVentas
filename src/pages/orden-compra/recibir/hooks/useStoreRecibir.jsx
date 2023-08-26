@@ -3,7 +3,6 @@ import { useSnackbar } from "notistack";
 
 export const UseStoreRecibir = (id, values) => {
     const { enqueueSnackbar } = useSnackbar();
-
     const ApiStoreEntradaAlamacen = async () => {
         console.log(id, values)
         try {

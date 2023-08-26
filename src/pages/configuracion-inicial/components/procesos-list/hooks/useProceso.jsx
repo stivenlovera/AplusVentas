@@ -1,5 +1,5 @@
 import { Request } from "utils/http";
-export const UseAsiento = () => {
+export const useProceso = () => {
 
   const List = async () => {
     const { data, message, status } = await Request({
@@ -27,14 +27,14 @@ export const UseAsiento = () => {
       status: !!status
     };
   }
-  const Store = async (values) => {
+  const Store = async ({ nombreAsiento, tipoAsientoId, id, nombreTipoAsiento, cuentas }) => {
     const { data, message, status } = await Request({
       endPoint: `${process.env.REACT_APP_API}api/asiento`,
       initialValues: [],
       method: 'post',
       showError: true,
       showSuccess: true,
-      values: values
+      values: { nombreAsiento, tipoAsientoId, id, nombreTipoAsiento, cuentas }
     });
     return {
       store: data,
@@ -43,7 +43,7 @@ export const UseAsiento = () => {
   }
   const Editar = async (id) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/asiento/${id}`,
+      endPoint: `${process.env.REACT_APP_API}api/asiento/editar/${id}`,
       initialValues: [],
       method: 'get',
       showError: true,
@@ -54,14 +54,14 @@ export const UseAsiento = () => {
       status: !!status
     };
   }
-  const Update = async (values) => {
+  const Update = async ({ nombreAsiento, tipoAsientoId, id, nombreTipoAsiento, cuentas }) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/asiento/${values.id}`,
+      endPoint: `${process.env.REACT_APP_API}api/asiento/${id}`,
       initialValues: [],
       method: 'put',
       showError: true,
       showSuccess: false,
-      values: values
+      values: { nombreAsiento, tipoAsientoId, id, nombreTipoAsiento, cuentas }
     });
     return {
       update: data,

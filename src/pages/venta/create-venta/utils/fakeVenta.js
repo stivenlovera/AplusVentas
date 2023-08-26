@@ -1,17 +1,42 @@
-import { clienteListFake } from "pages/clientes/clientes-list/components/cliente-fake";
+import { initialStateCliente } from "pages/clientes/clientes-list/components/cliente-fake";
+import moment from 'moment';
 
-export const initialVenta = {
+export const initialCotizacion = {
     id: 0,
-    fecha:moment().format('YYYY/MM/DD'),
+    fecha: moment().format('dd/mm/yyyy'),
     descripcion: '',
     codigoVenta: '',
-    vCliente: clienteListFake,
-    montoliteral: '',
+    vCliente: initialStateCliente,
+    estado: {
+        id: 0,
+        nombreEstadoVenta: ''
+    },
     total: 0,
-    asiento: '',
+    asiento: {
+        tipoAsientoId: 0,
+        asientoId: 0,
+        nombreTipoAsiento: '',
+        nombreAsiento: ''
+    },
     usuario: '',
     nit: '',
-    nombreAsiento: '',
     telefono: '',
-    productos: null
+    fechaCreacion: '',
+    montoliteral: '',
+    productos: []
+}
+export const initialPreviewVenta = {
+    id: 0,
+    codigoOrden: '',
+    fechaCreacion: '',
+    codigoVenta: '',
+    vClienteId: '',
+    nit: '',
+    total: 0,
+    asientoId: 0,
+    estado: {
+        id: 0,
+        nombreEstadoVenta: ''
+    },
+    productos: []
 }

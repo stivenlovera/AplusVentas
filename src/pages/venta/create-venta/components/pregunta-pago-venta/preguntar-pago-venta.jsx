@@ -29,7 +29,6 @@ const StyledAppModal = styled(AppModal)(({
 }));
 const ModalPreguntarPagoVenta = ({
     open,
-    data,
     onClose,
     onPago
 }) => {

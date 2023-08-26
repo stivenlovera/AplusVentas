@@ -1,6 +1,7 @@
 import { enqueueSnackbar } from 'notistack';
 import axios from "axios";
-
+import { AxiosRequest } from './axios';
+AxiosRequest()
 export async function Request({ endPoint, initialValues, method, showError, showSuccess, values }) {
     try {
         const { data } = await axios({
@@ -33,7 +34,8 @@ export async function Request({ endPoint, initialValues, method, showError, show
                 console.log(e.response?.status)
                 switch (e.response?.status) {
                     case 401:
-                        enqueueSnackbar('No authenticate', { variant: 'error' });
+                        enqueueSnackbar('No autorizado', { variant: 'error' });
+                        window.location.reload();
                         break;
                     case 400:
                         enqueueSnackbar('Error validacion', { variant: 'error' });

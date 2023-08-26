@@ -7,8 +7,11 @@ import Delete from "icons/Delete";
 import { Small } from "components/Typography";
 import RecibirProducto from "pages/orden-compra/recibir/recibir-producto";
 import LocalMallIcon from '@mui/icons-material/LocalMall';
-import { UsePreviewOrdenCompraRecibir } from "pages/orden-compra/recibir/hooks/usePreviewRecibir";
 import { Link } from "react-router-dom";
+import ModalDelete from "components/modal-delete/modal-delete";
+import { UseOrdenCompra } from "pages/orden-compra/create-orden-inicial/hooks/useOrdenCompra";
+import { initialStateOrdenCompra } from "pages/orden-compra/create-orden-inicial/utils/initialState";
+import { UseDetalleAlmacen } from "pages/almacenes/hooks/useDetalleAlmacen";
 const OrdenCompraColumns = [
     {
         Header: "Codigo",
@@ -63,23 +66,32 @@ const OrdenCompraColumns = [
                 transition: "color 0.3s",
                 color: row.isSelected ? "white" : "text.disabled"
             };
-            const [tipo, setTipo] = useState('');
-
+            const [openModalDelete, setOpenModalDelete] = useState(false);
             const [openModal, setOpenModal] = useState(false);
-
-            /*Modal recibir producto */
             const [modalRecibir, setModalRecibir] = useState(false);
+            const [previewRecibir, setpreviewRecibir] = useState(initialStateOrdenCompra)
+            const { onDelete, onPreviewOrdeCompra } = UseOrdenCompra();
+            const { onStore } = UseDetalleAlmacen();
+            /*Modal recibir producto */
             const onCloseRecibir = () => {
                 setModalRecibir(false)
             }
-
-            const { ApiPreviewPago, previewPago, almacenes } = UsePreviewOrdenCompraRecibir();
-
+            const onSubmitRecibir = async (values) => {
+                const { data, status } = await onStore(values);
+                if (status) {
+                    setModalRecibir(false)
+                }
+            }
             const hanlerOpenModalRecibir = async () => {
-                console.log(row.original.id)
-                console.log(almacenes)
-                await ApiPreviewPago(row.original.id)
+                const { status, compra } = await onPreviewOrdeCompra(row.original.id)
+                setpreviewRecibir(compra)
                 setModalRecibir(true)
+            }
+            const onDeleteProducto = async () => {
+                const { status } = await onDelete(row.original.id)
+                if (status) {
+                    setOpenModalDelete(false)
+                }
             }
             return (
                 <Fragment>
@@ -101,11 +113,27 @@ const OrdenCompraColumns = [
                             color: "text.disabled"
                         }} />
                     </Link>
-                    <IconButton onClick={() => setOpenModal(true)}>
+                    <IconButton onClick={() => setOpenModalDelete(true)}>
                         <Delete sx={style} />
                     </IconButton>
-                    <RecibirProducto data={previewPago} almacenes={almacenes} onClose={onCloseRecibir} open={modalRecibir} />
-                    <CreateOrdenCompraModal editProduct open={openModal} data={row.original} onClose={() => setOpenModal(false)} />
+                    <RecibirProducto
+                        data={previewRecibir}
+                        onClose={onCloseRecibir}
+                        open={modalRecibir}
+                        onEnviar={onSubmitRecibir}
+                    />
+                    <CreateOrdenCompraModal
+                        editProduct
+                        open={openModal}
+                        data={row.original}
+                        onClose={() => setOpenModal(false)}
+                    />
+                    <ModalDelete
+                        disabledButton={false}
+                        onClose={() => setOpenModalDelete(false)}
+                        onSave={onDeleteProducto}
+                        open={openModalDelete}
+                    />
                 </Fragment>
             );
         }

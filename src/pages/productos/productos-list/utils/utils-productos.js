@@ -16,7 +16,7 @@ export const initialStateProducto = {
   codigoProducto: '',
   codigoBarra: '',
   nombreProducto: '',
-  productoMaestroNombre:'',
+  nombreProductoMaestro:'',
   productoMaestro:{
     productoMaestroId:0,
     nombre:'',

@@ -2,6 +2,7 @@ import LoadingScreen from "components/LoadingScreen";
 import { ContextUser } from "contexts/ContextUser";
 import useSettings from "hooks/useSettings";
 import DashboardLayoutV3 from "layouts/layout-v3/DashboardLayout";
+import { element } from "prop-types";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
@@ -21,6 +22,10 @@ const ClasificacionList = Loadable(lazy(() => import("./pages/Clasificacion/clas
 const CreateOrden = Loadable(lazy(() => import("./pages/orden-compra/create-orden/create-orden")));
 const PaginaInicial = Loadable(lazy(() => import("./pages/pagina-inicial/pagina-inicial")));
 const Configuracion = Loadable(lazy(() => import("./pages/configuracion-inicial/configuracion/configuracion")));
+const AlmacenProducto = Loadable(lazy(() => import("./pages/almacenes/almacen-producto/almacen-producto")));
+const Almacenes = Loadable(lazy(() => import("./pages/almacenes/almacenes")));
+const Homologar = Loadable(lazy(() => import("./pages/almacenes/homologar/homologar")));
+
 
 const LearningManagement = Loadable(lazy(() => import("./pages/dashboards/learning-management"))); // account
 const CreateOrdenInicial = Loadable(lazy(() => import("./pages/orden-compra/create-orden-inicial/create-orden-inicial")));
@@ -28,7 +33,7 @@ const Venta = Loadable(lazy(() => import("./pages/venta/lista-ventas/list-venta"
 const VentaCreate = Loadable(lazy(() => import("./pages/venta/create-venta/create-venta")));
 const PermisoList = Loadable(lazy(() => import("./pages/permisos-roles/list-permisos-roles")));
 const Login = Loadable(lazy(() => import("./pages/login/login")));
-
+const Movimientos = Loadable(lazy(() => import("./pages/movimientos/lista-movimientos2")));
 const Error = Loadable(lazy(() => import("./pages/404")));
 
 const ActiveLayout = ({ nombreCompleto }) => {
@@ -50,9 +55,6 @@ const ActiveLayout = ({ nombreCompleto }) => {
 };
 
 const routes = (user, token) => {
-  if (token) {
-    console.log('bloquear login', user, token)
-  }
   if (token) { // true si hay token
     return [
       {
@@ -102,7 +104,7 @@ const dashboardRoutes = [
   },
   {
     path: "almacenes-list",
-    element: <AlmacenesList />
+    element: <Almacenes />
   },
   {
     path: "productos-list",
@@ -156,21 +158,29 @@ const dashboardRoutes = [
     path: "orden-inicial/:id",
     element: <CreateOrdenInicial />
   },
-{
-  path: "orden-inicial/editar/:id",
+  {
+    path: "orden-inicial/editar/:id",
     element: <CreateOrdenInicial />
-},
-{
-  path: "venta",
+  },
+  {
+    path: "venta",
     element: <Venta />
-},
-{
-  path: "venta-create/:id",
+  },
+  {
+    path: "venta-create/:id",
     element: <VentaCreate />
-},
-  /* {
-    path: "plan-cuentas",
-    element: <Sales />
-  } */
+  },
+  {
+    path: "movimientos",
+    element: <Movimientos />
+  },
+  {
+    path: "almacen/:id",
+    element: < AlmacenProducto />
+  },
+  {
+    path: "almacen-homologar/:almacen/:producto",
+    element: < Homologar />
+  }
 ];
 export default routes;

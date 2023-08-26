@@ -13,40 +13,37 @@ import { HeadingWrapper } from 'pages/admin-ecommerce/product-management'
 import React, { useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import CreateModalProcesar from '../procesar/procesar'
-import Delete from 'icons/Delete'
-import { UseCreateOrdenCompra } from './hooks/useCreateOrdenCompra'
 import { useParams } from 'react-router-dom';
-import { UseStoreOrdenCompra } from './hooks/useStoreOrderCompra'
 import numeroALetras from 'convertir-numero-a-letras-mexico';
-import { UsePreviewOrdenCompraPago } from '../procesar/hooks/usePreviewPago'
-import RecibirProducto from '../recibir/recibir-producto'
 import CreateModalPreguntar from '../pregunta/pregunta'
-import { Context } from "pages/proveedores/context/actualizarTabla";
 import { Request } from 'utils/http'
 import moment from 'moment';
 import CreateProveedorCompra from './components/create-proveedor/create-proveedor-compra'
 import AutocompleteAsync from 'components/AutocompleteAsync'
 import { useAutocompleteProveedor } from './hooks/useAutocompleteProveedor'
 import { useAutocompleteMetodoPago } from './hooks/useAutocompleteMetodoPago'
-import { useAutocompleteProducto } from './hooks/useAutoCompleteProducto'
+import { useNavigate } from "react-router-dom";
 import OrdenProducto from './components/orden-productos/ordenProducto'
+import { initialStateOrdenCompra } from './utils/initialState'
+import { UseOrdenCompra } from './hooks/useOrdenCompra'
 
 const CreateOrdenInicial = () => {
+    const navigate = useNavigate();
     const [estado, setEstado] = useState({
         modificar: true,
+        estadoId: 0,
         nombre: 'Editar orden compra'
     })
     const [loading, setLoading] = useState(true)
     const { id } = useParams();
     const { t } = useTranslation();
-    const [items, setItems] = useState([]);
-    const [selectAsiento, setSelectAsiento] = useState(null);
     const [modalProcesar, setModalProcesar] = useState(false);
     const [modalRecibir, setModalRecibir] = useState(false);
-    const [buttonProcesar, setButtonProcesar] = useState(true);
     const [openModalProveedor, setOpenModalProveedor] = useState(false);
     const [modalPreguntar, setModalPreguntar] = useState(false);
-
+    const [compraId, setcompraId] = useState(0)
+    const [OrdenCompra, setOrderCompra] = useState(initialStateOrdenCompra)
+    const [previewPago, setPreviewPago] = useState(initialStateOrdenCompra)
     //proveedores
     const {
         LoadListaProveedores,
@@ -68,33 +65,11 @@ const CreateOrdenInicial = () => {
         refresListaMetodoPago,
     } = useAutocompleteMetodoPago();
 
-    const [OrdenCompra, setOrderCompra] = useState({
-        ordenCompra: {
-            id: 0,
-            descripcion: '',
-            fecha: 0,
-            codigoOrden: '',
-            VProveedoreId: '',
-            nombreProveedor: '',
-            montoliteral: '',
-            total: 0,
-            telefono: '',
-            asientoId: '',
-            usuario: '',
-            nit: '',
-            nombreAsiento: '',
-            productos: []
-        },
-        proveedores: [],
-        asientos: [],
-        productos: []
-    })
-
     const handleAddItem = () => {
-        console.log(values)
         values.productos.push({
             productoId: 0,
             cantidad: 0,
+            stock: 0,
             codigoProducto: '',
             nombreProducto: '',
             precioCompra: 0,
@@ -102,12 +77,8 @@ const CreateOrdenInicial = () => {
         });
         setValues({ ...values })
     };
-    const handleDeleteItem = (i) => {
-        console.log(i)
-        values.productos.splice(i, 1);
-        console.log(values)
-        setValues({ ...values })
-    };
+
+    const { Create, Store, Editar, Update, CreateAlmacen, StoreAlmacen, PreviewPago, ProcesarPago } = UseOrdenCompra();
 
     const onCalculoTotal = (total, i) => {
         let resultado = 0;
@@ -130,7 +101,6 @@ const CreateOrdenInicial = () => {
     const onprecioCompra = (e, i) => {
         setFieldValue(`productos[${i}].precioCompra`, e.target.value);
         const nuevo = parseInt(e.target.value == '' ? 0 : e.target.value) * parseFloat(values.productos[i].cantidad);
-        console.log(nuevo)
         setFieldValue(`productos[${i}].precioTotal`, nuevo);
         onCalculoTotal(nuevo, i)
     }
@@ -139,17 +109,27 @@ const CreateOrdenInicial = () => {
         fecha: Yup.string().required(),
         descripcion: Yup.string().required('Descripcion es requerida'),
         codigoOrden: Yup.string().required('Codigo es requerido'),
+        nombreUsuario: Yup.string(),
+        nit: Yup.string().required('Nit es requerido'),
+        telefono: Yup.string().required('Telefono es requerido'),
         proveedor: Yup.object().shape({
-            id: Yup.number(),
-            codigoProveedor: Yup.string(),
-            nombreProveedor: Yup.string(),
-            nit: Yup.string(),
-            telefono: Yup.string()
-
+            id: Yup.number().min(1, 'Descripcion es requerida').required('Descripcion es requerida'),
+            nit: Yup.string().nullable(),
+            codigoProveedor: Yup.string().nullable(),
+            nombreProveedor: Yup.string().required('Seleccione un proveedor'),
+            contacto: Yup.string().nullable(),
+            telefono: Yup.string().nullable()
         }),
         montoliteral: Yup.string().nullable(),
+        stockActual: Yup.number(),
+        estadoId: Yup.number(),
         total: Yup.number().required(),
-        asientoId: Yup.number().required('Seleccione forma pago'),
+        asiento: Yup.object().shape({
+            tipoAsientoId: Yup.number(),
+            asientoId: Yup.string(),
+            nombreTipoAsiento: Yup.string().nullable(),
+            nombreAsiento: Yup.string().required('Metodo de pago es requerido'),
+        }),
         usuario: Yup.object().shape({
             nombre: Yup.string(),
             apellido: Yup.string(),
@@ -158,23 +138,30 @@ const CreateOrdenInicial = () => {
         productos: Yup.array().of(
             Yup.object().shape({
                 productoId: Yup.number(),
-                cantidad: Yup.number(),
+                cantidad: Yup.number().min(1, 'Debe ser mayor a 0').required('Cantidad es requerida'),
                 stock: Yup.number(),
-                codigoProducto: Yup.string(),
-                nombreProducto: Yup.string(),
-                precioCompra: Yup.number(),
+                codigoProducto: Yup.string().nullable(),
+                nombreProducto: Yup.string().required('Nombre producto es requerido'),
+                precioCompra: Yup.number().min(1, 'Debe ser mayor a 0').required('Precio compra es requerida'),
                 precioTotal: Yup.number(),
             })
         )
     });
 
     const formProducto = useFormik({
-        initialValues: OrdenCompra.ordenCompra,
+        initialValues: OrdenCompra,
         validationSchema,
         //enableReinitialize: true,
         onSubmit: async (valores) => {
-            valores.fecha = moment().format('yyyy-MM-DD')
-            StoreOrdenCompra(valores)
+            console.log('ESTADO ACTUAL', valores)
+            if (estado.modificar) {
+                valores.fecha = moment().format('yyyy-MM-DD')
+                await UpdateOrdenCompra(valores);
+            }
+            else {
+                valores.fecha = moment().format('yyyy-MM-DD')
+                await StoreOrdenCompra(valores)
+            }
         }
     });
 
@@ -191,54 +178,59 @@ const CreateOrdenInicial = () => {
         onSubmit
     } = formProducto;
 
-    const { ApiPreviewPago, previewPago } = UsePreviewOrdenCompraPago(1)
-
-    const StoreOrdenCompra = async (valores) => {
-        const { data, message, status } = await Request({
-            endPoint: `${process.env.REACT_APP_API}api/orden-compra`,
-            initialValues: [],
-            method: 'post',
-            showError: true,
-            showSuccess: true,
-            values: valores
-        });
-        setLoading(false)
-    }
-    const CreateOrdenCompra = async () => {
-        const { data, message, status } = await Request({
-            endPoint: `${process.env.REACT_APP_API}api/orden-compra/create`,
-            initialValues: [],
-            method: 'get',
-            showError: true,
-            showSuccess: false
-        });
+    const onPreviewPago = async (compraId) => {
+        const { status, venta } = await PreviewPago(compraId)
         if (!!status) {
-            const { asientos, proveedores, productos, ordenCompra } = data
-            setValues({
-                ...OrdenCompra.ordenCompra,
-                codigoOrden: ordenCompra.codigoOrden,
-                usuario: ordenCompra.usuario,
-                fecha: moment().format('DD/MM/yyy')
-            });
+            console.log('View procesar pago', venta)
+            setPreviewPago(venta)
+        }
+    }
+    const onStorePreviewPago = async (compraId) => {
+        const { status, resultado } = await ProcesarPago(compraId, moment())
+        if (!!status) {
+            setModalPreguntar(false);
+        }
+    }
+    const StoreOrdenCompra = async (valores) => {
+        const { store, status } = await Store(valores);
+        if (!!status) {
+            console.log(store);
+            setcompraId(store)
+            setModalPreguntar(true)
         }
         setLoading(false)
     }
+    const UpdateOrdenCompra = async (valores) => {
+        const { update, status } = await Update(valores);
+        if (!!status) {
+            console.log(update);
+            setcompraId(update)
+            setModalPreguntar(true)
+        }
+        setLoading(false)
+    }
+    const CreateOrdenCompra = async () => {
+        const { data, status } = await Create();
+        if (!!status) {
+            console.log('DATA ENTRANTE', data)
+            setValues({ ...data, nombreUsuario: data.usuario.nombre, fecha: moment(data.fecha).format('DD/MM/yyyy') });
+        }
+        setLoading(false)
+    }
+
     const EditarOrdenCompra = async () => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/orden-compra/editar/${id}`,
             initialValues: [],
             method: 'get',
             showError: true,
-            showSuccess: true
+            showSuccess: false
         });
         if (!!status) {
-            const { asientos, proveedores, productos, ordenCompra } = data
+            setEstado({ ...estado, estadoId: data.estadoId })
             setValues({
-                ...ordenCompra,
-                nombreProveedor: 'demo provedor',
-                codigoOrden: ordenCompra.codigoOrden,
-                usuario: ordenCompra.usuario,
-                fecha: moment().format('DD/MM/yyy')
+                ...data,
+                fecha: moment(data.fecha).format("DD/MM/yyyy")
             });
         }
         setLoading(false)
@@ -248,24 +240,18 @@ const CreateOrdenInicial = () => {
             CreateOrdenCompra();
             setEstado({
                 modificar: false,
+                estadoId: 0,
                 nombre: 'Crear orden compra'
             })
         }
         else {
-            EditarOrdenCompra()
+            EditarOrdenCompra();
         }
     }
     useEffect(() => {
         Iniciar()
-    }, [])
+    }, [compraId, previewPago, estado.estado])
 
-    /*handler procesar */
-    const onOpenRecibir = () => {
-        setModalRecibir(true)
-    }
-    const onCloseRecibir = () => {
-        setModalRecibir(false)
-    }
     return (
         <>
             <Backdrop
@@ -328,12 +314,12 @@ const CreateOrdenInicial = () => {
                                         <AppTextField
                                             fullWidth
                                             size="small"
-                                            name="usuario"
+                                            name="nombreUsuario"
                                             placeholder="Usuario"
-                                            value={values.usuario}
+                                            value={values.nombreUsuario}
                                             onChange={handleChange}
-                                            error={Boolean(touched.usuario && errors.usuario)}
-                                            helperText={touched.usuario && errors.usuario}
+                                            error={Boolean(touched.nombreUsuario && errors.nombreUsuario)}
+                                            helperText={touched.nombreUsuario && errors.nombreUsuario}
                                             disabled={true}
                                         />
                                     </Grid>
@@ -348,6 +334,7 @@ const CreateOrdenInicial = () => {
                                             onChange={handleChange}
                                             error={Boolean(touched.descripcion && errors.descripcion)}
                                             helperText={touched.descripcion && errors.descripcion}
+                                            disabled={estado.estadoId == 2 ? true : false}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
@@ -362,20 +349,35 @@ const CreateOrdenInicial = () => {
                                             isOptionEqualToValue={isOptionEqualToValueProveedor}
                                             getOptionLabel={getOptionLabelProveedor}
                                             handleChange={handleChange}
-                                            name={'VProveedoreId'}
-                                            value={values.VProveedoreId}
+                                            name={'values.proveedor.id'}
+                                            value={values.proveedor}
+                                            errors={Boolean(touched.proveedor?.nombreProveedor && errors.proveedor?.nombreProveedor)}
+                                            helperText={touched.proveedor?.nombreProveedor && errors.proveedor?.nombreProveedor}
                                             onChange={(e, value) => {
                                                 if (value != null) {
+                                                    setFieldValue('proveedor', value);
                                                     console.log(value)
-                                                    setFieldValue('VProveedoreId', value.id)
+                                                    setFieldValue('telefono', value.telefono);
+                                                    setFieldValue('nit', value.nit)
+                                                } else {
+                                                    setFieldValue('telefono', '');
+                                                    setFieldValue('nit', '')
+                                                    setFieldValue('proveedor', initialStateOrdenCompra.proveedor);
                                                 }
                                             }}
-                                            defaultValue={() => {
-                                                return {
-                                                    id: values.VProveedoreId,
-                                                    nombreProveedor: values.nombreProveedor,
+                                            defaultValue={
+                                                () => {
+                                                    return {
+                                                        id: 0,
+                                                        nit: values.proveedor.nit,
+                                                        codigoProveedor: values.proveedor.codigoProveedor,
+                                                        nombreProveedor: values.proveedor.nombreProveedor,
+                                                        contacto: values.proveedor.contacto,
+                                                        telefono: values.proveedor.telefono,
+                                                    }
                                                 }
-                                            }}
+                                            }
+                                            disabled={estado.estadoId == 2 ? true : false}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
@@ -389,6 +391,7 @@ const CreateOrdenInicial = () => {
                                             onChange={handleChange}
                                             error={Boolean(touched.nit && errors.nit)}
                                             helperText={touched.nit && errors.nit}
+                                            disabled={estado.estadoId == 2 ? true : false}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
@@ -402,6 +405,7 @@ const CreateOrdenInicial = () => {
                                             onChange={handleChange}
                                             error={Boolean(touched.telefono && errors.telefono)}
                                             helperText={touched.telefono && errors.telefono}
+                                            disabled={estado.estadoId == 2 ? true : false}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
@@ -416,31 +420,51 @@ const CreateOrdenInicial = () => {
                                             isOptionEqualToValue={isOptionEqualToValueMetodoPago}
                                             getOptionLabel={getOptionLabelMetodoPago}
                                             handleChange={handleChange}
-                                            name={'asientoId'}
-                                            value={values.asientoId}
+                                            name={'asiento'}
+                                            value={values.asiento}
+                                            errors={Boolean(touched.asiento?.nombreAsiento && errors.asiento?.nombreAsiento)}
+                                            helperText={touched.asiento?.nombreAsiento && errors.asiento?.nombreAsiento}
                                             onChange={(e, value) => {
+                                                console.log(value)
                                                 if (value != null) {
-                                                    console.log(value)
-                                                    setFieldValue('asientoId', value.asientoId)
+                                                    setFieldValue('asiento', value)
+                                                } else {
+                                                    setFieldValue('asiento', initialStateOrdenCompra.asiento)
                                                 }
                                             }}
                                             defaultValue={() => {
                                                 return {
-                                                    asientoId: values.asientoId,
-                                                    nombreAsiento: values.nombreProveedor
+                                                    asientoId: values.asiento.asientoId,
+                                                    nombreAsiento: values.asiento.nombreAsiento,
+                                                    nombreTipoAsiento: values.asiento.nombreAsiento,
+                                                    tipoAsientoId: values.asiento.tipoAsientoId
                                                 }
                                             }}
+                                            disabled={estado.estadoId == 2 ? true : false}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         <H6 mb={1}>Cree un producto</H6>
-                                        <Button fullWidth variant="contained" endIcon={<Add />} onClick={() => { }}>
+                                        <Button
+                                            fullWidth
+                                            variant="contained"
+                                            endIcon={<Add />}
+                                            onClick={() => { }}
+                                            disabled={estado.estadoId == 2 ? true : false}
+                                        >
                                             {t("Crea un producto")}
                                         </Button>
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         <H6 mb={1}>Cree un proveedor</H6>
-                                        <Button fullWidth variant="contained" endIcon={<Add />} onClick={() => { setOpenModalProveedor(true); }}>
+                                        <Button
+                                            fullWidth
+                                            variant="contained"
+                                            endIcon={<Add />}
+                                            onClick={() => { setOpenModalProveedor(true); }}
+                                            disabled={estado.estadoId == 2 ? true : false}
+
+                                        >
                                             {t("Crea un proveedor")}
                                         </Button>
                                     </Grid>
@@ -465,6 +489,7 @@ const CreateOrdenInicial = () => {
                                                         endIcon={<Add />}
                                                         color='success'
                                                         onClick={handleAddItem}
+                                                        disabled={estado.estadoId == 2 ? true : false}
                                                     >
                                                         {t("Añadir item")}
                                                     </Button>
@@ -502,8 +527,10 @@ const CreateOrdenInicial = () => {
                                                                                             label: "Cantidad",
                                                                                             handleChange: (e) => {
                                                                                                 onCantidad(e, index);
-                                                                                            }
-
+                                                                                            },
+                                                                                            error: Boolean(touched.productos?.[index]?.cantidad && errors.productos?.[index]?.cantidad),
+                                                                                            helperText: touched.productos?.[index]?.cantidad && errors.productos?.[index]?.cantidad,
+                                                                                            disabled: estado.estadoId == 2 ? true : false
                                                                                         }}
                                                                                         dataCodigoProducto={
                                                                                             {
@@ -519,21 +546,35 @@ const CreateOrdenInicial = () => {
                                                                                                 label: "Precio compra",
                                                                                                 handleChange: (e) => {
                                                                                                     onprecioCompra(e, index);
-                                                                                                }
+                                                                                                },
+                                                                                                error: Boolean(touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra),
+                                                                                                helperText: touched.productos?.[index]?.precioCompra && errors.productos?.[index]?.precioCompra,
+                                                                                                disabled: estado.estadoId == 2 ? true : false
                                                                                             }
                                                                                         }
                                                                                         dataProducto={
                                                                                             {
-                                                                                                name: `productos[${index}].productoId`,
-                                                                                                value: values.productos[index].productoId,
+                                                                                                name: `productos[${index}]`,
+                                                                                                value: values.productos[index],
                                                                                                 label: "Selecione un producto",
                                                                                                 handleChange: (e, value) => {
+                                                                                                    console.log('selected producto', value)
                                                                                                     if (value != null) {
-                                                                                                        console.log(value)
-                                                                                                        setFieldValue(`productos[${index}].productoId`, value.productoId)
-                                                                                                        setFieldValue(`productos[${index}].codigoProducto`, value.codigoProducto)
+                                                                                                        setFieldValue(`productos[${index}]`, value)
                                                                                                     }
-                                                                                                }
+                                                                                                },
+                                                                                                error: Boolean(touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto),
+                                                                                                helperText: touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto,
+                                                                                                defaultValues: {
+                                                                                                    productoId: 0,
+                                                                                                    cantidad: 0,
+                                                                                                    stock: 0,
+                                                                                                    codigoProducto: '',
+                                                                                                    nombreProducto: 'demo',
+                                                                                                    precioCompra: 0,
+                                                                                                    precioTotal: 0,
+                                                                                                },
+                                                                                                disabled: estado.estadoId == 2 ? true : false
                                                                                             }
                                                                                         }
                                                                                         dataStock={
@@ -597,43 +638,28 @@ const CreateOrdenInicial = () => {
                                 padding: 3
                             }}>
                                 <Grid container spacing={3}>
-                                    <Grid item xs={12} sm={4}>
-                                        <Button
-                                            variant="contained"
-                                            color='success'
-                                            endIcon={<Add />}
-                                            disabled={buttonProcesar}
-                                            onClick={() => { setModalProcesar(true) }}
-                                        >
-                                            {t("Procesar pago")}
-                                        </Button>
-                                    </Grid>
-                                    <Grid item xs={12} sm={4}>
-                                        <Button
-                                            variant="contained"
-                                            endIcon={<Add />}
-                                            onClick={onOpenRecibir}
-                                        >
-                                            {t("Recibir")}
-                                        </Button>
-                                    </Grid>
-                                    <Grid item xs={12} sm={4}>
-                                        <Button
-                                            variant="contained"
-                                            endIcon={<Add />}
-                                            type='submit'
-                                        >
-                                            {t("Guardar")}
-                                        </Button>
+                                    <Grid item xs={12} sm={12}>
+                                        <FlexBox justifyContent="flex-start" gap={2} marginTop={2}>
+                                            <Grid item xs={12} sm={4}>
+                                                <Button
+                                                    fullWidth
+                                                    variant="contained"
+                                                    type='submit'
+                                                    disabled={estado.estadoId == 2 ? true : false}
+                                                >
+                                                    {t("Guardar")}
+                                                </Button>
+                                            </Grid>
+                                        </FlexBox>
                                     </Grid>
                                 </Grid>
                             </Card>
                         </Grid>
                     </Form>
                 </FormikProvider>
-                <CreateModalProcesar open={modalProcesar} data={previewPago} ></CreateModalProcesar>
-                <CreateModalPreguntar onPago={() => { setModalProcesar(true); setModalPreguntar(false) }} open={modalPreguntar} />
-                <RecibirProducto data={previewPago} onClose={onCloseRecibir} open={modalRecibir} />
+                <CreateModalProcesar open={modalProcesar} data={previewPago} onSubmit={onStorePreviewPago} ></CreateModalProcesar>
+                <CreateModalPreguntar onPago={() => { setModalPreguntar(true); setModalProcesar(true); onPreviewPago(compraId) }} open={modalPreguntar} />
+                {/* <RecibirProducto data={previewPago} onClose={onCloseRecibir} open={modalRecibir} /> */}
                 <CreateProveedorCompra
                     openModal={openModalProveedor}
                     onClose={() => { setOpenModalProveedor(false) }}

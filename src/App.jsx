@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { UseAuthenticate } from "pages/login/hooks/useAuthenticate";
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectToken, setToken } from "reducers/Slice";
+import { useState } from "react";
 
 const App = () => {
   const token = useSelector(SelectToken);
@@ -24,21 +25,29 @@ const App = () => {
       })
     )
   }
-
-  const { ApiAuthenticar, user } = UseAuthenticate();
+  const [user, setUser] = useState({
+    usuario: '',
+    nombre: '',
+    apellido: '',
+    dirrecion: ''
+  })
+  const { GetAuthenticate, Login } = UseAuthenticate();
   const loadAuthenticacion = async () => {
-    await ApiAuthenticar()
+    const { data, status } = await GetAuthenticate();
+    if (status) {
+      setUser(data);
+    } else {
+      updateToken(false)
+    }
+    console.log(token)
   }
   useEffect(() => {
     if (token) {
       loadAuthenticacion();
-      
     } else {
       updateToken(false)
     }
-    console.log('PERSONA', user.nombre, user.apellido)
-  }, [token, user.nombre])
-
+  }, [token])
   const content = useRoutes(routes(user, token));
   const {
     settings

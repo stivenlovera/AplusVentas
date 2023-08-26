@@ -9,9 +9,10 @@ export const useAutocompleteCliente = () => {
     const { onList } = UseCliente()
     const LoadListaCliente = async () => {
         setLoadingAutoCompleteCliente(true)
-        const { lista, status } = await onList()
+        const { data, status } = await onList()
         if (status) {
-            setlistaCliente(lista)
+            console.log('resultado de option',data)
+            setlistaCliente(data)
             setOpenAutoCompleteCliente(true)
         }
         setLoadingAutoCompleteCliente(false)
@@ -20,6 +21,7 @@ export const useAutocompleteCliente = () => {
         setOpenAutoCompleteCliente(false)
         setlistaCliente([])
     }
+    
     const isOptionEqualToValueCliente = (option, value) => option.nombreCompletoCliente === value.nombreCompletoCliente
     const getOptionLabelCliente= (option) => option.nombreCompletoCliente
 

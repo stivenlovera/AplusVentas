@@ -9,7 +9,7 @@ import ConfigurePlanes from "../components/configure-planes/ConfigurePlanes";
 import Clasificacion from "../components/clasificacion/clasificacion";
 import ProcesosList from "../components/procesos-list/procesos-list";
 import TipoProceso from "../components/tipo-proceso/tipo-proceso";
-
+import SettingsIcon from '@mui/icons-material/Settings';
 const Configuracion = () => {
   const navigate = useNavigate();
   const [selectPaymentMethod, setSelectPaymentMethod] = useState("paypal");
@@ -21,7 +21,7 @@ const Configuracion = () => {
     <Box pt={2} pb={4}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Heading title="Configuracion" Icon={Shopping} />
+          <Heading title="Configuracion" Icon={SettingsIcon} />
         </Grid>
         <Grid item md={8} xs={12}>
           <General />
@@ -32,9 +32,9 @@ const Configuracion = () => {
         <Grid item md={12} xs={12}>
           <PlanCuentasList />
         </Grid>
-        <Grid item md={12} xs={12}>
+        {/* <Grid item md={12} xs={12}>
           <ConfigurePlanes />
-        </Grid>
+        </Grid> */}
         <Grid item md={8} xs={12}>
           <ProcesosList />
         </Grid>

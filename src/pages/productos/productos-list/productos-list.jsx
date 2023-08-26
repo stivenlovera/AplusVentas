@@ -39,8 +39,9 @@ const ProductosList = () => {
     const [listaProductos, setListaProductos] = useState([]);
     const [filteredItem, setFilteredItem] = useState([]);
     const [searchValue, setSearchValue] = useState("");
+
     const [create, setCreate] = useState({
-        codigo: '',
+        codigoProducto: '',
         proveedores: [],
         categorias: [],
         productosMaestros: []
@@ -79,8 +80,7 @@ const ProductosList = () => {
             showSuccess: false
         });
         if (!!status) {
-            console.log('respuesta de la api', data)
-            setCreate(data);
+            setCreate({ ...data, codigoProducto: data.codigoProducto });
             setOpenModal(true);
         }
     }
@@ -106,12 +106,13 @@ const ProductosList = () => {
                     open={openModal}
                     onClose={() => setOpenModal(false)}
                     data={{
-                        codigo: create.codigo,
+                        codigoProducto: create.codigoProducto,
                         proveedores: create.proveedores,
                         categorias: create.categorias,
                         productosMaestros: create.productosMaestros,
-                        initialState: initialStateProducto
+                        initialState: { ...initialStateProducto, codigoProducto: create.codigoProducto }
                     }} />
+
             </Box>
         </Context.Provider>
     );

@@ -51,12 +51,10 @@ const OrdenProducto = ({
                     label={dataProducto.label}
                     value={dataProducto.value}
                     onChange={dataProducto.handleChange}
-                /* defaultValue={() => {
-                    return {
-                        id: values.productos[i].productoId,
-                        nombreProducto: 'producto'
-                    }
-                }} */
+                    helperText={dataProducto.helperText}
+                    errors={dataProducto.error}
+                    defaultValue={dataProducto.defaultValue}
+                    disabled={dataProducto.disabled}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -75,14 +73,10 @@ const OrdenProducto = ({
                     label={dataCantidad.label}
                     value={dataCantidad.value}
                     onChange={dataCantidad.handleChange}
-                    /* onChange={(e) => {
-                        console.log('on change', e.target.value);
-                        items[i].cantidad = (e.target.value);
-                        items[i].precioTotal = parseInt(items[i].cantidad == '' ? 0 : items[i].cantidad) * parseFloat(items[i].precioCompra);
-                        setItems([...items]);
-                        onCalculoTotal()
-                    }} */
+                    error={dataCantidad.error}
+                    helperText={dataCantidad.helperText}
                     type={'number'}
+                    disabled={dataProducto.disabled}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -94,14 +88,10 @@ const OrdenProducto = ({
                     label={dataPrecioCompra.label}
                     value={dataPrecioCompra.value}
                     onChange={dataPrecioCompra.handleChange}
-                    /* onChange={(e) => {
-                        console.log('on change', e.target.value);
-                        items[i].precioCompra = (e.target.value);
-                        items[i].precioTotal = parseInt(items[i].cantidad == '' ? 0 : items[i].cantidad) * parseFloat(items[i].precioCompra == '' ? 0 : items[i].precioCompra);
-                        setItems([...items]);
-                        onCalculoTotal()
-                    }} */
+                    error={dataPrecioCompra.error}
+                    helperText={dataPrecioCompra.helperText}
                     type={'number'}
+                    disabled={dataProducto.disabled}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -114,7 +104,7 @@ const OrdenProducto = ({
                 />
             </BodyTableCell>
             <BodyTableCell>
-                <IconButton onClick={dataAcction.delete}>
+                <IconButton onClick={dataAcction.delete} disabled={dataProducto.disabled}>
                     <Delete sx={{
                         color: "text.disabled"
                     }} />
