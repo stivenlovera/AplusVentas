@@ -51,7 +51,7 @@ const CreatePlanCuentaModal = ({
 }) => {
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [button, setButton] = useState(false);
-/*     const [context, setContext] = useContext(Context); */
+    /*     const [context, setContext] = useContext(Context); */
     const [selectedMoneda, setSelectedMoneda] = useState("1");
 
     const handleChangeMoneda = event => {
@@ -90,7 +90,7 @@ const CreatePlanCuentaModal = ({
     });
 
     useEffect(() => {
-        console.log(data)
+        resetForm();
         setValues(data);
     }, [data])
 

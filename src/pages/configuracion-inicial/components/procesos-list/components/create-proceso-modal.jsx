@@ -15,7 +15,6 @@ import { BodyTableCell, HeadTableCell } from "page-sections/accounts/account/com
 import React, { useContext, useEffect, useState } from "react";
 import * as Yup from "yup"; // component props interface
 import { UseGuardarProceso } from "../hooks/UseGuardarProceso";
-import { Context } from "contexts/ContextDataTable";
 
 // styled components
 const StyledAppModal = styled(AppModal)(({
@@ -26,25 +25,6 @@ const StyledAppModal = styled(AppModal)(({
     outline: "none",
     padding: "1.5rem"
 }));
-const ImageDeleteWrapper = styled(FlexRowAlign)(({
-    theme
-}) => ({
-    top: 5,
-    right: 5,
-    width: 25,
-    height: 25,
-    borderRadius: "50%",
-    position: "absolute",
-    backgroundColor: theme.palette.error.main
-}));
-const ImageUploadWrapper = styled(FlexRowAlign)(({
-    theme
-}) => ({
-    minHeight: 140,
-    cursor: "pointer",
-    borderRadius: "8px",
-    backgroundColor: theme.palette.grey[200]
-}));
 
 const CreateProcesoModal = ({
     open,
@@ -54,7 +34,8 @@ const CreateProcesoModal = ({
     tipo,
     optionTipoAsiento,
     optionPlanCuenta,
-    optionRol
+    optionRol,
+    onEnviar
 }) => {
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [select, setSelect] = useState(null);
@@ -68,7 +49,7 @@ const CreateProcesoModal = ({
         id: 0,
         rol: ''
     }]);
-    const [context, setContext] = useContext(Context);
+
     const [items, setItems] = useState([]);
     const handleAddItem = () => {
         items.push({
@@ -119,33 +100,22 @@ const CreateProcesoModal = ({
         validationSchema,
         //enableReinitialize: true,
         onSubmit: async (values) => {
-            if (editProceso) {
-
-            } else {
-                handlerSubmitGuardar(values)
-                hadlerClose();
-                setContext(true);
-            }
+            onEnviar(values);
+            resetForm();
+            setItems([]);
+            setSelect(null);
         }
     });
     useEffect(() => {
 
-    }, [tipo])
-    const { handlerSubmitGuardar } = UseGuardarProceso();
-    const hadlerClose = () => {
-        onClose();
-        resetForm();
-        setItems([]);
-        setSelect(null);
-    }
-    return <StyledAppModal open={open} handleClose={hadlerClose} >
+    }, [open])
+    return <StyledAppModal open={open} handleClose={onClose} >
         <H2 marginBottom={2}>
             {editProceso ? "Editar asiento" : "Añadir asiento"}
         </H2>
 
         <form onSubmit={(e) => {
-            console.log(values);
-            console.log(items)
+            console.log(errors);
             handleSubmit(e)
         }}>
             <Scrollbar style={{
@@ -176,10 +146,10 @@ const CreateProcesoModal = ({
                             size="small"
                             isOptionEqualToValue={(option, value) => {
                                 if (value) {
-                                    console.log('obtener select ')
+                                 
                                     return (option.value === value.value)
                                 } else {
-                                    console.log('obtener select vacio')
+                                    
                                     return false;
                                 }
                             }}
@@ -321,7 +291,7 @@ const CreateProcesoModal = ({
             <Grid container>
                 <Grid item xs={12}>
                     <FlexBox justifyContent="flex-end" gap={2} marginTop={2}>
-                        <Button fullWidth variant="outlined" onClick={hadlerClose}>
+                        <Button fullWidth variant="outlined" onClick={onClose}>
                             Cancelar
                         </Button>
                         <Button fullWidth type="submit" variant="contained"  >

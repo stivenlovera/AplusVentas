@@ -17,3 +17,11 @@ export const initialAsiento = {
   nombreTipoAsiento: '',
   cuentas: []
 }
+export const initialLisAsiento = [
+  {
+    asientoId: 1,
+    nombreAsiento:"con factura",
+    nombreTipoAsiento : "Compra",
+    tipoAsientoId : 2
+  }
+]

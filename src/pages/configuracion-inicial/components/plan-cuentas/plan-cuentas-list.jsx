@@ -1,12 +1,8 @@
 import { Add } from "@mui/icons-material";
 import { Box, Button, Card, Divider, IconButton, styled } from "@mui/material";
-import FlexBox from "components/flexbox/FlexBox";
-import IconWrapper from "components/IconWrapper";
 import DeleteIcon from '@mui/icons-material/Delete';
-import InventoryIcon from '@mui/icons-material/Inventory';
 import { H3, H5, H6 } from "components/Typography";
 import { Fragment, useEffect, useState } from "react";
-import StoreMallDirectoryIcon from '@mui/icons-material/StoreMallDirectory';
 import Paper from '@mui/material/Paper';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import {
@@ -29,59 +25,69 @@ import {
 } from '@devexpress/dx-react-grid-material-ui';
 import { HeadingWrapper } from "pages/admin-ecommerce/product-management";
 import Edit from "icons/Edit";
-import { initialCuenta } from "./utils/utilPlanCuenta";
 import FlexBetween from "components/flexbox/FlexBetween";
-import SearchInput from "components/input-fields/SearchInput";
-import { UseCreatePlanCuenta } from "./hooks/useCreatePlanCuenta";
 import CreatePlanCuentaModal from "./components/create-plan-cuenta-modal";
-import { UseListPlanCuenta } from "./hooks/useListarPlanCuenta";
 import ModalDelete from "components/modal-delete/modal-delete";
-import { UseEditarPlanCuenta } from "./hooks/useEditarPlanCuenta";
-
+import { useCuenta } from "./hooks/useCuenta";
+const initialState = {
+  id: "",
+  codigo: '',
+  nombreCuenta: "",
+  moneda: '1',
+  valor: '1',
+  codigoIdentificador: '0',
+  nivel: 0,
+  debe: '0',
+  haber: '0',
+  vPlanCuentaId: 0,
+}
 const PlanCuentasList = () => {
   const [openModal, setOpenModal] = useState(false);
-  const [cuenta, setCuenta] = useState(cuenta)
   const [button, setButton] = useState(false);
   const [openModalDelete, setOpenModalDelete] = useState(false);
-  const { apiListar, lista } = UseListPlanCuenta();
-  const { create, apiCreate } = UseCreatePlanCuenta();
-  const { apiEditar, editar } = UseEditarPlanCuenta();
   const [tipo, setTipo] = useState('');
-  const [asiento, setAsiento] = useState({
-    id: "",
-    codigo: '',
-    nombreCuenta: "",
-    moneda: '1',
-    valor: '1',
-    codigoIdentificador: '0',
-    nivel: 0,
-    debe: '0',
-    haber: '0',
-    vPlanCuentaId: 0,
-  });
+  const { onCreate, onDelete, onEditar, onList, onStore, onStorehijo, onUpdate, } = useCuenta();
+  const [rows, setRows] = useState([])
+  const [asiento, setAsiento] = useState(initialState);
 
-  const handlerOpenHijo = async () => {
-    setTipo('hijo')
-    setOpenModal(true)
+  const handlerOpenHijo = async (nivel, vPlanCuentaId) => {
+    setButton(true);
+    setTipo('nuevo')
+    const { create, status } = await onCreate(nivel, vPlanCuentaId);
+    if (status) {
+      setAsiento({
+        ...initialState,
+        codigo: create.codigo,
+        nivel: create.nivel,
+
+      })
+      setOpenModal(true);
+    } else {
+      setButton(false);
+    }
   }
   const handlerOpenPadre = async () => {
     setButton(true);
     setTipo('nuevo')
-    const open = await apiCreate();
-    if (open) {
-      setAsiento(create)
+    const { create, status } = await onCreate(0, 0);
+    if (status) {
+      setAsiento({
+        ...initialState,
+        codigo: create.codigo,
+        nivel: create.nivel
+      })
       setOpenModal(true);
     } else {
       setButton(false);
     }
   }
 
-  const handlerOpenEditar = async () => {
+  const handlerOpenEditar = async (id) => {
     setButton(true);
     setTipo('editar')
-    const open = await apiEditar();
-    if (open) {
-      setAsiento(editar)
+    const { edit, status } = await onEditar(id);
+    if (status) {
+      setAsiento(edit)
       setOpenModal(true);
     } else {
       setButton(false);
@@ -89,30 +95,56 @@ const PlanCuentasList = () => {
   }
 
   const handlerClose = async () => {
-    console.log('on open')
     setOpenModal(false)
   }
-  const handlerOpenEliminar = async () => {
-    console.log('on open')
-    setOpenModalDelete(true)
+  const handlerOpenEliminar = async (asiento) => {
+    setAsiento(asiento)
+    setOpenModalDelete(true);
+  }
+
+  const hadlerEliminar = async (asiento) => {
+    console.log(asiento)
+    const { destroy, status } = await onDelete(asiento.id);
+    if (status) {
+      setOpenModal(false);
+      inizialize();
+      setOpenModalDelete(false);
+    }
   }
   const handlerCloseEliminar = () => {
     setOpenModalDelete(false)
+
   }
-  const handlerEnviar = (values) => {
+  const handlerEnviar = async (values) => {
     switch (tipo) {
       case 'nuevo':
         console.log('nuevo', values)
+        var { status, store } = await onStore(values);
+        if (status) {
+          setOpenModal(false);
+          inizialize()
+        }
         break;
       case 'hijo':
         console.log('hijo', values)
         break;
       case 'editar':
         console.log('editar', values)
+        var { status, update } = await onUpdate(values);
+        if (status) {
+          setOpenModal(false);
+          inizialize()
+        }
         break;
     }
+    setAsiento(asiento)
   }
-
+  const inizialize = async () => {
+    const { lista, status } = await onList()
+    if (status) {
+      setRows(lista)
+    }
+  }
   const [tableColumnExtensions] = useState([
     { columnName: 'codigo', width: 200, wordWrapEnabled: true, align: 'left' },
     { columnName: 'nombreCuenta', width: 180, wordWrapEnabled: true, align: 'left' },
@@ -139,19 +171,19 @@ const PlanCuentasList = () => {
   const CurrencyFormatter = ({ value, row }) => {
     return (
       <Fragment>
-        <IconButton onClick={handlerOpenHijo}>
+        <IconButton onClick={() => handlerOpenHijo(row.nivel, row.id)}>
           <AddCircleIcon sx={{
             fontSize: 18,
             color: "text.disabled"
           }} />
         </IconButton>
-        <IconButton onClick={handlerOpenEditar}>
+        <IconButton onClick={() => handlerOpenEditar(row.id)}>
           <Edit sx={{
             fontSize: 18,
             color: "text.disabled"
           }} />
         </IconButton>
-        <IconButton onClick={handlerOpenEliminar}>
+        <IconButton onClick={()=>{handlerOpenEliminar(row)}}>
           <DeleteIcon sx={{
             fontSize: 18,
             color: "text.disabled"
@@ -168,7 +200,7 @@ const PlanCuentasList = () => {
     />
   );
   useEffect(() => {
-    apiListar()
+    inizialize()
   }, [])
 
   return (
@@ -195,7 +227,7 @@ const PlanCuentasList = () => {
         </HeadingWrapper>
         <Paper>
           <Grid
-            rows={lista}
+            rows={rows}
             columns={columns}
           >
 
@@ -227,7 +259,7 @@ const PlanCuentasList = () => {
         </Paper>
       </Card>
       <CreatePlanCuentaModal data={asiento} tipo={tipo} open={openModal} onClose={handlerClose} onEnviar={handlerEnviar} />
-      <ModalDelete onClose={handlerCloseEliminar} open={openModalDelete} />
+      <ModalDelete onClose={handlerCloseEliminar} data={asiento} open={openModalDelete} onSave={hadlerEliminar} />
     </Box>
   );
 

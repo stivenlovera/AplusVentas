@@ -1,5 +1,5 @@
 
-import { UseAsiento } from "pages/configuracion-inicial/components/procesos-list/hooks/useAsientos";
+import { useProceso } from "pages/configuracion-inicial/components/procesos-list/hooks/useProceso";
 import { useState } from "react";
 
 export const useAutocompleteMetodoPago = () => {
@@ -8,7 +8,7 @@ export const useAutocompleteMetodoPago = () => {
     const [listaMetodoPago, setlistaMetodoPago] = useState([]);
     const [openAutoCompleteMetodoPago, setOpenAutoCompleteMetodoPago] = useState(false)
     const [loadingAutoCompleteMetodoPago, setLoadingAutoCompleteMetodoPago] = useState(false)
-    const { List } = UseAsiento()
+    const { List } = useProceso()
     const LoadListaMetodoPago = async () => {
         setLoadingAutoCompleteMetodoPago(true)
         const { lista, status } = await List()
@@ -41,7 +41,7 @@ export const useAutocompleteMetodoPagoVenta = () => {
     const [listaMetodoPago, setlistaMetodoPago] = useState([]);
     const [openAutoCompleteMetodoPago, setOpenAutoCompleteMetodoPago] = useState(false)
     const [loadingAutoCompleteMetodoPago, setLoadingAutoCompleteMetodoPago] = useState(false)
-    const { ListVenta } = UseAsiento()
+    const { ListVenta } = useProceso()
     const LoadListaMetodoPago = async () => {
         setLoadingAutoCompleteMetodoPago(true)
         const { lista, status } = await ListVenta()
