@@ -10,6 +10,7 @@ import Clasificacion from "../components/clasificacion/clasificacion";
 import ProcesosList from "../components/procesos-list/procesos-list";
 import TipoProceso from "../components/tipo-proceso/tipo-proceso";
 import SettingsIcon from '@mui/icons-material/Settings';
+import { Proceso } from "../components/cosa";
 const Configuracion = () => {
   const navigate = useNavigate();
   const [selectPaymentMethod, setSelectPaymentMethod] = useState("paypal");
@@ -20,6 +21,7 @@ const Configuracion = () => {
   return (
     <Box pt={2} pb={4}>
       <Grid container spacing={3}>
+        <Proceso  />
         <Grid item xs={12}>
           <Heading title="Configuracion" Icon={SettingsIcon} />
         </Grid>

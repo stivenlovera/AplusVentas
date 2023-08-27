@@ -230,7 +230,6 @@ const PlanCuentasList = () => {
             rows={rows}
             columns={columns}
           >
-
             {/* data format */}
             <CurrencyTypeProvider
               for={currencyColumns}
