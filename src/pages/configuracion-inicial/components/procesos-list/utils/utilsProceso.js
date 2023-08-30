@@ -11,17 +11,40 @@ export const getRoute = pathname => {
   return `/${str[1]}`;
 };
 export const initialAsiento = {
-  nombreAsiento: '',
-  id: 0,
-  tipoAsientoId: 0,
-  nombreTipoAsiento: '',
-  cuentas: []
+  asientoPlanCuenta: [
+    {
+      id: 0,
+      vPlanCuenta: {
+        id: 0,
+        codigo: '',
+        nombreCuenta: '',
+        moneda: '',
+        valor: 0,
+        codigoIdentificador: '',
+        nivel: 0,
+        debe: 0,
+        haber: 0,
+        vPlanCuentaId: 0
+      },
+      asientoId: 0,
+      rol: ''
+    }
+  ],
+  tipoAsiento: {
+    id: 0,
+    nombreTipoAsiento: ''
+  },
+  asiento: {
+    id: 0,
+    nombreAsiento: '',
+    tipoasientoId: 0
+  }
 }
-export const initialLisAsiento = [
+export const initialListAsiento = [
   {
     asientoId: 1,
-    nombreAsiento:"con factura",
-    nombreTipoAsiento : "Compra",
+    nombreAsiento: 'con factura',
+    nombreTipoAsiento : 'Compra',
     tipoAsientoId : 2
   }
 ]

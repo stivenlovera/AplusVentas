@@ -45,7 +45,6 @@ const TipoProceso = () => {
                     >
                         {t("Añadir clasificación")}
                     </Button>
-                    
                 </HeadingWrapper>
                 <CustomTable columnShape={TipoAsientoColumns} data={filteredItem} />
                 <CreateTipoAsientoModal data={create} tipo={'nuevo'} open={openModal} onClose={handlerClose} />

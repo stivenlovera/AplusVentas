@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Request } from "utils/http";
 
 export const useTipoProceso = () => {
@@ -57,7 +56,7 @@ export const useTipoProceso = () => {
     }
     const onUpdate = async (values) => {
         const { data, message, status } = await Request({
-            endPoint: `${process.env.REACT_APP_API}api/tipo-asiento/${id}`,
+            endPoint: `${process.env.REACT_APP_API}api/tipo-asiento/${values.id}`,
             initialValues: [],
             method: 'put',
             showError: true,         
