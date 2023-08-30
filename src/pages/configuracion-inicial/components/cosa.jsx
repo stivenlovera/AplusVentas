@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Grid,
   Table,
@@ -40,12 +40,24 @@ export const CurrencyFormatter = ({ value, row, column,onEdit, onDelete}) => {
     </>
   )
 };
+class TipoAsiento {
+  constructor(id, nombreTipoAsiento) {
+    this.id = id;
+    this.nombreTipoAsiento = nombreTipoAsiento;
+  }
+}
+class ColumnaTabla {
+  constructor(name, title) {
+    this.name = name;
+    this.title = title;
+  }
+}
 export const Proceso = () => {
-  const [rows, setRows] = useState([{ id: 23, nombreTipoAsiento: "nombre" }])
-  const [columns, setColumns] = useState([
-    { name: 'nombreTipoAsiento', title: 'nombre TipoAsiento' },
-    { name: 'id', title: 'id' }
-  ])
+  const [rows, setRows] = useState([new TipoAsiento(1,"nombre asiento 1")])
+  const [columns, setColumns] = useState([new ColumnaTabla("id","id")]);
+  useEffect(()=>{
+    setColumns([new ColumnaTabla("nombreTipoAsiento","nombre tipo asiento"),new ColumnaTabla("id","id")])
+  });
   const inizialize = async () => {
 
   }
@@ -57,6 +69,8 @@ export const Proceso = () => {
     { columnName: 'id', width: 200, wordWrapEnabled: true, align: 'left' },
     { columnName: 'nombreTipoAsiento', wordWrapEnabled: true, align: 'left' },
   ]);
+  var c = columns.map(x=> ({ columnName: x.name, width: 200, wordWrapEnabled: true, align: 'left' }))
+  
   return (
     <Tabla
       columns={columns}
@@ -74,12 +88,7 @@ export const Tabla = ({ rows, columns, tableColumnExtensions, onRefresh, onEdit,
   const [openModal, setOpenModal] = useState(false);
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [tipo, setTipo] = useState('');
-  const [asiento, setAsiento] = useState({
-    "id": 0,
-    "nombreTipoAsiento": ""
-  });
  
-
   const CurrencyTypeProvider = props => (
     <DataTypeProvider
       formatterComponent={({ value, row, column }) =>CurrencyFormatter({value, row, column,onDelete,onEdit})}
@@ -95,7 +104,6 @@ export const Tabla = ({ rows, columns, tableColumnExtensions, onRefresh, onEdit,
     setOpenModal(false)
   }
   const handlerOpenEliminar = async (asiento) => {
-    setAsiento(asiento)
     setOpenModalDelete(true);
   }
 
