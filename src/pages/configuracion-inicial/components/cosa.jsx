@@ -5,131 +5,62 @@ import Edit from 'icons/Edit';
 import { DataTablaStandar } from 'components/data-table/data-table-standar';
 
 export const Proceso = () => {
-  const [rows, setRows] = useState([new TipoAsiento(1,"nombre asiento 1")])
-  const [columns, setColumns] = useState([new ColumnaTabla("id","id")]);
-  useEffect(()=>{
-    setColumns([new ColumnaTabla("nombreTipoAsiento","nombre tipo asiento"),new ColumnaTabla("id","id")])
-  });
+  const [rows, setRows] = useState([
+    { id: 1, nombreTipoAsiento: 'demo' },
+    { id: 1, nombreTipoAsiento: 'demo' },
+  ])
+  const [columns, setColumns] = useState([
+    { name: 'id', title: 'Id' },
+    { name: 'nombreTipoAsiento', title: 'Nombre' }
+  ]);
+
   const inizialize = async () => {
 
+    setRows(
+      [
+        { id: 1, nombreTipoAsiento: 'aaa' },
+        { id: 1, nombreTipoAsiento: 'aa' },
+      ]
+    )
   }
   const onRefresh = () => {
+    inizialize()
+  }
+  const onEditar = () => {
     inizialize()
   }
   const onClicks = [
     {
       nombre: 'Editar',
+      onClick: (row) => { console.log(row); onEditar() },
       icon: (
-        <IconButton onClick={() => { console.log('Editar') }}>
-          <Edit sx={{
-            fontSize: 18,
-            color: "text.disabled"
-          }} />
-        </IconButton>
+        <Edit sx={{
+          fontSize: 18,
+          color: "text.disabled"
+        }} />
       ),
     },
     {
       nombre: 'Eliminar',
+      onclick: (row) => { console.log(row) },
       icon: (
-        <IconButton onClick={() => { console.log('eliminar') }}>
-          <DeleteIcon sx={{
-            fontSize: 18,
-            color: "text.disabled"
-          }} />
-        </IconButton>
+        <DeleteIcon sx={{
+          fontSize: 18,
+          color: "text.disabled"
+        }} />
       )
     }
   ]
 
   const [tableColumnExtensions] = useState([
-    { columnName: 'id', width: 200, wordWrapEnabled: true, align: 'left' },
+    { columnName: 'id', width: 500, wordWrapEnabled: true, align: 'left' },
     { columnName: 'nombreTipoAsiento', wordWrapEnabled: true, align: 'left' },
   ]);
-  var c = columns.map(x=> ({ columnName: x.name, width: 200, wordWrapEnabled: true, align: 'left' }))
-  
+
   return (
     <DataTablaStandar
       columns={columns}
       rows={rows}
-      tableColumnExtensions={tableColumnExtensions}
-      onDelete={(row) => { console.log(row) }}
-      onEdit={(row) => { console.log(row) }}
-      onClicks={onClicks}
-      AccionColumn={'id'}
     />
-
-  )
-}
-
-export const Tabla = ({ rows, columns, tableColumnExtensions, onRefresh, onEdit, onDelete }) => {
-  const [openModal, setOpenModal] = useState(false);
-  const [openModalDelete, setOpenModalDelete] = useState(false);
-  const [tipo, setTipo] = useState('');
- 
-  const CurrencyTypeProvider = props => (
-    <DataTypeProvider
-      formatterComponent={({ value, row, column }) =>CurrencyFormatter({value, row, column,onDelete,onEdit})}
-      {...props}
-    />
-  );
-
-  const handlerOpenEditar = async (id) => {
-
-  }
-
-  const handlerClose = async () => {
-    setOpenModal(false)
-  }
-  const handlerOpenEliminar = async (asiento) => {
-    setOpenModalDelete(true);
-  }
-
-  const hadlerEliminar = async (asiento) => {
-
-  }
-  const handlerCloseEliminar = () => {
-    setOpenModalDelete(false)
-
-  }
-  const handlerEnviar = async (values) => {
-
-
-  }
-  const inizialize = async () => {
-
-  }
-  const [currencyColumns] = useState(['id']);
-  return (
-    <Paper>
-      <Grid
-        rows={rows}
-        columns={columns}
-      >
-        {/* data format */}
-        <CurrencyTypeProvider
-          for={currencyColumns}
-        />
-        {/* sort columns*/}
-        <SortingState
-          defaultSorting={[{ columnName: 'city', direction: 'asc' }]}
-        />
-        <IntegratedSorting />
-        {/* paggin */}
-        <PagingState
-          defaultCurrentPage={0}
-          pageSize={5}
-        />
-        <IntegratedPaging />
-        <PagingPanel />
-        {/* buscador */}
-        <SearchState defaultValue="" />
-        <IntegratedFiltering />
-        <Toolbar />
-        <SearchPanel />
-        {/* table */}
-        <Table columnExtensions={tableColumnExtensions} />
-        <TableHeaderRow showSortingControls />
-      </Grid>
-    </Paper>
   )
 }

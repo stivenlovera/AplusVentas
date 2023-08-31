@@ -7,15 +7,17 @@ export const CurrencyFormatter = ({ value, row, column, onClicks }) => {
     return (
         <>
             {
-                onClicks.map(
-                    (metodo) => {
-                        return (
-                            <IconButton onClick={() => { metodo.onClick(row) }}>
+                onClicks!=null?(
+                    onClicks.map(
+                        (metodo,i) => {
+                            return (
+                                <IconButton onClick={() => { metodo.onClick(row) }} key={i}>
                                 {metodo.icon}
                             </IconButton>
                         )
                     }
-                )
+                    )
+                ):({value})
             }
         </>
     )
@@ -28,6 +30,7 @@ export const DataTablaStandar = ({ rows, columns, tableColumnExtensions, onClick
             {...props}
         />
     );
+    // columns.map(x=> { columnName: x.name, width: 200, wordWrapEnabled: true, align: 'left' })
     const [currencyColumns] = useState([AccionColumn]);
     return (
         <Paper>
@@ -57,7 +60,7 @@ export const DataTablaStandar = ({ rows, columns, tableColumnExtensions, onClick
                 <Toolbar />
                 <SearchPanel />
                 {/* table */}
-                <Table columnExtensions={tableColumnExtensions} />
+                <Table columnExtensions={tableColumnExtensions==null?[]:tableColumnExtensions} />
                 <TableHeaderRow showSortingControls />
             </Grid>
         </Paper>
