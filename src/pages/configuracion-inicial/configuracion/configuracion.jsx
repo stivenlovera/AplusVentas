@@ -21,7 +21,7 @@ const Configuracion = () => {
   return (
     <Box pt={2} pb={4}>
       <Grid container spacing={3}>
-   {/*      <Proceso  /> */}
+        <Proceso  />
         <Grid item xs={12}>
           <Heading title="Configuracion" Icon={SettingsIcon} />
         </Grid>
