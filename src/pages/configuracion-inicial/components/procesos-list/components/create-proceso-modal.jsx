@@ -117,11 +117,11 @@ const CreateProcesoModal = ({
     };
 
     useEffect(() => {
-        setValues(data)
-    }, [])
+        setValues(data);
+    }, [open])
     return <StyledAppModal open={open} handleClose={onClose} >
         <H2 marginBottom={2}>
-            {tipo != 'editar' ? "Editar asiento" : "Añadir asiento"}
+            {tipo == 'editar' ? "Editar asiento" : "Añadir asiento"}
         </H2>
 
         <FormikProvider value={formAsiento}>

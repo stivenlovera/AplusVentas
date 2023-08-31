@@ -10,13 +10,16 @@ import { initialAsiento, initialListAsiento } from './utils/utilsProceso'
 import { HeadingWrapper } from 'pages/admin-ecommerce/product-management'
 import { useProceso } from './hooks/useProceso'
 import { DataTablaStandar } from 'components/data-table/data-table-standar'
+import ModalDelete from 'components/modal-delete/modal-delete';
 
 const ProcesosList = () => {
     const [tipo, setTipo] = useState('');
     const [openModal, setOpenModal] = useState(false);
     const [asiento, setAsiento] = useState(initialAsiento)
-    const { Create, Delete, Editar, List, Store, Update } = useProceso();
+    const { Create, onDelete, Editar, List, Store, Update } = useProceso();
     const [rows, setRows] = useState(initialListAsiento)
+    const [openModalDelete, setOpenModalDelete] = useState(false);
+    const [id, setId] = useState(0);
 
     const [tableColumnExtensions] = useState([
         { columnName: 'nombreTipoAsiento', wordWrapEnabled: true, align: 'left' },
@@ -29,54 +32,64 @@ const ProcesosList = () => {
         { name: 'nombreAsiento', title: 'Nombre asiento' },
         { name: 'asientoId', title: 'Acciones' }
     ]);
-
     const inizialize = async () => {
         const { lista, status } = await List()
         if (status) {
             setRows(lista)
         }
     }
-
     const handlerOpenEditar = async (id) => {
         setTipo('editar')
         const { edit, status } = await Editar(id);
-        console.log(edit)
         if (status) {
             setAsiento(edit)
             setOpenModal(true);
-        } else {
-
         }
     }
     const handlerOpenCreate = async () => {
         setTipo('nuevo')
         const { create, status } = await Create();
         if (status) {
-            //setAsiento(initialAsiento)
+            setAsiento(initialAsiento)
             setOpenModal(true);
         }
     }
-
+    const handlerDelete = async (asientoId) => {
+        setId(asientoId)
+        setOpenModalDelete(true)
+    }
     const handlerClose = async () => {
         setOpenModal(false)
     }
-
     const handlerEnviar = async (values) => {
         switch (tipo) {
             case 'nuevo':
-                /*   var { status, store } = await Store(values);
-                  if (status) { */
-                console.log(values)
-                setOpenModal(false);
-                inizialize()
-                /*  } */
-                break;
-            case 'hijo':
-                console.log('hijo', values)
+                var { status, store } = await Store(values);
+                if (status) {
+                    setOpenModal(false);
+                    inizialize();
+                }
                 break;
             case 'editar':
-                console.log('editar', values)
+                var { status, update } = await Update(values, values.asiento.id);
+                if (status) {
+                    setOpenModal(false);
+                    inizialize();
+                }
                 break;
+        }
+    }
+    const handlerCloseEliminar = () => {
+        setOpenModalDelete(false)
+    }
+    const handlerOpenEliminar = () => {
+        setOpenModalDelete(true)
+    }
+    const hadlerEliminar = async (id) => {
+        var { status, data } = await onDelete(id);
+        if (status) {
+            setOpenModalDelete(false);
+            inizialize();
         }
     }
 
@@ -94,11 +107,10 @@ const ProcesosList = () => {
                     color: "text.disabled"
                 }} />
             ),
-
         },
         {
             nombre: 'Eliminar',
-            onClick: (row) => { handlerOpenEditar(row.asientoId) },
+            onClick: (row) => { handlerDelete(row.asientoId) },
             icon: (
                 <DeleteIcon sx={{
                     fontSize: 18,
@@ -107,7 +119,6 @@ const ProcesosList = () => {
             )
         }
     ];
-
     return (
         <Card sx={{
             padding: 3
@@ -117,7 +128,6 @@ const ProcesosList = () => {
                 my: 2
             }} />
             <Box mt={2} mb={3}>
-
                 <HeadingWrapper justifyContent="space-between" sx={{ m: 0 }} alignItems="center">
                     <Tiny lineHeight={1.8} >
                         Crea un asiento que será utilizado frecuentemente Ej: compra efectivom venta efectivo, etc.
@@ -148,6 +158,12 @@ const ProcesosList = () => {
                     open={openModal}
                     onClose={handlerClose}
                     onEnviar={handlerEnviar}
+                />
+                <ModalDelete
+                    onClose={handlerCloseEliminar}
+                    data={id}
+                    open={openModalDelete}
+                    onSave={hadlerEliminar}
                 />
             </Box>
         </Card>

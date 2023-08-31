@@ -30,14 +30,14 @@ export const useProceso = () => {
       status: !!status
     };
   }
-  const Store = async ({ nombreAsiento, tipoAsientoId, id, nombreTipoAsiento, cuentas }) => {
+  const Store = async (values,id) => {
     const { data, message, status } = await Request({
       endPoint: `${process.env.REACT_APP_API}api/asiento`,
       initialValues: [],
       method: 'post',
       showError: true,
       showSuccess: true,
-      values: { nombreAsiento, tipoAsientoId, id, nombreTipoAsiento, cuentas }
+      values: values
     });
     return {
       store: data,
@@ -57,30 +57,30 @@ export const useProceso = () => {
       status: !!status
     };
   }
-  const Update = async ({ nombreAsiento, tipoAsientoId, id, nombreTipoAsiento, cuentas }) => {
+  const Update = async (values,id) => {
     const { data, message, status } = await Request({
       endPoint: `${process.env.REACT_APP_API}api/asiento/${id}`,
       initialValues: [],
       method: 'put',
       showError: true,
-      showSuccess: false,
-      values: { nombreAsiento, tipoAsientoId, id, nombreTipoAsiento, cuentas }
+      showSuccess: true,
+      values: values
     });
     return {
       update: data,
       status: !!status
     };
   }
-  const Delete = async (id) => {
+  const onDelete = async (id) => {
     const { data, message, status } = await Request({
       endPoint: `${process.env.REACT_APP_API}api/asiento/${id}`,
       initialValues: [],
       method: 'delete',
       showError: true,
-      showSuccess: false
+      showSuccess: true
     });
     return {
-      delete: data,
+      data: data,
       status: !!status
     };
   }
@@ -91,7 +91,7 @@ export const useProceso = () => {
     Store,
     Editar,
     Update,
-    Delete
+    onDelete
   }
 }
 
