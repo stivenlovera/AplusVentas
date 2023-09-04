@@ -33,6 +33,7 @@ import { UseAlmacen } from "../hooks/useAlmacenes";
 import Edit from "icons/Edit";
 import { Link } from "react-router-dom";
 import { initialAlmacen } from "../utils/almacen";
+import ModalAlmacen from "./components/modal-almacen/modal-almacen";
 
 export const HeadingWrapper = styled(FlexBox)(({
   theme
@@ -211,6 +212,14 @@ const AlmacenesList = () => {
           <TableHeaderRow showSortingControls />
         </Grid>
       </Paper>
+      {/* <ModalAlmacen
+        data={}
+        editProduct={}
+        onClose={}
+        onSubmit={}
+        open={}
+
+      ></ModalAlmacen> */}
     </Box>
   );
 };
