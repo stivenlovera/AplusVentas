@@ -77,83 +77,89 @@ const ToggleCell = ({
     );
 };
 
-const DetailEditCell = ({ onRefresh }) => (
-    <Plugin name="detailEdit">
-        <Action
-            name="toggleDetailRowExpanded"
-            action={({ rowId }, { expandedDetailRowIds }, { startEditRows, stopEditRows }) => {
-                const rowIds = [rowId];
-                const isCollapsing = expandedDetailRowIds.indexOf(rowId) > -1;
-                if (isCollapsing) {
-                    stopEditRows({ rowIds });
-                } else {
-                    startEditRows({ rowIds });
-                }
-            }}
-        />
-        <Template
-            name="tableCell"
-            predicate={({ tableRow }) => tableRow.type === TableRowDetail.ROW_TYPE}
-        >
-            {params => (
-                <TemplateConnector>
-                    {({
-                        tableColumns,
-                        createRowChange,
-                        rowChanges,
-                    }, {
-                        changeRow,
-                        commitChangedRows,
-                        cancelChangedRows,
-                        toggleDetailRowExpanded,
-                    }) => {
-                        if (tableColumns.indexOf(params.tableColumn) !== 0) {
-                            return null;
-                        }
-                        const { tableRow: { rowId } } = params;
-                        const row = { ...params.tableRow.row, ...rowChanges[rowId] };
-                        const processValueChange = ({ target: { name, value } }) => {
-                            const changeArgs = {
-                                rowId,
-                                change: createRowChange(row, value, name),
+const DetailEditCell = ({ onRefresh }) => {
+    const { onUpdate } = UseDetalleAlmacen();
+    return (
+        <Plugin name="detailEdit">
+            <Action
+                name="toggleDetailRowExpanded"
+                action={({ rowId }, { expandedDetailRowIds }, { startEditRows, stopEditRows }) => {
+                    const rowIds = [rowId];
+                    const isCollapsing = expandedDetailRowIds.indexOf(rowId) > -1;
+                    if (isCollapsing) {
+                        stopEditRows({ rowIds });
+                    } else {
+                        startEditRows({ rowIds });
+                    }
+                }}
+            />
+            <Template
+                name="tableCell"
+                predicate={({ tableRow }) => tableRow.type === TableRowDetail.ROW_TYPE}
+            >
+                {params => (
+                    <TemplateConnector>
+                        {({
+                            tableColumns,
+                            createRowChange,
+                            rowChanges,
+                        }, {
+                            changeRow,
+                            commitChangedRows,
+                            cancelChangedRows,
+                            toggleDetailRowExpanded,
+                        }) => {
+                            if (tableColumns.indexOf(params.tableColumn) !== 0) {
+                                return null;
+                            }
+                            const { tableRow: { rowId } } = params;
+                            const row = { ...params.tableRow.row, ...rowChanges[rowId] };
+                            const processValueChange = ({ target: { name, value } }) => {
+                                const changeArgs = {
+                                    rowId,
+                                    change: createRowChange(row, value, name),
+                                };
+                                changeRow(changeArgs);
                             };
-                            changeRow(changeArgs);
-                        };
-                        const applyChanges = (values) => {
-                            console.log(values);
-                            onRefresh();
-                            /*  toggleDetailRowExpanded({ rowId });
-                             commitChangedRows({ rowIds: [rowId] }); */
-                            toggleDetailRowExpanded({ rowId });
-                            console.log('save')
-                        };
-                        const cancelChanges = () => {
-                            /*  toggleDetailRowExpanded({ rowId });
-                             cancelChangedRows({ rowIds: [rowId] }); */
-                            console.log('cancel<')
-                            toggleDetailRowExpanded({ rowId });
-                        };
-                        return (
-                            <TemplatePlaceholder params={{
-                                ...params,
-                                row,
-                                tableRow: {
-                                    ...params.tableRow,
+                            const applyChanges = async (values) => {
+                                console.log(values);
+                                const { data, status } = await onUpdate(values)
+                                if (status) {
+                                    onRefresh();
+                                }
+                                /*  toggleDetailRowExpanded({ rowId });
+                                 commitChangedRows({ rowIds: [rowId] }); */
+                                toggleDetailRowExpanded({ rowId });
+                                console.log('save')
+                            };
+                            const cancelChanges = () => {
+                                /*  toggleDetailRowExpanded({ rowId });
+                                 cancelChangedRows({ rowIds: [rowId] }); */
+                                console.log('cancel<')
+                                toggleDetailRowExpanded({ rowId });
+                            };
+                            return (
+                                <TemplatePlaceholder params={{
+                                    ...params,
                                     row,
-                                },
-                                changeRow,
-                                processValueChange,
-                                applyChanges,
-                                cancelChanges,
-                            }}
-                            />
-                        );
-                    }}
-                </TemplateConnector>
-            )}
-        </Template>
-    </Plugin>
-);
+                                    tableRow: {
+                                        ...params.tableRow,
+                                        row,
+                                    },
+                                    changeRow,
+                                    processValueChange,
+                                    applyChanges,
+                                    cancelChanges,
+                                }}
+                                />
+                            );
+                        }}
+                    </TemplateConnector>
+                )}
+            </Template>
+        </Plugin>
+    )
+};
 
 const DetailCell = ({
     children, changeRow, editingRowIds, addedRows, processValueChange,

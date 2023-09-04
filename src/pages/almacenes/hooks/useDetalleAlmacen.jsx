@@ -15,6 +15,20 @@ export const UseDetalleAlmacen = () => {
             status: !!status
         };
     }
+    const onUpdate = async (values) => {
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/detalle-almacen/${values.detallealmacenid}`,
+            values: values,
+            initialValues: [],
+            method: 'put',
+            showError: true,
+            showSuccess: true
+        });
+        return {
+            data: data,
+            status: !!status
+        };
+    }
     const onGetPendienteAlmacen = async (values) => {
         const { data, message, status } = await Request({
             endPoint: `${process.env.REACT_APP_API}api/detalle-almacen/pendientes-serializar`,
@@ -44,6 +58,7 @@ export const UseDetalleAlmacen = () => {
     }
     return {
         onStore,
+        onUpdate,
         onGetPendienteAlmacen,
         onGetProductoAlmacen
     }
