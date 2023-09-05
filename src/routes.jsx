@@ -5,7 +5,7 @@ import DashboardLayoutV3 from "layouts/layout-v3/DashboardLayout";
 import { element } from "prop-types";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-
+import { ProtectedRoute } from "components/ProtectedRoute";
 const Loadable = Component => props => {
   return <Suspense fallback={<LoadingScreen />}>
     <Component {...props} />
@@ -172,7 +172,7 @@ const dashboardRoutes = [
   },
   {
     path: "movimientos",
-    element: <Movimientos />
+    element: <ProtectedRoute isAllowed={false}><Movimientos /></ProtectedRoute>
   },
   {
     path: "almacen/:id",

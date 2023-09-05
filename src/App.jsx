@@ -29,7 +29,21 @@ const App = () => {
     usuario: '',
     nombre: '',
     apellido: '',
-    dirrecion: ''
+    dirrecion: '',
+    roles:[
+      {
+        rolId:'',
+        nombre:'',
+        Permisos:[
+          {
+            permisoId:0,
+            nombre:'',
+            ruta:''
+          }
+        ]
+
+      }
+    ]
   })
   const { GetAuthenticate, Login } = UseAuthenticate();
   const loadAuthenticacion = async () => {
