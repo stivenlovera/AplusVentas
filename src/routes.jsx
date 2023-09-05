@@ -24,7 +24,7 @@ const PaginaInicial = Loadable(lazy(() => import("./pages/pagina-inicial/pagina-
 const Configuracion = Loadable(lazy(() => import("./pages/configuracion-inicial/configuracion/configuracion")));
 const AlmacenProducto = Loadable(lazy(() => import("./pages/almacenes/almacen-producto/almacen-producto")));
 const Almacenes = Loadable(lazy(() => import("./pages/almacenes/almacenes")));
-const Homologar = Loadable(lazy(() => import("./pages/almacenes/homologar/homologar")));
+const Homologar = Loadable(lazy(() => import("./pages/almacenes/homologar/index")));
 
 
 const LearningManagement = Loadable(lazy(() => import("./pages/dashboards/learning-management"))); // account
@@ -179,7 +179,7 @@ const dashboardRoutes = [
     element: < AlmacenProducto />
   },
   {
-    path: "almacen-homologar/:almacen/:producto",
+    path: "almacen-homologar/:productoId",
     element: < Homologar />
   }
 ];

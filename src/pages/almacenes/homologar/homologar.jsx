@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Paper from '@mui/material/Paper';
 import {
     Plugin, Template, TemplateConnector, TemplatePlaceholder, Action,
@@ -12,29 +12,23 @@ import {
     TableHeaderRow,
     TableRowDetail,
 } from '@devexpress/dx-react-grid-material-ui';
-// eslint-disable-next-line
-import moment from 'moment';
 import TableCell from '@mui/material/TableCell';
-import Button from '@mui/material/Button';
 import MuiGrid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
-import FormGroup from '@mui/material/FormGroup';
 import Edit from '@mui/icons-material/Edit';
 import Cancel from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
-import MenuItem from '@mui/material/MenuItem';
-import DatePicker from '@mui/lab/DatePicker';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import AdapterMoment from '@mui/lab/AdapterMoment';
+import CropFreeIcon from '@mui/icons-material/CropFree';
 import { Box, Card } from '@mui/material';
 import { HeadingWrapper } from '../almacenes';
 import FlexBox from 'components/flexbox/FlexBox';
-import IconWrapper from 'components/IconWrapper';
 import { Link } from 'react-router-dom';
 import { H5, H6 } from 'components/Typography';
+import { UseDetalleAlmacen } from '../hooks/useDetalleAlmacen';
+import { initialProductoAlmacen } from '../utils/almacen';
+import FormDetalleSerie from './form';
 
 
-const getRowId = row => row.detalleAlmacenId;
+const getRowId = row => row.detallealmacenid;
 
 const DetailContent = ({ row, ...rest }) => {
     const {
@@ -42,82 +36,8 @@ const DetailContent = ({ row, ...rest }) => {
         applyChanges,
         cancelChanges,
     } = rest;
-    console.log(processValueChange,
-        applyChanges,
-        cancelChanges,)
     return (
-        <Box pt={2} pb={1}>
-            <Paper>
-                <MuiGrid container spacing={2} sx={{ p: 2 }}>
-                    <MuiGrid item xs={6}>
-                        <TextField
-                            fullWidth
-                            size='small'
-                            name="estado"
-                            label="Estado"
-                            value={row.estado}
-                            onChange={processValueChange}
-                        />
-                    </MuiGrid>
-                    <MuiGrid item xs={6}>
-                        <TextField
-                            fullWidth
-                            size='small'
-                            name="almacen"
-                            label="Almacen"
-                            value={row.almacen}
-                            onChange={processValueChange}
-                        />
-                    </MuiGrid>
-                    <MuiGrid item xs={6}>
-                        {/*     <TextField
-                                size='small'
-                                margin="normal"
-                                label="Estado"
-                                select
-                                name="estado"
-                                value={row.estado}
-                                onChange={processValueChange}
-                            >
-                            </TextField> */}
-                    </MuiGrid>
-                    <MuiGrid item xs={12}>
-                        <TextField
-                            fullWidth
-                            size='small'
-                            name="almacen"
-                            label="Serie"
-                            value={row.serie}
-                            onChange={processValueChange}
-                        />
-                    </MuiGrid>
-                    <MuiGrid item xs={12}>
-                        <MuiGrid container spacing={2} justifyContent="flex-end">
-                            <MuiGrid item>
-                                <Button
-                                    size='small'
-                                    variant='contained'
-                                    onClick={cancelChanges}
-                                    color="error"
-                                >
-                                    Cancel
-                                </Button>
-                            </MuiGrid>
-                            <MuiGrid item>
-                                <Button
-                                    size='small'
-                                    variant='contained'
-                                    onClick={applyChanges}
-                                    color="primary"
-                                >
-                                    Anotar
-                                </Button>
-                            </MuiGrid>
-                        </MuiGrid>
-                    </MuiGrid>
-                </MuiGrid>
-            </Paper>
-        </Box >
+        <FormDetalleSerie data={row} events={rest} />
     );
 };
 
@@ -157,80 +77,89 @@ const ToggleCell = ({
     );
 };
 
-const DetailEditCell = () => (
-    <Plugin name="detailEdit">
-        <Action
-            name="toggleDetailRowExpanded"
-            action={({ rowId }, { expandedDetailRowIds }, { startEditRows, stopEditRows }) => {
-                const rowIds = [rowId];
-                const isCollapsing = expandedDetailRowIds.indexOf(rowId) > -1;
-                if (isCollapsing) {
-                    stopEditRows({ rowIds });
-                } else {
-                    startEditRows({ rowIds });
-                }
-            }}
-        />
-        <Template
-            name="tableCell"
-            predicate={({ tableRow }) => tableRow.type === TableRowDetail.ROW_TYPE}
-        >
-            {params => (
-                <TemplateConnector>
-                    {({
-                        tableColumns,
-                        createRowChange,
-                        rowChanges,
-                    }, {
-                        changeRow,
-                        commitChangedRows,
-                        cancelChangedRows,
-                        toggleDetailRowExpanded,
-                    }) => {
-                        if (tableColumns.indexOf(params.tableColumn) !== 0) {
-                            return null;
-                        }
-                        const { tableRow: { rowId } } = params;
-                        const row = { ...params.tableRow.row, ...rowChanges[rowId] };
-
-                        const processValueChange = ({ target: { name, value } }) => {
-                            const changeArgs = {
-                                rowId,
-                                change: createRowChange(row, value, name),
+const DetailEditCell = ({ onRefresh }) => {
+    const { onUpdate } = UseDetalleAlmacen();
+    return (
+        <Plugin name="detailEdit">
+            <Action
+                name="toggleDetailRowExpanded"
+                action={({ rowId }, { expandedDetailRowIds }, { startEditRows, stopEditRows }) => {
+                    const rowIds = [rowId];
+                    const isCollapsing = expandedDetailRowIds.indexOf(rowId) > -1;
+                    if (isCollapsing) {
+                        stopEditRows({ rowIds });
+                    } else {
+                        startEditRows({ rowIds });
+                    }
+                }}
+            />
+            <Template
+                name="tableCell"
+                predicate={({ tableRow }) => tableRow.type === TableRowDetail.ROW_TYPE}
+            >
+                {params => (
+                    <TemplateConnector>
+                        {({
+                            tableColumns,
+                            createRowChange,
+                            rowChanges,
+                        }, {
+                            changeRow,
+                            commitChangedRows,
+                            cancelChangedRows,
+                            toggleDetailRowExpanded,
+                        }) => {
+                            if (tableColumns.indexOf(params.tableColumn) !== 0) {
+                                return null;
+                            }
+                            const { tableRow: { rowId } } = params;
+                            const row = { ...params.tableRow.row, ...rowChanges[rowId] };
+                            const processValueChange = ({ target: { name, value } }) => {
+                                const changeArgs = {
+                                    rowId,
+                                    change: createRowChange(row, value, name),
+                                };
+                                changeRow(changeArgs);
                             };
-                            changeRow(changeArgs);
-                        };
-
-                        const applyChanges = () => {
-                            toggleDetailRowExpanded({ rowId });
-                            commitChangedRows({ rowIds: [rowId] });
-                        };
-                        const cancelChanges = () => {
-                            toggleDetailRowExpanded({ rowId });
-                            cancelChangedRows({ rowIds: [rowId] });
-                        };
-
-                        return (
-                            <TemplatePlaceholder params={{
-                                ...params,
-                                row,
-                                tableRow: {
-                                    ...params.tableRow,
+                            const applyChanges = async (values) => {
+                                console.log(values);
+                                const { data, status } = await onUpdate(values)
+                                if (status) {
+                                    onRefresh();
+                                }
+                                /*  toggleDetailRowExpanded({ rowId });
+                                 commitChangedRows({ rowIds: [rowId] }); */
+                                toggleDetailRowExpanded({ rowId });
+                                console.log('save')
+                            };
+                            const cancelChanges = () => {
+                                /*  toggleDetailRowExpanded({ rowId });
+                                 cancelChangedRows({ rowIds: [rowId] }); */
+                                console.log('cancel<')
+                                toggleDetailRowExpanded({ rowId });
+                            };
+                            return (
+                                <TemplatePlaceholder params={{
+                                    ...params,
                                     row,
-                                },
-                                changeRow,
-                                processValueChange,
-                                applyChanges,
-                                cancelChanges,
-                            }}
-                            />
-                        );
-                    }}
-                </TemplateConnector>
-            )}
-        </Template>
-    </Plugin>
-);
+                                    tableRow: {
+                                        ...params.tableRow,
+                                        row,
+                                    },
+                                    changeRow,
+                                    processValueChange,
+                                    applyChanges,
+                                    cancelChanges,
+                                }}
+                                />
+                            );
+                        }}
+                    </TemplateConnector>
+                )}
+            </Template>
+        </Plugin>
+    )
+};
 
 const DetailCell = ({
     children, changeRow, editingRowIds, addedRows, processValueChange,
@@ -248,45 +177,52 @@ const DetailCell = ({
     );
 };
 
-const Homologar = () => {
+const Homologar = ({
+    productoId
+}) => {
+    const [producto, setProducto] = useState(initialProductoAlmacen)
+    const [rows, setRows] = useState(initialProductoAlmacen);
+    const [tableColumnExtensions] = useState([
+        { columnName: 'fecharegistro', wordWrapEnabled: true, align: 'left' },
+        { columnName: 'serie', wordWrapEnabled: true, align: 'left' },
+        { columnName: 'estadoVendido', wordWrapEnabled: true, align: 'left' },
+        { columnName: 'nombreAlmacen', wordWrapEnabled: true, align: 'left' }
+    ]);
     const [columns] = useState([
+        { name: 'fecharegistro', title: 'Fecha registro' },
         { name: 'serie', title: 'Serie' },
-        { name: 'estado', title: 'Estado' },
-        { name: 'almacen', title: 'Almacen' },
+        { name: 'estadoVendido', title: 'Estado' },
+        { name: 'nombreAlmacen', title: 'Almacen' }
     ]);
-    const [rows, setRows] = useState([
-        {
-            producto: 'producto',
-            serie: 'Producto',
-            stado: 'producto',
-            almacen: 'Producto',
-            detalleAlmacenId: 0
-        },
-        {
-            producto: 'producto',
-            serie: 'Producto',
-            stado: 'producto',
-            almacen: 'Producto',
-            detalleAlmacenId: 1
-        }
-    ]);
+    const { onGetProductoAlmacen } = UseDetalleAlmacen();
 
     const commitChanges = ({ changed }) => {
         const changedRows = rows.map(row => (changed[row.detalleAlmacenId] ? { ...row, ...changed[row.detalleAlmacenId] } : row));
         setRows(changedRows);
     };
+    const inizializando = async () => {
+        const { data, status } = await onGetProductoAlmacen(productoId);
+        console.log(data)
+        if (status) {
+            setProducto(data.producto)
+            setRows(data.productoAlmacen)
+        }
+    }
+    useEffect(() => {
+        inizializando()
+    }, [])
 
     return (
         <>
             <Box pt={2} pb={1}>
                 <HeadingWrapper justifyContent="space-between" alignItems="center">
                     <FlexBox gap={0.5} alignItems="center">
-                        <IconWrapper>
-                            {/*   <InventoryIcon sx={{
+                        <CropFreeIcon sx={{
                             color: "primary.main"
-                        }} /> */}
-                        </IconWrapper>
-                        <H5>Almacen | producto de ejemplo</H5>
+                        }}>
+
+                        </CropFreeIcon>
+                        <H5>Productos</H5>
                     </FlexBox>
                     <Link to={'/dashboard/orden-inicial/create'}>
                     </Link>
@@ -297,12 +233,12 @@ const Homologar = () => {
             }}>
                 <MuiGrid container mt={0}>
                     <MuiGrid item md={4} xs={6}>
-                        <H6 color="text.secondary">Codigo Producto</H6>
-                        <H5 fontWeight={500}>######</H5>
+                        <H6 color="text.secondary">Producto</H6>
+                        <H5 fontWeight={500}>{producto.nombre} {producto.nombreProducto}</H5>
                     </MuiGrid>
                     <MuiGrid item md={4} xs={6}>
                         <H6 color="text.secondary">Clasificacion</H6>
-                        <H5 fontWeight={500}>"########</H5>
+                        <H5 fontWeight={500}>{producto.nombrecategoria}</H5>
                     </MuiGrid>
                 </MuiGrid>
             </Card>
@@ -314,7 +250,7 @@ const Homologar = () => {
                     getRowId={getRowId}
                 >
                     <RowDetailState
-                        defaultExpandedRowIds={[1]}
+
                     />
                     <EditingState
                         defaultEditingRowIds={[1]}
@@ -327,7 +263,7 @@ const Homologar = () => {
                         cellComponent={DetailCell}
                         toggleCellComponent={ToggleCell}
                     />
-                    <DetailEditCell />
+                    <DetailEditCell onRefresh={inizializando} />
                 </Grid>
             </Paper>
         </>
