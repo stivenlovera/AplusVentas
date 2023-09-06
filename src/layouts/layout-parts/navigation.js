@@ -1,4 +1,5 @@
 import duotone from 'icons/duotone';
+
 export const navigations = [
   {
     type: 'label',
@@ -7,7 +8,7 @@ export const navigations = [
   {
     name: 'Tablero',
     path: '/dashboard',
-    icon: duotone.PersonChalkboard
+    icon: duotone["PersonChalkboard"]
   },
   {
     type: 'label',
@@ -16,7 +17,7 @@ export const navigations = [
   {
     name: 'Configuracion',
     path: '/dashboard/configuracion',
-    icon: duotone.SettingsIcon
+    icon: duotone["SettingsIcon"]
   },
   {
     type: 'label',

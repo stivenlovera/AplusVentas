@@ -6,6 +6,7 @@ import { element } from "prop-types";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { ProtectedRoute } from "components/ProtectedRoute";
+import { useTabContext } from "@mui/lab";
 const Loadable = Component => props => {
   return <Suspense fallback={<LoadingScreen />}>
     <Component {...props} />
@@ -55,12 +56,13 @@ const ActiveLayout = ({ nombreCompleto }) => {
 };
 
 const routes = (user, token) => {
+  
   if (token) { // true si hay token
     return [
       {
         path: "dashboard",
         element: <ActiveLayout nombreCompleto={`${user.nombre} ${user.apellido}`} />,
-        children: dashboardRoutes,
+        children: dashboardRoutes(user),
       },
       {
         path: "*",
@@ -82,7 +84,15 @@ const routes = (user, token) => {
 
 
 };
-
+const getAllRutas = (user) => {
+  const rutas = [];
+  user.roles.forEach((role) => {
+    role.permisos.forEach((permiso) => {
+      rutas.push(permiso.ruta);
+    });
+  });
+  return rutas;
+};
 const authRoutes = [
   {
     path: "/",
@@ -97,8 +107,12 @@ const authRoutes = [
   },
 ];
 
-const dashboardRoutes = [
-  {
+const dashboardRoutes = (user)=>
+{
+  const rutas=getAllRutas(user);
+  console.log(rutas)
+  return [
+    {
     path: "",
     element: <LearningManagement />
   },
@@ -182,5 +196,9 @@ const dashboardRoutes = [
     path: "almacen-homologar/:productoId",
     element: < Homologar />
   }
-];
+]
+.filter((element)=>{
+  rutas.includes(element.path)
+});
+}
 export default routes;

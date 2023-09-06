@@ -32,9 +32,9 @@ const App = () => {
     dirrecion: '',
     roles:[
       {
-        rolId:'',
+        rolId:0,
         nombre:'',
-        Permisos:[
+        permisos:[
           {
             permisoId:0,
             nombre:'',
@@ -62,6 +62,7 @@ const App = () => {
       updateToken(false)
     }
   }, [token])
+
   const content = useRoutes(routes(user, token));
   const {
     settings
