@@ -3,6 +3,8 @@ import { Paragraph, Span } from "components/Typography";
 import { useLocation, useNavigate } from "react-router-dom";
 import { navigations } from "../layout-parts/navigation";
 import SidebarAccordion from "./SidebarAccordion";
+import { useContext } from "react";
+import { UsuarioContext } from "contexts/usuarioContexto";
 const NavItemButton = styled(ButtonBase)(({
   theme,
   active
@@ -108,7 +110,7 @@ const MultiLevelMenu = ({
   } = useLocation(); // handle active current page
 
   const activeRoute = path => pathname === path ? 1 : 0; // handle navigate to another route or page
-
+  const contexto = useContext(UsuarioContext); 
 
   const handleNavigation = path => navigate(path); // ACTIVATE SIDEBAR COMPACT
 
@@ -163,7 +165,7 @@ const MultiLevelMenu = ({
     });
   };
 
-  return <>{renderLevels(navigations)}</>;
+  return <>{renderLevels((navigations(contexto.user)))}</>;
 };
 
 export default MultiLevelMenu;

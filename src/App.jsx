@@ -13,7 +13,7 @@ import { UseAuthenticate } from "pages/login/hooks/useAuthenticate";
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectToken, setToken } from "reducers/Slice";
 import { useState } from "react";
-
+import { UsuarioContext } from "contexts/usuarioContexto";
 const App = () => {
   const token = useSelector(SelectToken);
   const dispatch = useDispatch();
@@ -30,21 +30,22 @@ const App = () => {
     nombre: '',
     apellido: '',
     dirrecion: '',
-    roles:[
+    roles: [
       {
-        rolId:0,
-        nombre:'',
-        permisos:[
+        rolId: 0,
+        nombre: '',
+        permisos: [
           {
-            permisoId:0,
-            nombre:'',
-            ruta:''
+            permisoId: 0,
+            nombre: '',
+            ruta: ''
           }
         ]
 
       }
     ]
   })
+
   const { GetAuthenticate, Login } = UseAuthenticate();
   const loadAuthenticacion = async () => {
     const { data, status } = await GetAuthenticate();
@@ -72,16 +73,20 @@ const App = () => {
     direction: settings.direction,
     responsiveFontSizes: settings.responsiveFontSizes
   });
-  return <StyledEngineProvider injectFirst>
-    <ThemeProvider theme={theme}>
-      <RTL>
-        <SnackbarProvider maxSnack={5}>
-          <CssBaseline />
-          {content}
-        </SnackbarProvider>
-      </RTL>
-    </ThemeProvider>
-  </StyledEngineProvider>;
+  return (
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <UsuarioContext.Provider value={{ user, setUser }} >
+          <RTL>
+            <SnackbarProvider maxSnack={5}>
+              <CssBaseline />
+              {content}
+            </SnackbarProvider>
+          </RTL>
+        </UsuarioContext.Provider>
+      </ThemeProvider>
+    </StyledEngineProvider>
+  );
 };
 
 export default App;

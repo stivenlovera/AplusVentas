@@ -7,5 +7,16 @@ export const initialUsuario = {
     fechaNacimiento: '',
     email: '',
     telefono: '',
-    roles:[]
+    roles: []
 };
+export interface UsuarioEditar {
+    usuarioId: number;
+    ci: string;
+    nombre: string;
+    apellido: string;
+    direccion: string;
+    fechaNacimiento: string;
+    email: string;
+    telefono: string;
+    roles: any[]; // You can replace 'any' with a more specific type if needed
+}

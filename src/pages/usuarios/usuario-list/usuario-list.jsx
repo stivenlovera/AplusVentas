@@ -112,7 +112,7 @@ const UsuarioList = () => {
             >
                 <CurrencyTypeProvider
                     for={['roles']}
-                    onClicks={({value, row, column}) => { console.log(value, row, column) }}
+                    onClicks={({ value, row, column }) => { console.log(value, row, column) }}
                 />
             </DataTablaCustomize>
         </Context.Provider>
@@ -145,7 +145,7 @@ export const CurrencyFormatter = ({ value, row, column, onClicks }) => {
                         size="small"
                         label={rol}
                         sx={{ m: 0.5 }}
-                        onClick={() => onClicks({value, row, column})}
+                        onClick={() => onClicks({ value, row, column })}
                     />)
                 })
             }
