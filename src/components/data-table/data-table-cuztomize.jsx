@@ -44,9 +44,9 @@ export const DataTablaCustomize = (props) => {
                 <CurrencyTypeProvider
                     for={currencyColumns}
                 />
-                <CurrencyTypeProvider
+                {/* <CurrencyTypeProvider
                     for={currencyColumns}
-                />
+                /> */}
                 {/* sort columns*/}
                 <SortingState
                     defaultSorting={[{ columnName: 'city', direction: 'asc' }]}

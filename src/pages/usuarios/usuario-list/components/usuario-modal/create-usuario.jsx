@@ -68,7 +68,7 @@ const CreateUsuarioModal = ({
         email: Yup.string().email().required("Email es requerido!"),
         telefono: Yup.string().required("Telefono es requerido!")
     });
-    const { onCreate } = UseUsuario();
+
     const {
         values,
         errors,
@@ -78,7 +78,7 @@ const CreateUsuarioModal = ({
         resetForm,
         touched
     } = useFormik({
-        initialValues: data,
+        initialValues: initialUsuario,
         validationSchema,
         onSubmit: async (values) => {
             if (editUsuario) {
