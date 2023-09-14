@@ -1,22 +1,23 @@
 import { Add } from "@mui/icons-material";
-import { Box, Button, Chip, styled } from "@mui/material";
+import { Box, Button, Chip, IconButton, Tooltip, styled } from "@mui/material";
 import FlexBox from "components/flexbox/FlexBox";
 import IconWrapper from "components/IconWrapper";
-import SearchInput from "components/input-fields/SearchInput";
-import { H5 } from "components/Typography";
+import { H1, H5 } from "components/Typography";
 import ShoppingBasket from "icons/ShoppingBasket";
-import CustomTable from "page-sections/admin-ecommerce/CustomTable";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CreateUsuarioModal from "./components/usuario-modal/create-usuario";
-import UsuarioColumns from "./components/columns-usuario/usuario-columns";
-import { usurioFake } from "./components/usuario-fake";
-import { searchByNombre } from "./components/usuario-util";
-import { UseListaUsuario } from "./hooks/use-list-usuario";
 import { Context } from "contexts/ContextDataTable";
 import { DataTablaCustomize } from "components/data-table/data-table-cuztomize";
 import { DataTypeProvider } from "@devexpress/dx-react-grid";
-
+import { UseUsuario } from "./hooks/useUsuario";
+import Edit from "icons/Edit";
+import Delete from "icons/Delete";
+import ModalCrud from "components/modal-crud/modal-crud";
+import { CrearEditarUsuario } from "./components/usuario-modal/crear-editar-usuario";
+import { UsuarioDto } from "interfaces/Interfaces";
+import { initialUsuario } from "./components/utils/initialUsuario";
+import { UsuarioActions } from "./components/actions/usuario-actions";
 export const HeadingWrapper = styled(FlexBox)(({
     theme
 }) => ({
@@ -37,23 +38,29 @@ const UsuarioList = () => {
     const {
         t
     } = useTranslation();
-    const { ApiListaUsuario, filter, filteredItem, searchValue, setFilteredItem, setSearchValue } = UseListaUsuario();
+    const { onList, onCreate } = UseUsuario();
     const [openModal, setOpenModal] = useState(false); // search input
+    const [actualEditar, setActual] = useState(initialUsuario); // search input
 
     const [actualizarTable, setActualizarTableContext] = useState(false);
 
-    const loadIndex = async () => {
-        await ApiListaUsuario();
+    const load = async () => {
+        const lista = await onList();
+        if (lista.status) {
+            setRows(lista.data);
+        }
     }
-
-    useEffect(() => {
-        loadIndex();
-        const result = searchByNombre(usurioFake, searchValue);
-        setFilteredItem(result);
-        setActualizarTableContext(false);
-
-    }, [searchValue, actualizarTable]);
-
+    /**
+     * 
+     * @param {UsuarioDto} actual 
+     */
+    const getActual = (data) => {
+        onCreate(data.usuarioId).then((result) => {
+            if (result.status) {
+                setActual(result.data);
+            }
+        });
+    }
     const [rows, setRows] = useState([
         {
             nombre: 'demo',
@@ -82,9 +89,10 @@ const UsuarioList = () => {
         { name: 'roles', title: 'Rol' },
         { name: 'usuarioId', title: 'Acciones' }
     ]);
-    const inizialize = async () => {
+    useEffect(() => {
+        load()
+    }, [])
 
-    }
     return (
         <Context.Provider value={[actualizarTable, setActualizarTableContext]}>
             <Box pt={2} pb={4}>
@@ -97,25 +105,31 @@ const UsuarioList = () => {
                         </IconWrapper>
                         <H5>Usuario</H5>
                     </FlexBox>
-                    <SearchInput bordered={'true'} placeholder="Buscar usuario" onChange={e => setSearchValue(e.target.value)} />
-                    <Button variant="contained" endIcon={<Add />} onClick={() => setOpenModal(true)}>
+
+                    <Button variant="contained" endIcon={<Add />} onClick={() => { setOpenModal(true) }}>
                         {t("Añadir Usuario")}
                     </Button>
                 </HeadingWrapper>
-                <CustomTable columnShape={UsuarioColumns} data={filteredItem} />
+                <DataTablaCustomize
+                    rows={rows}
+                    columns={columns}
+                    tableColumnExtensions={tableColumnExtensions}
+                >
+
+                    <DataTypeProvider
+                        for={['roles']}
+                        formatterComponent={({ value, row, column }) => MostrarRoles({ value, row, column })}
+                    />
+                    <DataTypeProvider
+                        for={['usuarioId']}
+                        formatterComponent={({ value, row, column }) => UsuarioActions({ row })}
+                    />
+
+                </DataTablaCustomize>
                 <CreateUsuarioModal open={openModal} onClose={() => setOpenModal(false)} />
             </Box>
-            <DataTablaCustomize
-                rows={rows}
-                columns={columns}
-                tableColumnExtensions={tableColumnExtensions}
-            >
-                <CurrencyTypeProvider
-                    for={['roles']}
-                    onClicks={({value, row, column}) => { console.log(value, row, column) }}
-                />
-            </DataTablaCustomize>
-        </Context.Provider>
+
+        </Context.Provider >
     );
 };
 
@@ -125,12 +139,15 @@ export const CurrencyTypeProvider = props => {
     console.log('PROP CurrencyTypeProvider')
     return (
         <DataTypeProvider
-            formatterComponent={({ value, row, column }) => CurrencyFormatter({ value, row, column, onClicks })}
+            formatterComponent={({ value, row, column }) => MostrarRoles({ value, row, column, onClicks })}
             {...props}
         ></DataTypeProvider>
     )
 };
-export const CurrencyFormatter = ({ value, row, column, onClicks }) => {
+
+
+
+export const MostrarRoles = ({ value, row, column, onClicks }) => {
     console.log('VALORES DE LA FILA', row)
     var roles = [];
     if (row.roles != "") {
@@ -145,7 +162,7 @@ export const CurrencyFormatter = ({ value, row, column, onClicks }) => {
                         size="small"
                         label={rol}
                         sx={{ m: 0.5 }}
-                        onClick={() => onClicks({value, row, column})}
+                        onClick={onClicks ? () => onClicks({ value, row, column }) : () => { }}
                     />)
                 })
             }

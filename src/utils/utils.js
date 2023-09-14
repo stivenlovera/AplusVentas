@@ -10,3 +10,18 @@ export const getRoute = pathname => {
   const str = pathname.split("/");
   return `/${str[1]}`;
 };
+
+/**
+ * 
+ * @param {UsuarioActual} user 
+ * @returns 
+ */
+export const getAllRutas = (user) => {
+  const rutas = [];
+  user.roles.forEach((role) => {
+    role.permisos.forEach((permiso) => {
+      rutas.push(permiso.ruta);
+    });
+  });
+  return rutas;
+};

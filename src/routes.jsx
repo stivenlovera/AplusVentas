@@ -5,13 +5,14 @@ import DashboardLayoutV3 from "layouts/layout-v3/DashboardLayout";
 import { element } from "prop-types";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-
+import { ProtectedRoute } from "components/ProtectedRoute";
+import { useTabContext } from "@mui/lab";
+import { getAllRutas } from "utils/utils";
 const Loadable = Component => props => {
   return <Suspense fallback={<LoadingScreen />}>
     <Component {...props} />
   </Suspense>;
 }; // dashboards
-const AlmacenesList = Loadable(lazy(() => import("./pages/almacenes/almacenes-list/almacenes-list")));
 const ProductosList = Loadable(lazy(() => import("./pages/productos/productos-list/productos-list")));
 const CategoriaList = Loadable(lazy(() => import("./pages/categorias/categorias-list/categoria-list")));
 const UsuarioList = Loadable(lazy(() => import("./pages/usuarios/usuario-list/usuario-list")));
@@ -54,13 +55,20 @@ const ActiveLayout = ({ nombreCompleto }) => {
   );
 };
 
+/**
+ * 
+ * @param {UsuarioActual} user 
+ * @param {*} token 
+ * @returns 
+ */
 const routes = (user, token) => {
+
   if (token) { // true si hay token
     return [
       {
         path: "dashboard",
         element: <ActiveLayout nombreCompleto={`${user.nombre} ${user.apellido}`} />,
-        children: dashboardRoutes,
+        children: dashboardRoutes(user),
       },
       {
         path: "*",
@@ -97,90 +105,97 @@ const authRoutes = [
   },
 ];
 
-const dashboardRoutes = [
-  {
-    path: "",
-    element: <LearningManagement />
-  },
-  {
-    path: "almacenes-list",
-    element: <Almacenes />
-  },
-  {
-    path: "productos-list",
-    element: <ProductosList />
-  },
-  {
-    path: "categoria-list",
-    element: <CategoriaList />
-  },
-  {
-    path: "usuario-list",
-    element: <UsuarioList />
-  },
-  {
-    path: "roles-permisos",
-    element: <PermisoList />
-  },
-  {
-    path: "proveedor-list",
-    element: <ProveedorList />
-  },
-  {
-    path: "cliente-list",
-    element: <ClientesList />
-  },
-  {
-    path: "orden-compra-list",
-    element: <OrdenCompraList />
-  },
-  {
-    path: "orden-compra-list/create",
-    element: <CreateOrden />
-  },
-  {
-    path: "orden-compra-list/editar/:id",
-    element: <CreateOrden />
-  },
-  {
-    path: "clasificacion",
-    element: <ClasificacionList />
-  },
-  {
-    path: "configuracion",
-    element: <Configuracion />
-  },
-  {
-    path: "configuracion-inicial",
-    element: <PaginaInicial />
-  },
-  {
-    path: "orden-inicial/:id",
-    element: <CreateOrdenInicial />
-  },
-  {
-    path: "orden-inicial/editar/:id",
-    element: <CreateOrdenInicial />
-  },
-  {
-    path: "venta",
-    element: <Venta />
-  },
-  {
-    path: "venta-create/:id",
-    element: <VentaCreate />
-  },
-  {
-    path: "movimientos",
-    element: <Movimientos />
-  },
-  {
-    path: "almacen/:id",
-    element: < AlmacenProducto />
-  },
-  {
-    path: "almacen-homologar/:productoId",
-    element: < Homologar />
-  }
-];
+const dashboardRoutes = (user) => {
+  const rutas = getAllRutas(user);
+
+  return [
+    {
+      path: "",
+      element: <LearningManagement />
+    },
+    {
+      path: "almacenes-list",
+      element: <Almacenes />
+    },
+    {
+      path: "productos-list",
+      element: <ProductosList />
+    },
+    {
+      path: "categoria-list",
+      element: <CategoriaList />
+    },
+    {
+      path: "usuario-list",
+      element: <UsuarioList />
+    },
+    {
+      path: "roles-permisos",
+      element: <PermisoList />
+    },
+    {
+      path: "proveedor-list",
+      element: <ProveedorList />
+    },
+    {
+      path: "cliente-list",
+      element: <ClientesList />
+    },
+    {
+      path: "orden-compra-list",
+      element: <OrdenCompraList />
+    },
+    {
+      path: "orden-compra-list/create",
+      element: <CreateOrden />
+    },
+    {
+      path: "orden-compra-list/editar/:id",
+      element: <CreateOrden />
+    },
+    {
+      path: "clasificacion",
+      element: <ClasificacionList />
+    },
+    {
+      path: "configuracion",
+      element: <Configuracion />
+    },
+    {
+      path: "configuracion-inicial",
+      element: <PaginaInicial />
+    },
+    {
+      path: "orden-inicial/:id",
+      element: <CreateOrdenInicial />
+    },
+    {
+      path: "orden-inicial/editar/:id",
+      element: <CreateOrdenInicial />
+    },
+    {
+      path: "venta",
+      element: <Venta />
+    },
+    {
+      path: "venta-create/:id",
+      element: <VentaCreate />
+    },
+    {
+      path: "movimientos",
+      element: <ProtectedRoute isAllowed={false}><Movimientos /></ProtectedRoute>
+    },
+    {
+      path: "almacen/:id",
+      element: < AlmacenProducto />
+    },
+    {
+      path: "almacen-homologar/:productoId",
+      element: < Homologar />
+    }
+  ]
+    .filter((element) => {
+      return rutas.includes(element.path)
+    });
+}
 export default routes;

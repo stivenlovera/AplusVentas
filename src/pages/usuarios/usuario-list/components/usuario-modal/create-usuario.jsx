@@ -10,10 +10,10 @@ import { H2, H6, Small } from "components/Typography";
 import { useFormik } from "formik";
 import DeleteIcon from "icons/DeleteIcon";
 import * as Yup from "yup"; // component props interface
-import { initialUsuario } from "../utils/initialUsuario";
+import { initialUsuario, UsuarioEditar } from "../utils/initialUsuario";
 import { DatePicker } from "@mui/x-date-pickers";
 import { UseStoreUsuario } from "./hook/use-store-usuario";
-
+import { UseUsuario } from "../../hooks/useUsuario";
 // styled components
 const StyledAppModal = styled(AppModal)(({
     theme
@@ -42,13 +42,20 @@ const ImageUploadWrapper = styled(FlexRowAlign)(({
     borderRadius: "8px",
     backgroundColor: theme.palette.grey[200]
 }));
-
+/**
+ * 
+ * @param {Object} props 
+ * @param {boolean} props.open
+ * @param {UsuarioEditar} props.data 
+ * @returns 
+ */
 const CreateUsuarioModal = ({
     open,
     data,
     onClose,
     editUsuario
 }) => {
+
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
 
     const validationSchema = Yup.object().shape({
@@ -61,6 +68,7 @@ const CreateUsuarioModal = ({
         email: Yup.string().email().required("Email es requerido!"),
         telefono: Yup.string().required("Telefono es requerido!")
     });
+
     const {
         values,
         errors,
@@ -70,10 +78,9 @@ const CreateUsuarioModal = ({
         resetForm,
         touched
     } = useFormik({
-        initialValues: initialUsuario,
+        initialValues: data ?? initialUsuario,
         validationSchema,
         onSubmit: async (values) => {
-            console.log(values)
             if (editUsuario) {
                 //editar
             } else {
@@ -82,7 +89,7 @@ const CreateUsuarioModal = ({
                     resetForm();
                     onClose();
                 }
-                
+
             }
         }
     });

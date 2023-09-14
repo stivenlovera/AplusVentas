@@ -5,7 +5,10 @@ import CreateUsuarioModal from "../usuario-modal/create-usuario";
 import Delete from "icons/Delete";
 import TuneIcon from '@mui/icons-material/Tune';
 import RolesModal from "../rol-modal/rol-modal";
-import {  UseEditarUsuarioRoles } from "../rol-modal/hook/use-edit-usuario";
+import { UseEditarUsuarioRoles } from "../rol-modal/hook/use-edit-usuario";
+import ModalDelete from "components/modal-delete/modal-delete";
+import { UseUsuario } from "../../hooks/useUsuario";
+
 const UsuarioColumns = [
     {
         Header: "Nombres",
@@ -26,6 +29,7 @@ const UsuarioColumns = [
     {
         Header: "Roles",
         accessor: "roles",
+
         Cell: ({
             row
         }) => {
@@ -63,6 +67,7 @@ const UsuarioColumns = [
             const [openModalEditar, setOpenModalEditar] = useState(false);
             const [openModalRol, setOpenModalRol] = useState(false);
             const [openModalEliminar, setModalEliminar] = useState(false);
+            const [openModalDelete, setOpenModalDelete] = useState(false);
 
             /*use editar */
 
@@ -73,6 +78,13 @@ const UsuarioColumns = [
             const hanlderOpenRol = async () => {
                 if (await apiEditar()) {
                     setOpenModalRol(true);
+                }
+            }
+            const { onDelete } = UseUsuario()
+            const hanlderDelete = async () => {
+                const { data, status } = await onDelete(row.original.usuarioId);
+                if (status) {
+                    setOpenModalDelete(false)
                 }
             }
             const { apiEditar, roles, usuario } = UseEditarUsuarioRoles(row.original.usuarioId);
@@ -95,18 +107,30 @@ const UsuarioColumns = [
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Eliminar" arrow>
-                    <IconButton onClick={() => { alert('funcion pendiente') }}>
+                    <IconButton onClick={() => { setOpenModalDelete(true) }}>
                         <Delete sx={{
                             fontSize: 22,
                             color: "text.disabled"
                         }} />
                     </IconButton>
                 </Tooltip>
-                <CreateUsuarioModal editUsuario open={openModalEditar} data={row.original} onClose={() => setOpenModalEditar(false)} />
+                <CreateUsuarioModal
+                    editUsuario
+                    open={openModalEditar}
+                    data={row.original}
+                    onClose={() => setOpenModalEditar(false)} />
                 <RolesModal data={{
                     roles,
                     usuario
-                }} editRol onClose={() => { setOpenModalRol(false) }} open={openModalRol} />
+                }}
+                    editRol
+                    onClose={() => { setOpenModalRol(false) }} open={openModalRol} />
+                <ModalDelete
+                    disabledButton={false}
+                    onClose={() => { setOpenModalDelete(false) }}
+                    onSave={hanlderDelete}
+                    open={openModalDelete}
+                />
             </Fragment >;
         }
     }];

@@ -12,7 +12,8 @@ import { useContext, useEffect, useState } from "react";
 import { UseUpdateUsuarioRoles } from "./hook/use-update-usuario";
 import { initialRoles } from "../utils/initialRoles";
 import { Context } from "contexts/ContextDataTable";
-
+import { Rol } from "interfaces/Rol";
+import { UsuarioActual } from "interfaces/usuarioActual";
 // styled components
 const StyledAppModal = styled(AppModal)(({
     theme
@@ -30,13 +31,26 @@ const SwitchWrapper = styled(Box)(() => ({
     width: "100%",
     marginTop: 10
 }));
-
+interface dataRol {
+    usuario: UsuarioActual,
+    roles: Rol[]
+}
+/**
+ * RolesModal component for managing user roles.
+ * @param {Object} props - The component props.
+ * @param {boolean} props.open - Flag indicating whether the modal is open.
+ * @param {dataRol} props.data - Data object containing user and role information.
+ * @param {Function} props.onClose - Callback function to close the modal.
+ * @param {boolean} props.editRol - Flag indicating whether the user is in edit mode.
+ * @returns {JSX.Element} The rendered RolesModal component.
+ */
 const RolesModal = ({
     open,
     data,
     onClose,
     editRol
 }) => {
+
     const { usuario, roles } = data
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
 
@@ -78,6 +92,7 @@ const RolesModal = ({
                 habilitado: usuario.habilitado,
                 usuario: usuario.usuario,
                 usuarioId: usuario.usuarioId,
+                roles: usuario.roles.map(x => x.rolId),
                 password: '',
             })
         } else {
@@ -97,8 +112,10 @@ const RolesModal = ({
             habilitado: usuario.habilitado,
             usuario: usuario.usuario,
             usuarioId: usuario.usuarioId,
+            roles: usuario.roles.map(x => x.rolId),
             password: '',
         })
+
     }, [data])
 
     /*Metodos */
@@ -177,17 +194,18 @@ const RolesModal = ({
                             multiple
                             getOptionLabel={(options) => options.nombre}
                             options={roles}
-
                             disabled={!values.habilitado}
                             defaultValue={usuario.roles}
                             //isOptionEqualToValue={(option, value) => option.value === value.value}
                             size="small"
                             onChange={(event, newValue) => {
+
                                 if (newValue != null) {
                                     var rolId = newValue.map(x => x.rolId);
                                     setChangeRoles(newValue)
                                     setFieldValue('roles', rolId)
                                 } else {
+
 
                                 }
                             }}
