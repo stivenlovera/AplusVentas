@@ -78,7 +78,7 @@ const CreateUsuarioModal = ({
         resetForm,
         touched
     } = useFormik({
-        initialValues: initialUsuario,
+        initialValues: data ?? initialUsuario,
         validationSchema,
         onSubmit: async (values) => {
             if (editUsuario) {
