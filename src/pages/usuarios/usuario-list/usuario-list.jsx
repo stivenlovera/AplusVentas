@@ -14,7 +14,6 @@ import { UseUsuario } from "./hooks/useUsuario";
 import Edit from "icons/Edit";
 import Delete from "icons/Delete";
 import ModalCrud from "components/modal-crud/modal-crud";
-import { CrearEditarUsuario } from "./components/usuario-modal/crear-editar-usuario";
 import { UsuarioDto } from "interfaces/Interfaces";
 import { initialUsuario } from "./components/utils/initialUsuario";
 import { UsuarioActions } from "./components/actions/usuario-actions";
