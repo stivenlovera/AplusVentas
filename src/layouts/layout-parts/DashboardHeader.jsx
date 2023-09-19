@@ -10,6 +10,7 @@ import NotificationsPopover from "./popovers/NotificationsPopover";
 import ProfilePopover from "./popovers/ProfilePopover";
 import ServicePopover from "./popovers/ServicePopover";
 import SearchBar from "./SearchBar"; // ------------------------------------------------
+import HeaderCarritoCompra from "components/header/header-carrito";
 
 // ------------------------------------------------
 // custom styled components
@@ -64,65 +65,68 @@ const DashboardHeader = props => {
   const downMd = useMediaQuery(theme => theme.breakpoints.down(1200));
 
   const handleChangeDirection = value => {
-    saveSettings({ ...settings,
+    saveSettings({
+      ...settings,
       direction: value
     });
   };
 
   const handleChangeTheme = value => {
-    saveSettings({ ...settings,
+    saveSettings({
+      ...settings,
       theme: value
     });
   };
 
   return <DashboardHeaderRoot position="sticky">
-      <StyledToolBar>
-        {downMd && <Box sx={{
+    <StyledToolBar>
+      {downMd && <Box sx={{
         cursor: "pointer"
       }} onClick={setShowMobileSideBar}>
-            <ToggleIcon />
-            <ToggleIcon width={18} />
-            <ToggleIcon width={9} />
-          </Box>}
+        <ToggleIcon />
+        <ToggleIcon width={18} />
+        <ToggleIcon width={9} />
+      </Box>}
 
-        <ClickAwayListener onClickAway={() => setSearchBar(false)}>
-          <Box>
-            {!openSearchBar && <StyledIconButton onClick={() => setSearchBar(true)}>
-                <SearchIcon sx={{
+      <ClickAwayListener onClickAway={() => setSearchBar(false)}>
+        <Box>
+          {!openSearchBar && <StyledIconButton onClick={() => setSearchBar(true)}>
+            <SearchIcon sx={{
               color: "text.disabled"
             }} />
-              </StyledIconButton>}
-
-            <SearchBar open={openSearchBar} handleClose={() => setSearchBar(false)} />
-          </Box>
-        </ClickAwayListener>
-
-        <Box flexGrow={1} ml={1} />
-
-        {settings.direction === "rtl" ? <StyledIconButton onClick={() => handleChangeDirection("ltr")}>
-            <MenuLeft sx={{
-          color: "text.disabled"
-        }} />
-          </StyledIconButton> : <StyledIconButton onClick={() => handleChangeDirection("rtl")}>
-            <MenuLeftRight sx={{
-          color: "text.disabled"
-        }} />
           </StyledIconButton>}
 
-        {settings.theme === "light" ? <StyledIconButton onClick={() => handleChangeTheme("dark")}>
-            <ThemeIcon />
-          </StyledIconButton> : <StyledIconButton onClick={() => handleChangeTheme("light")}>
-            <ThemeIcon />
-          </StyledIconButton>}
+          <SearchBar open={openSearchBar} handleClose={() => setSearchBar(false)} />
+        </Box>
+      </ClickAwayListener>
 
-        {upSm && <Fragment>
-            <LanguagePopover />
-            <NotificationsPopover />
-            <ServicePopover />
-          </Fragment>}
-        <ProfilePopover />
-      </StyledToolBar>
-    </DashboardHeaderRoot>;
+      <Box flexGrow={1} ml={1} />
+
+      {settings.direction === "rtl" ? <StyledIconButton onClick={() => handleChangeDirection("ltr")}>
+        <MenuLeft sx={{
+          color: "text.disabled"
+        }} />
+      </StyledIconButton> : <StyledIconButton onClick={() => handleChangeDirection("rtl")}>
+        <MenuLeftRight sx={{
+          color: "text.disabled"
+        }} />
+      </StyledIconButton>}
+
+      {settings.theme === "light" ? <StyledIconButton onClick={() => handleChangeTheme("dark")}>
+        <ThemeIcon />
+      </StyledIconButton> : <StyledIconButton onClick={() => handleChangeTheme("light")}>
+        <ThemeIcon />
+      </StyledIconButton>}
+      <HeaderCarritoCompra />
+      {upSm && <Fragment>
+        {/* <LanguagePopover /> */}
+
+        {/* <NotificationsPopover /> */}
+        {/* <ServicePopover /> */}
+      </Fragment>}
+      <ProfilePopover />
+    </StyledToolBar>
+  </DashboardHeaderRoot>;
 };
 
 export default DashboardHeader;

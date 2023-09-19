@@ -25,3 +25,10 @@ export const initialDetalleAlmacen = {
     estadoVendido: 0,
     almacen: initialAlmacen
 };
+export const initialStateStockProducto={
+    almacenid:0,
+    codigoAlmacen:'',
+    nombreAlmacen:'',
+    nombreProducto:'',
+    productoid:0
+}

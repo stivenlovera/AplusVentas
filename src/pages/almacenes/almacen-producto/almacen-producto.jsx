@@ -1,4 +1,4 @@
-import { Backdrop, Button, Card, CircularProgress, TableContainer } from '@mui/material'
+import { Backdrop, Button, Card, CircularProgress, IconButton, TableContainer } from '@mui/material'
 import { Grid as GridMaterial } from '@mui/material'
 import { Box } from '@mui/system'
 import IconWrapper from 'components/IconWrapper'
@@ -6,72 +6,83 @@ import { H4, H5, H6 } from 'components/Typography'
 import FlexBox from 'components/flexbox/FlexBox'
 import InventoryIcon from '@mui/icons-material/Inventory';
 import { HeadingWrapper } from 'pages/admin-ecommerce/product-management'
-import React, { useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { UseAlmacen } from '../hooks/useAlmacenes'
 import { useParams } from 'react-router-dom';
-import { initialAlmacen } from '../utils/almacen'
-import Paper from '@mui/material/Paper';
-import {
-    RowDetailState, PagingState,
-    IntegratedSorting,
-    SortingState,
-    IntegratedPaging,
-    DataTypeProvider,
-    SearchState,
-    IntegratedFiltering
-} from '@devexpress/dx-react-grid';
-import {
-    Grid,
-    Table,
-    TableHeaderRow,
-    TableRowDetail,
-    PagingPanel,
-    SearchPanel,
-    Toolbar
+import { initialAlmacen, initialStateStockProducto } from '../utils/almacen'
+import { UseDetalleAlmacen } from '../hooks/useDetalleAlmacen'
+import { DataTablaCustomize } from 'components/data-table/data-table-cuztomize'
+import { DataTypeProvider } from '@devexpress/dx-react-grid'
+import FormatListNumberedRtlIcon from '@mui/icons-material/FormatListNumberedRtl';
+import ModalHomologar from './modal-homologar'
 
-} from '@devexpress/dx-react-grid-material-ui';
+const CurrencyFormatter = ({ value, row, column, onClicks }) => {
+    return (
+        <Fragment>
+            <IconButton onClick={() => onClicks({ value, row, column })} >
+                <FormatListNumberedRtlIcon sx={{
+                    fontSize: 18,
+                    color: "text.disabled"
+                }} />
+            </IconButton>
+        </Fragment>
+    )
+};
+
+const CurrencyTypeProvider = props => {
+    const { onClicks } = props;
+    return (
+        <DataTypeProvider
+            formatterComponent={({ value, row, column }) => CurrencyFormatter({ value, row, column, onClicks })}
+            {...props}
+        ></DataTypeProvider>
+    )
+};
+
 const AlmacenProducto = () => {
-    const { id } = useParams();
+    const { almacenId } = useParams();
     const [loading, setLoading] = useState(true)
     const [almacen, setAlmacen] = useState(initialAlmacen);
 
-    const { onMovimientoAlmacen, onProductoAlmacen, onAlmacenProducto, onEditar } = UseAlmacen();
-
+    const { onGetStockProducto } = UseDetalleAlmacen();
+    const { onEditar } = UseAlmacen()
+    const [producto, setProducto] = useState(initialStateStockProducto);
+    const [openModalHomologar, setOpenModalHomologar] = useState(false)
     /*TABLE  */
     const [tableColumnExtensions] = useState([
-        { columnName: 'producto', wordWrapEnabled: true, align: 'left' },
+        { columnName: 'almacenid', wordWrapEnabled: true, align: 'left' },
+        { columnName: 'nombreProducto', wordWrapEnabled: true, align: 'left' },
         { columnName: 'cantidad', wordWrapEnabled: true, align: 'left' },
-        { columnName: 'estado', width: 180, wordWrapEnabled: true, align: 'left' },
-        { columnName: 'stockDiponible', width: 180, wordWrapEnabled: true, align: 'left' },
-        { columnName: 'detalleAlmacenId', width: 180, wordWrapEnabled: true, align: 'left' }
-        /*       { columnName: 'id', width: 150, wordWrapEnabled: true, align: 'left' }, */
+        { columnName: 'productoid', width: 180, wordWrapEnabled: true, align: 'left' }
     ]);
     const [columns] = useState([
-        { name: 'producto', title: 'Producto' },
-        { name: 'cantidad', title: 'Cantidad' },
-        { name: 'estado', title: 'Estado' },
-        { name: 'stockDiponible', title: 'Stock  Disponible' },
-        { name: 'detalleAlmacenId', title: 'Acciones' },
+        { name: 'almacenid', title: 'Producto maestro' },
+        { name: 'nombreProducto', title: 'Producto' },
+        { name: 'cantidad', title: 'Stock' },
+        { name: 'productoid', title: 'Acciones' },
     ]);
     const [rows, setRow] = useState([]);
 
     /*Eventos */
-    const inizializeLista = async () => {
-        const { almacen, status } = await onAlmacenProducto(id);
-        setRow(almacen)
+    const inizializeListaStock = async () => {
+        const { data, status } = await onGetStockProducto(almacenId, 0);
+        setRow(data)
         setLoading(false);
     }
     const inizializeAlmacen = async () => {
-        const { edit, status } = await onEditar(id);
+        const { edit, status } = await onEditar(almacenId);
         setAlmacen(edit)
         setLoading(false);
     }
     useEffect(() => {
-        inizializeLista();
+        inizializeListaStock();
         inizializeAlmacen();
     }, [])
-
+    const handlerHomologar = ({ value, row, column }) => {
+        setProducto(row)
+        setOpenModalHomologar(true)
+    }
     return (
         <>
             <Backdrop
@@ -103,46 +114,36 @@ const AlmacenProducto = () => {
                             <H5 fontWeight={500}>{almacen.codigoAlmacen}</H5>
                         </GridMaterial>
                         <GridMaterial item md={4} xs={6}>
+                            <H6 color="text.secondary">Almacen </H6>
+                            <H5 fontWeight={500}>{almacen.nombreAlmacen}</H5>
+                        </GridMaterial>
+                        <GridMaterial item md={4} xs={6}>
                             <H6 color="text.secondary">Direccion</H6>
                             <H5 fontWeight={500}>{almacen.dirrecion}</H5>
                         </GridMaterial>
                     </GridMaterial>
                 </Card>
                 <br />
-                <Paper>
-                    <Grid
-                        rows={rows}
-                        columns={columns}
-                    >
-                        {/* data format */}
-                        {/*   <CurrencyTypeProvider
-                            for={currencyColumns}
-                        /> */}
-                        {/* sort columns*/}
-                        <SortingState
-                            defaultSorting={[{ columnName: 'nombre', direction: 'asc' }]}
-                        />
-                        <IntegratedSorting />
-                        {/* paggin */}
-                        <PagingState
-                            defaultCurrentPage={0}
-                            pageSize={5}
-                        />
-                        <IntegratedPaging />
-                        <PagingPanel />
-                        {/* buscador */}
-                        <SearchState defaultValue="" />
-                        <IntegratedFiltering />
-                        <Toolbar />
-                        <SearchPanel />
-                        {/* table */}
-                        <Table columnExtensions={tableColumnExtensions} />
-                        <TableHeaderRow showSortingControls />
-                    </Grid>
-                </Paper>
+                <DataTablaCustomize
+                    rows={rows}
+                    columns={columns}
+                    tableColumnExtensions={tableColumnExtensions}
+                >
+                    <CurrencyTypeProvider
+                        for={['productoid']}
+                        onClicks={handlerHomologar}
+                    />
+                </DataTablaCustomize>
+                <ModalHomologar
+                    productoId={producto.productoid}
+                    open={openModalHomologar}
+                    onClose={() => { setOpenModalHomologar(false) }}
+                >
+                </ModalHomologar>
             </Box>
         </>
     )
 }
+export default AlmacenProducto;
 
-export default AlmacenProducto
+

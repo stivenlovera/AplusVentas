@@ -103,25 +103,16 @@ const ProfilePopover = () => {
       }} />
 
       <Box>
-        <H6>{user?.name || 'Aaron Cooper'}</H6>
+        <H6>{user?.name || ''}</H6>
         <Tiny display="block" fontWeight={500} color="text.disabled">
           {user?.email || 'aaron@example.com'}
         </Tiny>
       </Box>
     </FlexBox>}>
       <Box pt={1}>
-        <StyledSmall onClick={() => handleMenuItem('/dashboard/profile')}>Set Status</StyledSmall>
-
         <StyledSmall onClick={() => handleMenuItem('/dashboard/profile')}>
-          Profile & Account
+          Configurar Perfil
         </StyledSmall>
-
-        <StyledSmall onClick={() => handleMenuItem('/dashboard/account')}>Settings</StyledSmall>
-
-        <StyledSmall onClick={() => handleMenuItem('/dashboard/team-member')}>
-          Manage Team
-        </StyledSmall>
-
         <Divider sx={{
           my: 1
         }} />
@@ -130,7 +121,7 @@ const ProfilePopover = () => {
           handleLogout();
           toast.error('You Logout Successfully');
         }}>
-          Sign Out
+          Cerrar session
         </StyledSmall>
       </Box>
     </PopoverLayout>

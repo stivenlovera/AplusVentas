@@ -56,10 +56,24 @@ export const UseDetalleAlmacen = () => {
             status: !!status
         };
     }
+    const onGetStockProducto = async (almacenId, estado) => {
+        const { data, message, status } = await Request({
+            endPoint: `${process.env.REACT_APP_API}api/detalle-almacen/producto-stock/${almacenId}/${estado}`,
+            initialValues: [],
+            method: 'get',
+            showError: true,
+            showSuccess: false
+        });
+        return {
+            data: data,
+            status: !!status
+        };
+    }
     return {
         onStore,
         onUpdate,
         onGetPendienteAlmacen,
-        onGetProductoAlmacen
+        onGetProductoAlmacen,
+        onGetStockProducto
     }
 }

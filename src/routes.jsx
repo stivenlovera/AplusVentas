@@ -25,7 +25,7 @@ const Configuracion = Loadable(lazy(() => import("./pages/configuracion-inicial/
 const AlmacenProducto = Loadable(lazy(() => import("./pages/almacenes/almacen-producto/almacen-producto")));
 const Almacenes = Loadable(lazy(() => import("./pages/almacenes/almacenes")));
 const Homologar = Loadable(lazy(() => import("./pages/almacenes/homologar/index")));
-
+const Tienda = Loadable(lazy(() => import("./pages/tienda/tienda")));
 
 const LearningManagement = Loadable(lazy(() => import("./pages/dashboards/learning-management"))); // account
 const CreateOrdenInicial = Loadable(lazy(() => import("./pages/orden-compra/create-orden-inicial/create-orden-inicial")));
@@ -41,15 +41,17 @@ const ActiveLayout = ({ nombreCompleto }) => {
     settings
   } = useSettings(); // console.log(settings);
 
-  const [userContext, setUserContext] = useState(nombreCompleto);
-
+  const [userContext, setUserContext] = useState();
+  const [userContextCotizacion, setUserContextCotizacion] = useState();
   useEffect(() => {
     setUserContext(nombreCompleto)
   }, [nombreCompleto])
 
   return (
     <ContextUser.Provider value={[userContext, setUserContext]}>
-      <DashboardLayoutV3 />
+      <ContextUser.Provider value={[userContextCotizacion, setUserContextCotizacion]}>
+        <DashboardLayoutV3 />
+      </ContextUser.Provider>
     </ContextUser.Provider>
   );
 };
@@ -175,12 +177,16 @@ const dashboardRoutes = [
     element: <Movimientos />
   },
   {
-    path: "almacen/:id",
+    path: "almacen/:almacenId",
     element: < AlmacenProducto />
   },
   {
     path: "almacen-homologar/:productoId",
     element: < Homologar />
+  },
+  {
+    path: "tienda",
+    element: < Tienda />
   }
 ];
 export default routes;
