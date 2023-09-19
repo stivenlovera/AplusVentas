@@ -3,7 +3,7 @@ import StyledEngineProvider from "@mui/material/StyledEngineProvider";
 import RTL from "components/RTL";
 import useSettings from "hooks/useSettings";
 import { useRoutes } from "react-router-dom";
-import routes from "routes";
+import routes from "routes.jsx";
 import { createCustomTheme } from "theme";
 import "./i18n";
 import * as React from 'react';

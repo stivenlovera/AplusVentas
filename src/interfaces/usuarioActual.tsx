@@ -1,5 +1,5 @@
 import { Rol } from "./Rol";
-export interface UsuarioActual {
+export class UsuarioActual {
     usuario: string;
     nombre: string;
     apellido: string;

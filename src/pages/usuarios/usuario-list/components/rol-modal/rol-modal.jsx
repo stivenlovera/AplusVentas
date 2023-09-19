@@ -1,3 +1,4 @@
+//@ts-nocheck
 
 import { Autocomplete, Box, Button, Grid, Switch, TextField, styled, useMediaQuery } from "@mui/material";
 import AppModal from "components/AppModal";
@@ -31,10 +32,7 @@ const SwitchWrapper = styled(Box)(() => ({
     width: "100%",
     marginTop: 10
 }));
-interface dataRol {
-    usuario: UsuarioActual,
-    roles: Rol[]
-}
+
 /**
  * RolesModal component for managing user roles.
  * @param {Object} props - The component props.

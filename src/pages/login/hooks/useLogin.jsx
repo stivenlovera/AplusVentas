@@ -26,11 +26,12 @@ export const UseLogin = (usuario, password) => {
                 enqueueSnackbar(data.message, { variant: 'success' });
             }
             else {
+                console.log(error)
 
                 enqueueSnackbar(data.message, { variant: 'error' });
             }
         } catch (error) {
-
+            console.log(error)
             enqueueSnackbar('Servidor desconectado', { variant: 'error' });
         }
     }
