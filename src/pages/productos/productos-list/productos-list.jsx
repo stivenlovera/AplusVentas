@@ -44,7 +44,8 @@ const ProductosList = () => {
         codigoProducto: '',
         proveedores: [],
         categorias: [],
-        productosMaestros: []
+        productosMaestros: [],
+        tiposProducto: []
     })
 
     useEffect(() => {
@@ -106,10 +107,7 @@ const ProductosList = () => {
                     open={openModal}
                     onClose={() => setOpenModal(false)}
                     data={{
-                        codigoProducto: create.codigoProducto,
-                        proveedores: create.proveedores,
-                        categorias: create.categorias,
-                        productosMaestros: create.productosMaestros,
+                        ...create,
                         initialState: { ...initialStateProducto, codigoProducto: create.codigoProducto }
                     }} />
 

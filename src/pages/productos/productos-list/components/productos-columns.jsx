@@ -56,9 +56,9 @@ const ProductosColumns = [
                     showSuccess: false
                 });
                 if (!!status) {
+                    console.log(data);
                     setEditar({
-                        categorias: data.categorias,
-                        productosMaestros: data.productosMaestros,
+                        ...data,
                         initialState: data.producto
                     });
                     setOpenModal(true);

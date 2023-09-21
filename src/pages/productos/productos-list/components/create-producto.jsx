@@ -50,7 +50,7 @@ const CreateProductoModal = ({
     onClose,
     editProduct
 }) => {
-    const { codigoProducto, categorias, productosMaestros, initialState } = data;
+    const { codigoProducto, categorias, productosMaestros, tiposProducto, initialState } = data;
     const [context, setContext] = useContext(Context);
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [selectProductoMaestro, setSelectProductoMaestro] = useState(null)
@@ -102,6 +102,7 @@ const CreateProductoModal = ({
                     onClose()
                 }
             } else {
+                console.log(values)
                 const { data, message, status } = await Request({
                     endPoint: `${process.env.REACT_APP_API}api/Producto`,
                     initialValues: [],
@@ -281,6 +282,41 @@ const CreateProductoModal = ({
                                 onChange={handleChange}
                                 error={Boolean(touched.nombreProducto && errors.nombreProducto)}
                                 helperText={touched.nombreProducto && errors.nombreProducto}
+                            />
+                        </Grid>
+                        <Grid item sm={12} xs={12}>
+                            <H6 mb={1}>Seleccione un tipo</H6>
+                            <Autocomplete
+                                options={tiposProducto}
+                                getOptionLabel={(options) => options.nombre}
+                                isOptionEqualToValue={(option, value) => option.tipoProductoId === value.tipoProductoId}
+                                size="small"
+                                fullWidth
+                                onChange={(event, newValue) => {
+                                    if (newValue != null) {
+                                        setFieldValue('tipoProductoId', newValue.tipoProductoId)
+                                    } else {
+                                        setFieldValue('tipoProductoId', '')
+                                    }
+                                }}
+                                defaultValue={() => {
+                                    console.log(initialState)
+                                    const a = tiposProducto.find(x => x.tipoProductoId === initialState.tipoProductoId)
+                                    console.log(a)
+
+                                    return a;
+
+
+                                }}
+                                renderInput={
+                                    (params) =>
+                                        <TextField
+                                            {...params}
+                                            value={values.tipoProductoId}
+                                            label="Selecione un tipo producto"
+                                            error={Boolean(touched.tipoProductoId && errors.tipoProductoId)}
+                                            helperText={touched.tipoProductoId && errors.tipoProductoId}
+                                        />}
                             />
                         </Grid>
                         <Grid item sm={4} xs={12}>
