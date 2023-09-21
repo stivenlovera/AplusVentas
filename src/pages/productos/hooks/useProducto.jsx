@@ -43,9 +43,22 @@ export const UseProducto = () => {
       status: !!status
     };
   }
+  const Get = async (id) => {
+    const { data, message, status } = await Request({
+      endPoint: `${process.env.REACT_APP_API}api/Producto/${id}`,
+      initialValues: [],
+      method: 'get',
+      showError: true,
+      showSuccess: false
+    });
+    return {
+      edit: data,
+      status: !!status
+    };
+  }
   const Editar = async (id) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/Producto/editar${id}`,
+      endPoint: `${process.env.REACT_APP_API}api/Producto/editar/${id}`,
       initialValues: [],
       method: 'get',
       showError: true,
@@ -58,7 +71,7 @@ export const UseProducto = () => {
   }
   const Update = async (values) => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/Producto/update${values.id}`,
+      endPoint: `${process.env.REACT_APP_API}api/Producto/update/${values.id}`,
       initialValues: [],
       method: 'put',
       showError: true,
@@ -86,6 +99,7 @@ export const UseProducto = () => {
 
   return {
     List,
+    Get,
     Create,
     Store,
     Editar,

@@ -1,7 +1,7 @@
 import { Box, Button, ButtonBase, Grid, IconButton, Snackbar, Stack, styled } from "@mui/material";
 import SearchInput from "components/input-fields/SearchInput";
 import { StyledPagination } from "page-sections/data-table/dataTableV2/styledComponents";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useContext, useEffect, useState } from "react";
 import { searchByName } from "utils/utils"; // styled components
 import SlideFilter from "./components/slide-filter";
 import CardProducto from "./components/card-producto";
@@ -10,16 +10,21 @@ import { UseProducto } from "pages/productos/hooks/useProducto";
 import { UseClasificacion } from "pages/Clasificacion/hooks/useClasificacion";
 import MuiAlert from '@mui/material/Alert';
 import sortArray from 'sort-array'
+import { ContextCotizacion } from "contexts/ContextCotizacion";
+import { initialStateDetalleProducto, initialStateSort } from "./utils/initialStates";
+import ModalCarritoLista from "./components/modal-carrito-lista";
+import { useCarritoCompra } from "./hooks/useCarritoCompra";
 
 const Alert = forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 const Tienda = () => {
-  const [openModal, setOpenModal] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-  const [filteredItem, setFilteredItem] = useState(productList);
+  const [carritoProductos, setCarritoProductos] = useState([])
+  const [openModalCarritoCompra, setOpenModalCarritoCompra] = useState(false);
+  const [openModalDetalleProducto, setOpenModalDetalleProducto] = useState(false);
   const [productos, setProductos] = useState([]);
+  const [activeProducto, setActiveProducto] = useState(initialStateDetalleProducto);
   //ordered
   const [categorias, setCategorias] = useState([])
   const [activeCategory, setActiveCategory] = useState({
@@ -27,25 +32,12 @@ const Tienda = () => {
     column: 'nombre',
     order: 'asc'
   });
-  const [sort, setSort] = useState([{
-    nombre: 'Nombre',
-    column: 'nombre',
-    order: 'asc'
-  },
-  {
-    nombre: 'De mayor a menor precio',
-    column: 'precioVentaMax',
-    order: 'desc'
-  },
-  {
-    nombre: 'De menor a mayor precio',
-    column: 'precioVentaMax',
-    order: 'asc'
-  }])
+  const [sort, setSort] = useState(initialStateSort)
   const [activeSortBy, setActiveSortBy] = useState("");
 
-  const { List } = UseProducto();
+  const { List, Get } = UseProducto();
   const { onList } = UseClasificacion();
+  const { GetGroupProducto } = useCarritoCompra()
 
   const inizialize = async () => {
     const { lista, status } = await List();
@@ -57,7 +49,6 @@ const Tienda = () => {
       setCategorias(listaCategoria);
     }
   }
-
   const ordenar = (data) => {
     /* const categorias = sortArray(productos, { by: 'nombre', order: 'asc' }) */
     //console.log(categorias)
@@ -65,37 +56,43 @@ const Tienda = () => {
     //console.log(ordenar)
     setActiveSortBy(data)
   }
-  const AddCarrttoCompra = (producto) => {
-    console.log(producto)
+  const AddCarritoCompra = (producto) => {
+    carritoProductos.push(producto)
+    setCarritoProductos(carritoProductos)
+    console.log(carritoProductos)
     handleClick()
   }
-  useEffect(() => {
-    const result = searchByName(productList, searchValue);
 
-    setFilteredItem(result);
-    inizialize()
-  }, [searchValue]);
+  const onEditarProducto = async (productoId) => {
+    const { edit, status } = await Get(productoId)
+    if (status) {
+      setActiveProducto(edit);
+      setOpenModalDetalleProducto(true)
+    }
+  };
+
   //notistack
   const [open, setOpen] = useState(false);
-
   const handleClick = () => {
     setOpen(true);
   };
-
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
       return;
     }
-
     setOpen(false);
   };
+  //useEffect
+  useEffect(() => {
+    inizialize()
+  }, []);
   return <Box pt={2} pb={4}>
-    <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+    <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
       <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
         Añadido al carrto de compra
       </Alert>
     </Snackbar>
-    <SearchInput bordered={false} placeholder="Find Products" onChange={e => setSearchValue(e.target.value)} />
+    <SearchInput bordered={false} placeholder="Buscar productos" onChange={() => { }} />
     <Box marginTop={3}>
       <Grid container spacing={3}>
         <Grid item lg={3} sm={4} xs={12}>
@@ -106,15 +103,17 @@ const Tienda = () => {
             sort={sort}
             activeSortBy={activeSortBy}
             onActiveSortBy={ordenar}
+            carritoCompra={carritoProductos}
+            onOpenCarritoCompra={() => { setOpenModalCarritoCompra(true) }}
           />
         </Grid>
         <Grid item lg={9} sm={8} xs={12}>
           <Grid container spacing={3}>
-            {productos.map(producto => <Grid item lg={4} md={6} xs={12} key={producto.id}>
+            {productos.map(producto => <Grid item lg={4} md={6} xs={12} key={producto.productoId}>
               <CardProducto
                 product={producto}
-                handleClick={() => setOpenModal(true)}
-                onAddProducto={AddCarrttoCompra}
+                handleClick={() => { onEditarProducto(producto.productoId) }}
+                onAddProducto={AddCarritoCompra}
               />
             </Grid>)}
           </Grid>
@@ -128,25 +127,21 @@ const Tienda = () => {
         </Grid>
       </Grid>
     </Box>
-    <ModalDetailProducto onClose={() => { setOpenModal(false) }} openModal={openModal} />
+    <ModalDetailProducto
+      producto={activeProducto}
+      onClose={() => { setOpenModalDetalleProducto(false);  }}
+      openModal={openModalDetalleProducto}
+      onAddProducto={AddCarritoCompra}
+    />
+    <ModalCarritoLista
+      openModalCarritoCompra={openModalCarritoCompra}
+      carritoProductos={carritoProductos}
+      onCloseModalCarritoCompra={() => { setOpenModalCarritoCompra(false);console.log('Delete repeat carrito compra',GetGroupProducto(carritoProductos)) }}
+      onDecrementItem={(producto) => { console.log('decrement', producto) }}
+      onIncrementItem={(producto) => { console.log('increment', producto) }}
+      onDeleteItem={(producto) => { console.log('delete', producto) }}
+    />
   </Box>;
 };
 
-const productList = [{
-  productoId: 1,
-  codigoProducto: 'prod-1',
-  codigoBarra: '554521222112',
-  nombreProducto: 'RT53K6541SL',
-  stockActual: 0,
-  precioCompra: 1000,
-  utilidadMin: 20,
-  precioVentaMin: 4200,
-  utilidadMax: 40,
-  precioVentaMax: 4900,
-  categoria: null,
-  productoMaestro: null,
-  productoMaestroNombre: null,
-  imagenes: null,
-  atributos: []
-}];
 export default Tienda;

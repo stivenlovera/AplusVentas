@@ -2,7 +2,6 @@ import { ShoppingCart } from "@mui/icons-material";
 import { Box, Button, Card, Slider, styled } from "@mui/material";
 import FlexBox from "components/flexbox/FlexBox";
 import { H6, Small, Tiny } from "components/Typography";
-import { useState } from "react";
 import { useTranslation } from "react-i18next"; // styled components
 
 const Dot = styled(Box)(({
@@ -34,7 +33,9 @@ const SlideFilter = ({
     onActiveCategory,
     sort,
     activeSortBy,
-    onActiveSortBy
+    onActiveSortBy,
+    carritoCompra,
+    onOpenCarritoCompra
 }) => {
     const {
         t
@@ -79,10 +80,13 @@ const SlideFilter = ({
                     <Small>{t(item.nombre)}</Small>
                 </FlexBox>)}
         </Box>
-        <Button variant="contained" fullWidth sx={{
-            marginTop: 4
-        }}>
-            Ver carrito
+        <Button variant="contained"
+            fullWidth sx={{
+                marginTop: 4
+            }}
+            onClick={onOpenCarritoCompra}
+        >
+            Ver carrito ({carritoCompra.length})
             <ShoppingCart sx={{
                 fontSize: 17,
                 marginLeft: 1

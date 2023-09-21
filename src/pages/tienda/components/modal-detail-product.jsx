@@ -6,7 +6,7 @@ import React, { useState } from 'react'
 import styled from '@emotion/styled';
 import AppModal from 'components/AppModal';
 import { H3, H6 } from 'components/Typography';
-import ModalAccordion from 'page-sections/ecommerce/ModalAccordion';
+import AtributoProducto from './atributos-productos';
 
 const StyledAppModal = styled(AppModal)(({
     theme
@@ -37,10 +37,30 @@ const CustomDot = styled(Dot)(() => ({
 }));
 
 const ModalDetailProducto = ({
+    producto,
     openModal,
-    onClose
+    onClose,
+    onAddProducto
 }) => {
     const [activeSize, setActiveSize] = useState("Small"); // search input
+    const {
+        productoId,
+        codigoProducto,
+        codigoBarra,
+        nombreProducto,
+        stockActual,
+        precioCompra,
+        utilidadMin,
+        precioVentaMin,
+        utilidadMax,
+        precioVentaMax,
+        categoria,
+        productoMaestro,
+        productoMaestroNombre,
+        imagenes,
+        atributos
+    } = producto
+
     return (
         <StyledAppModal open={openModal} handleClose={onClose}>
             <Grid container spacing={3}>
@@ -54,57 +74,85 @@ const ModalDetailProducto = ({
                             <Slider style={{
                                 marginBottom: 10
                             }}>
-                                {[0, 1, 2].map(item => <Slide index={item} key={item}>
-                                    <img alt="" width="100%" height="100%" src="/static/products/airbud-2.png" style={{
+                                {imagenes.map((imagen, i) => <Slide index={i} key={i}>
+                                    <img alt="" width="100%" height="100%" src={`${process.env.REACT_APP_IMAGENES_PRODUCTOS}/${imagen}`} style={{
                                         objectFit: "cover"
                                     }} />
                                 </Slide>)}
                             </Slider>
 
                             <FlexBetween>
-                                {[0, 1, 2].map(item => <CustomDot slide={item} key={item}>
-                                    <img alt="" width="100%" height="100%" src="/static/products/airbud-2.png" style={{
-                                        objectFit: "cover"
-                                    }} />
-                                </CustomDot>)}
+                                {imagenes.map((imagen, i) => {
+                                    return (<CustomDot slide={i} key={i}>
+                                        <img alt="" width="100%" height="100%" src={`${process.env.REACT_APP_IMAGENES_PRODUCTOS}/${imagen}`} style={{
+                                            objectFit: "cover"
+                                        }} />
+                                    </CustomDot>)
+                                })}
                             </FlexBetween>
                         </CarouselProvider>
                     </Box>
                 </Grid>
 
                 <Grid item sm={7} xs={12}>
-                    <H3 mb={0.5}>Lamp Light</H3>
+                    <H3 mb={0.5}>{productoMaestroNombre}</H3>
                     <H6 fontWeight={500} color="text.disabled">
-                        Built for natural motion, the flex and motion
+                        {nombreProducto}
                     </H6>
 
-                    <FlexBetween width={200} marginTop={2}>
+                    {/* <FlexBetween width={200} marginTop={2}>
                         <H6>Sizes:</H6>
                         {["Small", "Medium", "Big"].map(item => <CustomButton disableRipple key={item} onClick={() => setActiveSize(item)} active={(activeSize === item).toString()}>
                             {item}
                         </CustomButton>)}
-                    </FlexBetween>
+                    </FlexBetween> */}
 
                     <H3 fontWeight={700} marginTop={2}>
-                        $215
+                        {precioVentaMax} Bs
                     </H3>
 
                     <Box mt={1}>
-                        <Button variant="contained" size="small" endIcon={<Add />}>
-                            Add To Cart
+                        <Button
+                            variant="contained"
+                            size="small"
+                            endIcon={<Add />}
+                            onClick={() => {
+                                onAddProducto({
+                                    productoId: productoId ,
+                                    codigoProducto: codigoProducto,
+                                    codigoBarra: codigoBarra,
+                                    nombreProducto:  nombreProducto,
+                                    stockActual: stockActual,
+                                    precioCompra: precioCompra,
+                                    utilidadMin: utilidadMin,
+                                    precioVentaMin: precioVentaMin,
+                                    utilidadMax: utilidadMax,
+                                    precioVentaMax: precioVentaMax,
+                                    categoria: null,
+                                    productoMaestro: productoMaestro,
+                                    productoMaestroNombre: productoMaestroNombre,
+                                    imagenes: imagenes,
+                                    atributos: null
+                                })
+                            }}
+                        >
+                            Añadir al carrito
                         </Button>
-                        <IconButton sx={{
+                        {/*   <IconButton sx={{
                             marginLeft: 1.5,
                             backgroundColor: "grey.100"
                         }}>
                             <Favorite sx={{
                                 color: "text.disabled"
                             }} />
-                        </IconButton>
+                        </IconButton> */}
                     </Box>
 
                     <Box marginTop={3}>
-                        <ModalAccordion />
+                        <AtributoProducto
+                            atributos={atributos}
+                            descripcion={''}
+                        />
                     </Box>
                 </Grid>
             </Grid>

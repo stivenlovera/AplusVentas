@@ -1,4 +1,5 @@
 import LoadingScreen from "components/LoadingScreen";
+import { ContextCotizacion } from "contexts/ContextCotizacion";
 import { ContextUser } from "contexts/ContextUser";
 import useSettings from "hooks/useSettings";
 import DashboardLayoutV3 from "layouts/layout-v3/DashboardLayout";
@@ -42,16 +43,14 @@ const ActiveLayout = ({ nombreCompleto }) => {
   } = useSettings(); // console.log(settings);
 
   const [userContext, setUserContext] = useState();
-  const [userContextCotizacion, setUserContextCotizacion] = useState();
+  const [cotizacionContext, setCotizacionContext] = useState();
   useEffect(() => {
     setUserContext(nombreCompleto)
   }, [nombreCompleto])
 
   return (
     <ContextUser.Provider value={[userContext, setUserContext]}>
-      <ContextUser.Provider value={[userContextCotizacion, setUserContextCotizacion]}>
         <DashboardLayoutV3 />
-      </ContextUser.Provider>
     </ContextUser.Provider>
   );
 };

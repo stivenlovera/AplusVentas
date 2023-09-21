@@ -65,6 +65,7 @@ const ProfilePopover = () => {
     navigate('/login');
   };
   useEffect(() => {
+    console.log('Info usuario',userContext)
   }, [userContext])
 
   return <Fragment>
