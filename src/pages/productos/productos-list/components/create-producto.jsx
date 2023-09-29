@@ -1,11 +1,11 @@
 
-import { Autocomplete, Box, Button, Grid, IconButton, styled, TextField, useMediaQuery } from "@mui/material";
+import { Autocomplete, Box, Button, Grid, IconButton, styled, TextField, Typography, useMediaQuery } from "@mui/material";
 import AppModal from "components/AppModal";
 import FlexBox from "components/flexbox/FlexBox";
 import FlexRowAlign from "components/flexbox/FlexRowAlign";
 import AppTextField from "components/input-fields/AppTextField";
 import Scrollbar from "components/ScrollBar";
-import { H2, H6, Small } from "components/Typography";
+import { H1, H2, H6, Small } from "components/Typography";
 import { Context } from "contexts/ContextDataTable";
 import { FieldArray, useFormik, FormikProvider, Form } from "formik";
 import Add from "icons/Add";
@@ -14,7 +14,18 @@ import { useContext, useEffect, useState } from "react";
 import { readUploadedFileAsText } from "utils/convertoToBase64";
 import * as Yup from "yup"; // component props interface
 import { Request } from "utils/http";
+import { IngredientesList } from "./ingredientes/ingredientes-list";
+import { UseProducto } from "pages/productos/hooks/useProducto";
+import AppTextField2 from "components/input-fields/AppTextField2";
+import { AutocompleteId } from "components/AutoCompleteId";
+import React from 'react';
+import { AutocompleteObject } from "components/AutoCompleteObject";
+const { List } = UseProducto();
 
+const listadoIngredientes = async () => {
+    return await List();
+
+}
 // styled components
 const StyledAppModal = styled(AppModal)(({
     theme
@@ -48,12 +59,13 @@ const CreateProductoModal = ({
     open,
     data,
     onClose,
-    editProduct
+    editProduct = false
 }) => {
     const { codigoProducto, categorias, productosMaestros, tiposProducto, initialState } = data;
     const [context, setContext] = useContext(Context);
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [selectProductoMaestro, setSelectProductoMaestro] = useState(null)
+    const ingredientevalue = useState([])
 
     const validationSchema = Yup.object().shape({
         productoId: Yup.number().nullable(),
@@ -72,6 +84,7 @@ const CreateProductoModal = ({
         precioVentaMin: Yup.number('debe ser un numero').required("Precio venta min es requerido!"),
         utilidadMax: Yup.number('debe ser un numero').required("Utilidad min es requerido!"),
         precioVentaMax: Yup.number('debe ser un numero').required("Precio venta max es requerido!"),
+        tipoProductoId: Yup.number('').required("tipo de producto es requerido!"),
         categoria: Yup.object().shape({
             categoriaId: Yup.number(),
             nombre: Yup.string().min(3, "debe ser mayor a 3 caracteres"),
@@ -137,7 +150,8 @@ const CreateProductoModal = ({
         setFieldValue('precioVentaMax', resultado);
     }
     const calcularUtilidadMin = () => {
-        let resultado = parseInt(((values.precioVentaMin * 100) / values.precioCompra) - (100));
+        console.log(values.precioVentaMin)
+        let resultado = ((values.precioVentaMin * 100) / values.precioCompra) - 100;
         setFieldValue('utilidadMin', resultado);
     }
     const calcularUtilidadMax = () => {
@@ -188,6 +202,7 @@ const CreateProductoModal = ({
     }, [open])
 
     return <StyledAppModal open={open} handleClose={onClose}>
+
         <H2 marginBottom={2}>
             {editProduct && data ? "Editar producto" : "Añadir producto"}
         </H2>
@@ -197,252 +212,145 @@ const CreateProductoModal = ({
                     maxHeight: 500,
                     overflow: 'auto'
                 }}>
+                    <text>
+                        {JSON.stringify(values)}
+                    </text>
                     <Grid container spacing={2}>
                         <Grid item sm={6} xs={12}>
-                            <H6 mb={1}>Codigo</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
+                            <AppTextField2
                                 name="codigoProducto"
                                 placeholder="Codigo producto"
-                                value={values.codigoProducto}
-                                onChange={handleChange}
-                                error={Boolean(touched.codigoProducto && errors.codigoProducto)}
-                                helperText={touched.codigoProducto && errors.codigoProducto}
                             />
                         </Grid>
                         <Grid item sm={6} xs={12}>
-                            <H6 mb={1}>Codigo de Barras</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
+                            <AppTextField2
                                 name="codigoBarra"
                                 placeholder="Codigo de barras"
-                                value={values.codigoBarra}
-                                onChange={handleChange}
-                                error={Boolean(touched.codigoBarra && errors.codigoBarra)}
-                                helperText={touched.codigoBarra && errors.codigoBarra}
                             />
                         </Grid>
                         <Grid item sm={12} xs={12}>
-                            <H6 mb={1}>Seleccione un producto maestro</H6>
-                            <Autocomplete
+                            <AutocompleteObject
+                                label='Selecione un producto maestro (opcional)'
+                                name='productoMaestro'
                                 options={productosMaestros}
-                                getOptionLabel={(options) => options.nombre}
-                                isOptionEqualToValue={(option, value) => option.nombre === value.nombre}
-                                size="small"
-                                fullWidth
+                                labelName='nombre'
                                 onChange={(event, newValue) => {
-                                    if (newValue != null) {
-                                        setFieldValue('productoMaestro', newValue)
-                                        setFieldValue('productoMaestroNombre', newValue.nombre)
-                                    } else {
-                                        setFieldValue('productoMaestroNombre', '')
-                                    }
+                                    if (newValue) setFieldValue('productoMaestroNombre', newValue.nombre)
+                                    else setFieldValue('productoMaestroNombre', '')
+
+                                    handleChange(event);
                                 }}
-                                defaultValue={() => {
-                                    return {
-                                        productoMaestroId: initialState.productoMaestro.productoMaestroId,
-                                        nombre: initialState.productoMaestro.nombre,
-                                        categoriaId: initialState.productoMaestro.categoriaId,
-                                    }
-                                }}
-                                renderInput={
-                                    (params) =>
-                                        <TextField
-                                            {...params}
-                                            value={values.productoMaestroNombre}
-                                            label="Selecione un producto maestro (opcional)"
-                                            error={Boolean(touched.productoMaestro && errors.productoMaestro)}
-                                            helperText={touched.productoMaestro && errors.productoMaestro}
-                                        />}
                             />
                         </Grid>
                         <Grid item sm={12} xs={12}>
-                            <H6 mb={1}>Nombre producto maestro</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
+                            <AppTextField2
                                 name="productoMaestroNombre"
                                 placeholder="Nombre producto maestro"
-                                value={values.productoMaestroNombre}
-                                onChange={handleChange}
-                                error={Boolean(touched.productoMaestroNombre && errors.productoMaestroNombre)}
-                                helperText={touched.productoMaestroNombre && errors.productoMaestroNombre}
                             />
                         </Grid>
                         <Grid item sm={12} xs={12}>
-                            <H6 mb={1}>Nombre producto</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
+                            <AppTextField2
                                 name="nombreProducto"
                                 placeholder="Nombre producto"
-                                value={values.nombreProducto}
-                                onChange={handleChange}
-                                error={Boolean(touched.nombreProducto && errors.nombreProducto)}
-                                helperText={touched.nombreProducto && errors.nombreProducto}
                             />
                         </Grid>
                         <Grid item sm={12} xs={12}>
                             <H6 mb={1}>Seleccione un tipo</H6>
-                            <Autocomplete
+                            <AutocompleteId
+                                name='tipoProductoId'
                                 options={tiposProducto}
-                                getOptionLabel={(options) => options.nombre}
-                                isOptionEqualToValue={(option, value) => option.tipoProductoId === value.tipoProductoId}
-                                size="small"
-                                fullWidth
-                                onChange={(event, newValue) => {
-                                    if (newValue != null) {
-                                        setFieldValue('tipoProductoId', newValue.tipoProductoId)
-                                    } else {
-                                        setFieldValue('tipoProductoId', '')
+                                labelName='nombre'
+                                defaultValue={() => {
+                                    if (!editProduct) {
+                                        return tiposProducto[0]
+                                    }
+                                    else {
+                                        return tiposProducto.find(x => x.tipoProductoId === initialState.tipoProductoId)
                                     }
                                 }}
-                                defaultValue={() => {
-                                    console.log(initialState)
-                                    const a = tiposProducto.find(x => x.tipoProductoId === initialState.tipoProductoId)
-                                    console.log(a)
-
-                                    return a;
-
-
-                                }}
-                                renderInput={
-                                    (params) =>
-                                        <TextField
-                                            {...params}
-                                            value={values.tipoProductoId}
-                                            label="Selecione un tipo producto"
-                                            error={Boolean(touched.tipoProductoId && errors.tipoProductoId)}
-                                            helperText={touched.tipoProductoId && errors.tipoProductoId}
-                                        />}
                             />
                         </Grid>
                         <Grid item sm={4} xs={12}>
-                            <H6 mb={1}>Stock Actual</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
+                            <AppTextField2
                                 name="stockActual"
                                 type="number"
                                 placeholder="Stock actual"
-                                value={values.stockActual}
-                                onChange={handleChange}
-                                error={Boolean(touched.stockActual && errors.stockActual)}
-                                helperText={touched.stockActual && errors.stockActual}
                             />
                         </Grid>
                         <Grid item sm={4} xs={12}>
-                            <H6 mb={1}>% Utilidad min</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
+                            <AppTextField2
                                 name="utilidadMin"
                                 type="number"
-                                placeholder="% Utilidad mi"
-                                value={values.utilidadMin}
-                                onChange={(e) => {
-                                    handleChange(e)
-                                }}
+                                placeholder="% Utilidad min"
                                 onKeyUp={
                                     (e) => {
                                         calcularPrecioVentaMin()
                                         console.log(e.target.value)
                                     }
                                 }
-                                error={Boolean(touched.utilidadMin && errors.utilidadMin)}
-                                helperText={touched.utilidadMin && errors.utilidadMin}
                             />
                         </Grid>
                         <Grid item sm={4} xs={12}>
-                            <H6 mb={1}>Precio venta min</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
+                            <AppTextField2
                                 name="precioVentaMin"
                                 type="number"
                                 placeholder="Precio venta min"
-                                value={values.precioVentaMin}
-                                onChange={handleChange}
                                 onKeyUp={
                                     (e) => {
                                         calcularUtilidadMin()
-                                        console.log(e.target.value)
                                     }
-                                }
-                                error={Boolean(touched.precioVentaMin && errors.precioVentaMin)}
-                                helperText={touched.precioVentaMin && errors.precioVentaMin}
-                            />
+                                } />
                         </Grid>
                         <Grid item sm={4} xs={12}>
-                            <H6 mb={1}>Precio compra</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
+                            <AppTextField2
                                 name="precioCompra"
                                 type="number"
-                                placeholder="precio compra"
-                                value={values.precioCompra}
-                                onChange={handleChange}
+                                placeholder="Precio compra"
                                 onKeyUp={
                                     (e) => {
                                         //calcularUtilidadMin()
                                         console.log(e.target.value)
                                     }
                                 }
-                                error={Boolean(touched.precioCompra && errors.precioCompra)}
-                                helperText={touched.precioCompra && errors.precioCompra}
                             />
                         </Grid>
                         <Grid item sm={4} xs={12}>
-                            <H6 mb={1}>% Utilidad max</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
+                            <AppTextField2
                                 name="utilidadMax"
                                 type="number"
                                 placeholder="% Utilidad max"
-                                value={values.utilidadMax}
-                                onChange={handleChange}
                                 onKeyUp={
                                     (e) => {
                                         calcularPrecioVentaMax()
-                                        console.log(e.target.value)
                                     }
                                 }
-                                error={Boolean(touched.utilidadMax && errors.utilidadMax)}
-                                helperText={touched.utilidadMax && errors.utilidadMax}
                             />
                         </Grid>
                         <Grid item sm={4} xs={12}>
-                            <H6 mb={1}>Precio venta max</H6>
-                            <AppTextField
-                                fullWidth
-                                size="small"
+                            <AppTextField2
                                 name="precioVentaMax"
                                 type="number"
-                                placeholder="Categoria"
-                                value={values.precioVentaMax}
-                                onChange={handleChange}
+                                placeholder="Precio venta max"
                                 onKeyUp={
                                     (e) => {
                                         calcularUtilidadMax()
-                                        console.log(e.target.value)
                                     }
                                 }
-                                error={Boolean(touched.PrecioVentaMax && errors.PrecioVentaMax)}
-                                helperText={touched.PrecioVentaMax && errors.PrecioVentaMax}
                             />
                         </Grid>
+                        {values.tipoProductoId === 1 ? (<Grid item sm={12} xs={12}>
+                            <IngredientesList
+                                data={ingredientevalue}
+                                getList={listadoIngredientes}
+                            />
+                        </Grid>) : null
+                        }
                         <Grid item sm={12} xs={12}>
-                            <H6 mb={1}>Categoria</H6>
-                            <Autocomplete
-                                fullWidth
-                                id="categoria"
+                            <AutocompleteObject
+                                label='seleccione categoria'
+                                labelName='nombre'
+                                name="categoria"
                                 options={categorias}
-                                getOptionLabel={(options) => options.nombre}
-                                size="small"
                                 onChange={async (event, newValue) => {
                                     if (newValue != null) {
                                         await ApiObtenerAtributo(newValue.categoriaId);
@@ -452,23 +360,6 @@ const CreateProductoModal = ({
                                         setFieldValue('atributos', [])
                                     }
                                 }}
-                                defaultValue={() => {
-                                    return {
-                                        categoriaId: initialState.categoria.categoriaId,
-                                        nombre: initialState.categoria.nombre,
-                                        der: initialState.categoria.der,
-                                        izq: initialState.categoria.izq
-                                    }
-                                }}
-                                renderInput={
-                                    (params) =>
-                                        <TextField
-                                            {...params}
-                                            value={values.categoriaId}
-                                            label="Seleccione una categoria"
-                                            error={Boolean(touched.categoriaId && errors.categoriaId)}
-                                            helperText={touched.categoriaId && errors.categoriaId}
-                                        />}
                             />
                         </Grid>
                         <Grid item sm={12} xs={12}>
@@ -524,6 +415,7 @@ const CreateProductoModal = ({
                                 borderColor: "text.disabled",
                                 backgroundColor: "grey.100"
                             }}>
+
                                 <Grid container spacing={1}>
                                     <FieldArray
                                         name="imagenes"
@@ -592,7 +484,10 @@ const CreateProductoModal = ({
                 <Grid container>
                     <Grid item xs={12}>
                         <FlexBox justifyContent="flex-end" gap={2} marginTop={2}>
-                            <Button fullWidth variant="outlined" onClick={onClose}>
+                            <Button fullWidth variant="outlined" onClick={(e) => {
+                                onClose(e)
+
+                            }}>
                                 Cancelar
                             </Button>
                             <Button fullWidth type="submit" variant="contained">

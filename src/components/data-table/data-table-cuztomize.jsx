@@ -23,8 +23,8 @@ export const CurrencyFormatter = ({ value, row, column, onClicks }) => {
     )
 };
 
-export const DataTablaCustomize = (props) => {
-    const { rows, columns, tableColumnExtensions, onClicks, AccionColumn, children } = props
+export const DataTablaCustomize = ({ rows, columns, tableColumnExtensions = null, onClicks = null, AccionColumn = null, children }) => {
+    // const { rows, columns, tableColumnExtensions, onClicks, AccionColumn, children } = props
     const CurrencyTypeProvider = props => (
         <DataTypeProvider
             formatterComponent={({ value, row, column }) => CurrencyFormatter({ value, row, column, onClicks })}

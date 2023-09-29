@@ -13,6 +13,7 @@ export const getRoute = pathname => {
 
 export const initialStateProducto = {
   productoId: 0,
+  tipoProductoId: 1,
   codigoProducto: '',
   codigoBarra: '',
   nombreProducto: '',

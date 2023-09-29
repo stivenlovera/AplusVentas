@@ -1,4 +1,4 @@
-import { styled, TextField } from "@mui/material";
+import { styled, TextField, TextFieldProps } from "@mui/material";
 import React from "react";
 const StyledTextField = styled(TextField)(({
   theme
@@ -25,9 +25,15 @@ const StyledTextField = styled(TextField)(({
     color: theme.palette.text.disabled
   }
 }));
-
+/**
+ * 
+ * @param {TextFieldProps} props 
+ * @returns 
+ */
 const AppTextField = props => {
-  return <StyledTextField {...props} />;
+  return <StyledTextField {...props}
+
+  />;
 };
 
 export default AppTextField;
