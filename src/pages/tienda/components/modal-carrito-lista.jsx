@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // styled components
 import ResumenCarrito from "./resumen-carrito";
 import ImagenNoDisponible from '../../../assets/no-dispnible.jpg'
+import IncrementDecrement from "./increment-decrement";
 const StyledAppModal = styled(AppModal)(({
     theme
 }) => ({
@@ -43,8 +44,12 @@ const BodyTableCell = styled(HeadTableCell)(() => ({
 
 const ModalCarritoLista = ({
     openModalCarritoCompra,
+    stock,
     carritoProductos,
-    onCloseModalCarritoCompra
+    onCloseModalCarritoCompra,
+    onIncrement,
+    onDecrement,
+    onDelete
 }) => {
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const navigate = useNavigate();
@@ -88,7 +93,7 @@ const ModalCarritoLista = ({
                                         <TableRow>
                                             <HeadTableCell>Producto</HeadTableCell>
                                             <HeadTableCell>Cantidad</HeadTableCell>
-                                            <HeadTableCell>Precio</HeadTableCell>
+                                            <HeadTableCell>Precio Unitario</HeadTableCell>
                                             <HeadTableCell>Acciones</HeadTableCell>
                                         </TableRow>
                                     </TableHead>
@@ -119,21 +124,16 @@ const ModalCarritoLista = ({
                                                     </FlexBox>
                                                 </BodyTableCell>
                                                 <BodyTableCell>
-                                                    <QuantityButtons
-                                                        quantity={quantity}
-                                                        increment={() => setQuantity(quantity + 1)}
-                                                        decrement={() => setQuantity(quantity - 1)}
+                                                    <IncrementDecrement
+                                                        cantidad={producto.cantidad}
+                                                        onDecrement={() => { onDecrement(producto) }}
+                                                        onIncrement={() => { onIncrement(producto, producto.stockActual) }}
+                                                        stock={producto.stockActual}
                                                     />
-                                                    <Tiny
-                                                        fontSize={10}
-                                                        mt={1}
-                                                        fontWeight={500}>
-                                                        Available: 12
-                                                    </Tiny>
                                                 </BodyTableCell>
                                                 <BodyTableCell>{producto.precioVentaMax} Bs </BodyTableCell>
                                                 <BodyTableCell>
-                                                    <IconButton>
+                                                    <IconButton onClick={() => { onDelete(producto) }}>
                                                         <Clear sx={{
                                                             color: "text.disabled"
                                                         }} />

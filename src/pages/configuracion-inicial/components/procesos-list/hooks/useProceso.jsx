@@ -3,7 +3,19 @@ import { useCuenta } from "../../plan-cuentas/hooks/useCuenta";
 import { useState } from "react";
 import { useTipoProceso } from "../../tipo-proceso/hooks/useTIpoProceso";
 export const useProceso = () => {
-
+  const ListById = async (tipoId) => {
+    const { data, message, status } = await Request({
+      endPoint: `${process.env.REACT_APP_API}api/asiento/tipo/${tipoId}`,
+      initialValues: [],
+      method: 'get',
+      showError: true,
+      showSuccess: false
+    });
+    return {
+      lista: data,
+      status: !!status
+    };
+  }
   const List = async () => {
     const { data, message, status } = await Request({
       endPoint: `${process.env.REACT_APP_API}api/asiento`,
@@ -30,7 +42,7 @@ export const useProceso = () => {
       status: !!status
     };
   }
-  const Store = async (values,id) => {
+  const Store = async (values, id) => {
     const { data, message, status } = await Request({
       endPoint: `${process.env.REACT_APP_API}api/asiento`,
       initialValues: [],
@@ -57,7 +69,7 @@ export const useProceso = () => {
       status: !!status
     };
   }
-  const Update = async (values,id) => {
+  const Update = async (values, id) => {
     const { data, message, status } = await Request({
       endPoint: `${process.env.REACT_APP_API}api/asiento/${id}`,
       initialValues: [],
@@ -86,6 +98,7 @@ export const useProceso = () => {
   }
 
   return {
+    ListById,
     List,
     Create,
     Store,

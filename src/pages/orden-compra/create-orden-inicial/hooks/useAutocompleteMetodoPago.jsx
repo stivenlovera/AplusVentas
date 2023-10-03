@@ -8,10 +8,10 @@ export const useAutocompleteMetodoPago = () => {
     const [listaMetodoPago, setlistaMetodoPago] = useState([]);
     const [openAutoCompleteMetodoPago, setOpenAutoCompleteMetodoPago] = useState(false)
     const [loadingAutoCompleteMetodoPago, setLoadingAutoCompleteMetodoPago] = useState(false)
-    const { List } = useProceso()
+    const { ListById } = useProceso()
     const LoadListaMetodoPago = async () => {
         setLoadingAutoCompleteMetodoPago(true)
-        const { lista, status } = await List()
+        const { lista, status } = await ListById(2)
         if (status) {
             setlistaMetodoPago(lista)
             setOpenAutoCompleteMetodoPago(true)
@@ -41,10 +41,10 @@ export const useAutocompleteMetodoPagoVenta = () => {
     const [listaMetodoPago, setlistaMetodoPago] = useState([]);
     const [openAutoCompleteMetodoPago, setOpenAutoCompleteMetodoPago] = useState(false)
     const [loadingAutoCompleteMetodoPago, setLoadingAutoCompleteMetodoPago] = useState(false)
-    const { ListVenta } = useProceso()
+    const { ListById } = useProceso()
     const LoadListaMetodoPago = async () => {
         setLoadingAutoCompleteMetodoPago(true)
-        const { lista, status } = await ListVenta()
+        const { lista, status } = await ListById(1)
         if (status) {
             setlistaMetodoPago(lista)
             setOpenAutoCompleteMetodoPago(true)

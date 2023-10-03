@@ -17,7 +17,7 @@ const ResumenCarrito = ({
 }) => {
     const Total = () => {
         let total = 0;
-        carritoProductos.map((item) => { total += item.precioVentaMax })
+        carritoProductos.map((item) => { total += item.precioVentaMax*item.cantidad })
         console.log(total)
         return total;
     }
@@ -37,13 +37,17 @@ const ResumenCarrito = ({
         <Stack spacing={1.5} mb={4}>
             {
                 carritoProductos.map((producto, i) => {
-                    return (<ListItem title={producto.productoMaestroNombre} value={producto.precioVentaMax} />)
+                    return (<ListItem
+                        key={i}
+                        title={producto.productoMaestroNombre}
+                        value={producto.precioVentaMax * producto.cantidad}
+                    />)
                 })
             }
             <Divider />
             <ListItem
                 title="Total"
-                value={total}
+                value={Total()}
                 valueColor="error.main"
             />
         </Stack>{/* 

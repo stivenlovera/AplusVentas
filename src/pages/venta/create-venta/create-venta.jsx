@@ -75,7 +75,9 @@ const CreateVenta = () => {
             precioUnitario: 0,
             precioTotal: 0,
         });
+
         setValues({ ...values })
+        console.log('add', values)
     };
 
     const validationSchema = Yup.object().shape({
@@ -135,9 +137,12 @@ const CreateVenta = () => {
         //enableReinitialize: true,
         onSubmit: async (values) => {
             if (id == 'create') {
+                values.fechaCreacion = moment().format('yyyy-MM-DD');
+                setValues(values)
                 const { status, store } = await Store(values);
+                console.log(status)
                 if (status) {
-                    console.log('esta  en create')
+                    console.log(store)
                     setVentaId(store);
                     setModalPreguntar(true);
                 }
@@ -177,7 +182,7 @@ const CreateVenta = () => {
     const Iniciar = async () => {
         if (id == 'create') {
             const { create, status } = await Create();
-            setValues({...create, fechaCreacion:moment().format('DD/MM/yyyy')});
+            setValues({ ...create, fechaCreacion: moment().format('DD/MM/yyyy') });
             setLoading(false)
             setEstado({
                 modificar: false,
@@ -476,8 +481,8 @@ const CreateVenta = () => {
                                                                                         }
                                                                                         dataProducto={
                                                                                             {
-                                                                                                name: `productos[${index}].productoId`,
-                                                                                                value: values.productos[index].productoId,
+                                                                                                name: `productos[${index}]`,
+                                                                                                value: values.productos[index],
                                                                                                 label: "Selecione un producto",
                                                                                                 helperText: touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto,
                                                                                                 error: Boolean(touched.productos?.[index]?.nombreProducto && errors.productos?.[index]?.nombreProducto),
@@ -573,7 +578,7 @@ const CreateVenta = () => {
                 <ProcesarPagoVentaModal
                     open={modalProcesar}
                     data={viewPreviewPago}
-                    onSubmit={(data)=>{}}
+                    onSubmit={(data) => { }}
                 />
                 <ModalPreguntarPagoVenta
                     onPago={() => { onEmitirPago() }}

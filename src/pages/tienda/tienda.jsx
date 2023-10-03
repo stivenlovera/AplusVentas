@@ -14,6 +14,7 @@ import { ContextCotizacion } from "contexts/ContextCotizacion";
 import { initialStateDetalleProducto, initialStateSort } from "./utils/initialStates";
 import ModalCarritoLista from "./components/modal-carrito-lista";
 import { useCarritoCompra } from "./hooks/useCarritoCompra";
+import { decrementaProducto, deleteProducto, incrementaProducto, verificarProductoRepetido } from "./utils/funciones";
 
 const Alert = forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -56,10 +57,23 @@ const Tienda = () => {
     //console.log(ordenar)
     setActiveSortBy(data)
   }
+
+  const decrementar = (carritoProductos, producto) => {
+    const carrito = decrementaProducto(carritoProductos, producto);
+    setCarritoProductos(carrito);
+  }
+  const incrementar = (carritoProductos, producto, stock) => {
+    const carrito = incrementaProducto(carritoProductos, producto, stock);
+    setCarritoProductos(carrito);
+  }
+  const deleteLista = (carritoProductos, producto) => {
+    const carrito = deleteProducto(carritoProductos, producto);
+    setCarritoProductos(carrito);
+  }
+
   const AddCarritoCompra = (producto) => {
-    carritoProductos.push(producto)
-    setCarritoProductos(carritoProductos)
-    console.log(carritoProductos)
+    const carritoVerificado = verificarProductoRepetido(carritoProductos, producto)
+    setCarritoProductos(carritoVerificado)
     handleClick()
   }
 
@@ -129,17 +143,17 @@ const Tienda = () => {
     </Box>
     <ModalDetailProducto
       producto={activeProducto}
-      onClose={() => { setOpenModalDetalleProducto(false);  }}
+      onClose={() => { setOpenModalDetalleProducto(false); }}
       openModal={openModalDetalleProducto}
       onAddProducto={AddCarritoCompra}
     />
     <ModalCarritoLista
       openModalCarritoCompra={openModalCarritoCompra}
       carritoProductos={carritoProductos}
-      onCloseModalCarritoCompra={() => { setOpenModalCarritoCompra(false);console.log('Delete repeat carrito compra',GetGroupProducto(carritoProductos)) }}
-      onDecrementItem={(producto) => { console.log('decrement', producto) }}
-      onIncrementItem={(producto) => { console.log('increment', producto) }}
-      onDeleteItem={(producto) => { console.log('delete', producto) }}
+      onCloseModalCarritoCompra={() => { setOpenModalCarritoCompra(false); console.log(carritoProductos) }}
+      onIncrement={(producto, stockActual) => { console.log(producto, stockActual, 'incrementar'); incrementar(carritoProductos, producto, stockActual) }}
+      onDecrement={(producto) => { console.log(producto, 'decrementar'); decrementar(carritoProductos, producto) }}
+      onDelete={(producto) => { deleteLista(carritoProductos, producto) }}
     />
   </Box>;
 };

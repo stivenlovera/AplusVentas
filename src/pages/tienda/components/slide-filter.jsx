@@ -3,6 +3,7 @@ import { Box, Button, Card, Slider, styled } from "@mui/material";
 import FlexBox from "components/flexbox/FlexBox";
 import { H6, Small, Tiny } from "components/Typography";
 import { useTranslation } from "react-i18next"; // styled components
+import { countProductos } from "../utils/funciones";
 
 const Dot = styled(Box)(({
     theme,
@@ -86,7 +87,7 @@ const SlideFilter = ({
             }}
             onClick={onOpenCarritoCompra}
         >
-            Ver carrito ({carritoCompra.length})
+            Ver carrito ({countProductos(carritoCompra)})
             <ShoppingCart sx={{
                 fontSize: 17,
                 marginLeft: 1

@@ -37,7 +37,6 @@ const ProcesarPagoVentaModal = ({
     onClose,
     onSubmit
 }) => {
-    console.log('entrada a pago ', data)
     const navigate = useNavigate();
 
     const { ProcesarPago } = UseCotizacion();
