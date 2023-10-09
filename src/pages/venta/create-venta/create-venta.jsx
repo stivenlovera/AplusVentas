@@ -136,17 +136,17 @@ const CreateVenta = () => {
         validationSchema,
         //enableReinitialize: true,
         onSubmit: async (values) => {
+            setLoading(true);
             if (id == 'create') {
                 values.fechaCreacion = moment().format('yyyy-MM-DD');
                 setValues(values)
                 const { status, store } = await Store(values);
-                console.log(status)
                 if (status) {
-                    console.log(store)
                     setVentaId(store);
                     setModalPreguntar(true);
                 }
             }
+            setLoading(false);
         }
     });
     const {
@@ -198,15 +198,19 @@ const CreateVenta = () => {
     }, [])
 
     //handler procesar  preview pago
-    const onEmitirPago = () => {
-        setModalProcesar(true);
+    const onEmitirPago = async() => {
         setModalPreguntar(false)
-        onPreviewPago()
-    }
-
-    const onPreviewPago = async () => {
+        setLoading(true);
         const { venta, status } = await PreviewPago(ventaId);
-        setViewPreviewPago(venta);
+        if (status) {
+            setLoading(false);
+            setViewPreviewPago(venta);
+            setModalProcesar(true);
+        }
+        else{
+            setModalPreguntar(false)
+            setLoading(false);
+        }
     }
     return (
         <>
@@ -588,7 +592,7 @@ const CreateVenta = () => {
                 <CreateClienteVenta
                     openModal={opencliente}
                     onClose={() => { setOpencliente(false) }}
-                    onSummit={() => { console.log('proveedor registrado') }}
+                    onEnviar={() => { console.log('proveedor registrado') }}
                 />
             </Box>
         </>

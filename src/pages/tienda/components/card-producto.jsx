@@ -11,7 +11,7 @@ const CardProducto = ({
     onAddProducto
 }) => {
     const theme = useTheme();
-    const validateImagen = product.imagenes.length > 0 ? `${process.env.REACT_APP_IMAGENES_PRODUCTOS}/${product.imagenes}` : ImagenNoDisponible;
+    const validateImagen = product.imagenes.length > 0 ? `${process.env.REACT_APP_IMAGENES_PRODUCTOS}/${product.imagenes[0]}` : ImagenNoDisponible;
     return <Card sx={{
         border: 0
     }}>

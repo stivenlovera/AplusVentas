@@ -112,10 +112,6 @@ const dashboardRoutes = [
     element: <ProductosList />
   },
   {
-    path: "categoria-list",
-    element: <CategoriaList />
-  },
-  {
     path: "usuario-list",
     element: <UsuarioList />
   },

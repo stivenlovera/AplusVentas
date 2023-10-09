@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import OrdenProducto from './components/orden-productos/ordenProducto'
 import { initialStateOrdenCompra } from './utils/initialState'
 import { UseOrdenCompra } from './hooks/useOrdenCompra'
+import { UseProveedor } from 'pages/proveedores/proveedores-list/hooks/useProveedor'
 
 const CreateOrdenInicial = () => {
     const navigate = useNavigate();
@@ -45,6 +46,7 @@ const CreateOrdenInicial = () => {
     const [OrdenCompra, setOrderCompra] = useState(initialStateOrdenCompra)
     const [previewPago, setPreviewPago] = useState(initialStateOrdenCompra)
     //proveedores
+    const { List } = UseProveedor()
     const {
         LoadListaProveedores,
         getOptionLabelProveedor,
@@ -53,7 +55,7 @@ const CreateOrdenInicial = () => {
         loadingAutoCompleteProveedores,
         openAutoCompleteProveedores,
         refresListaProveedores
-    } = useAutocompleteProveedor();
+    } = useAutocompleteProveedor('nombreProveedor',List);
 
     const {
         LoadListaMetodoPago,

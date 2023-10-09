@@ -1,15 +1,15 @@
 import { UseProveedor } from "pages/proveedores/proveedores-list/hooks/useProveedor";
 import { useState } from "react";
 
-export const useAutocompleteProveedor = () => {
+export const useAutocompleteProveedor = (nameToValue, onList) => {
     //proveedores
     const [listaProveedores, setlistaProveedores] = useState([]);
     const [openAutoCompleteProveedores, setOpenAutoCompleteProveedores] = useState(false)
     const [loadingAutoCompleteProveedores, setLoadingAutoCompleteProveedores] = useState(false)
-    const { List } = UseProveedor()
+
     const LoadListaProveedores = async () => {
         setLoadingAutoCompleteProveedores(true)
-        const { lista, status } = await List()
+        const { lista, status } = await onList()
         if (status) {
             setlistaProveedores(lista)
             setOpenAutoCompleteProveedores(true)
@@ -20,8 +20,8 @@ export const useAutocompleteProveedor = () => {
         setOpenAutoCompleteProveedores(false)
         setlistaProveedores([])
     }
-    const isOptionEqualToValueProveedor = (option, value) => option.nombreProveedor === value.nombreProveedor
-    const getOptionLabelProveedor = (option) => option.nombreProveedor
+    const isOptionEqualToValueProveedor = (option, value) => option[nameToValue] === value[nameToValue]
+    const getOptionLabelProveedor = (option) => option[nameToValue]
 
     return {
         listaProveedores,

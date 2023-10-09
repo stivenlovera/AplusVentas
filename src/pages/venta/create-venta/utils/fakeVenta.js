@@ -40,3 +40,12 @@ export const initialPreviewVenta = {
     },
     productos: []
 }
+
+export const initialSerieProductoVenta = {
+    ventaId: 0,
+    productos: [],
+
+}
+/* detalle_almacen_id:0,
+serie:0,
+venta_producto_id:0, */

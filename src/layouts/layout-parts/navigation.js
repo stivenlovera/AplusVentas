@@ -28,11 +28,6 @@ export const navigations = [
     icon: duotone.LayerGroup
   },
   {
-    name: 'Categorias',
-    path: '/dashboard/categoria-list',
-    icon: duotone.DataTable,
-  },
-  {
     name: 'Productos',
     path: '/dashboard/productos-list',
     icon: duotone.Invoice,
@@ -91,10 +86,5 @@ export const navigations = [
     name: 'Movimientos',
     path: '/dashboard/movimientos',
     icon: duotone.CurrencyExchangeIcon,
-  },
-  {
-    name: 'Plan cuentas',
-    path: '/dashboard/saas',
-    icon: duotone.TodoList,
-  },
+  }
 ];
