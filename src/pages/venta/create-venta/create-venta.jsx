@@ -77,7 +77,6 @@ const CreateVenta = () => {
         });
 
         setValues({ ...values })
-        console.log('add', values)
     };
 
     const validationSchema = Yup.object().shape({
@@ -198,7 +197,7 @@ const CreateVenta = () => {
     }, [])
 
     //handler procesar  preview pago
-    const onEmitirPago = async() => {
+    const onEmitirPago = async () => {
         setModalPreguntar(false)
         setLoading(true);
         const { venta, status } = await PreviewPago(ventaId);
@@ -207,7 +206,7 @@ const CreateVenta = () => {
             setViewPreviewPago(venta);
             setModalProcesar(true);
         }
-        else{
+        else {
             setModalPreguntar(false)
             setLoading(false);
         }
@@ -592,7 +591,7 @@ const CreateVenta = () => {
                 <CreateClienteVenta
                     openModal={opencliente}
                     onClose={() => { setOpencliente(false) }}
-                    onEnviar={() => { console.log('proveedor registrado') }}
+                    onSummit={(data) => { console.log(data) }}
                 />
             </Box>
         </>

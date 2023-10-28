@@ -30,6 +30,8 @@ import UserList from "./UserList"; // eslint-disable-next-line import/no-anonymo
 import SettingsIcon from '@mui/icons-material/Settings';
 import RuleIcon from '@mui/icons-material/Rule';
 import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+
 export default {
   AdminEcommerce,
   ArrowLeftToLine,
@@ -62,5 +64,6 @@ export default {
   PersonCircleCheck,
   RuleIcon,
   SettingsIcon,
-  CurrencyExchangeIcon
+  CurrencyExchangeIcon,
+  AddShoppingCartIcon
 };

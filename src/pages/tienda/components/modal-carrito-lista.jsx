@@ -1,5 +1,4 @@
 import { Box, Button, Card, Grid, Stack, styled, Table, useMediaQuery } from "@mui/material";
-
 import IconButton from "@mui/material/IconButton";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -11,7 +10,6 @@ import FlexBox from "components/flexbox/FlexBox";
 import Scrollbar from "components/ScrollBar";
 import { H2, H5, H6, Span, Tiny } from "components/Typography";
 import Clear from "icons/Clear";
-import QuantityButtons from "page-sections/ecommerce/QuantityButtons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // styled components
 import ResumenCarrito from "./resumen-carrito";
@@ -45,6 +43,7 @@ const BodyTableCell = styled(HeadTableCell)(() => ({
 const ModalCarritoLista = ({
     openModalCarritoCompra,
     stock,
+    onSaveCompra,
     carritoProductos,
     onCloseModalCarritoCompra,
     onIncrement,
@@ -52,8 +51,6 @@ const ModalCarritoLista = ({
     onDelete
 }) => {
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
-    const navigate = useNavigate();
-    const [quantity, setQuantity] = useState(1);
 
     function total() {
         let total = 0;
@@ -150,7 +147,7 @@ const ModalCarritoLista = ({
                         <ResumenCarrito
                             showCoupon
                             buttonText="Comprar ahora"
-                            handleClick={() => navigate("/dashboards/billing-address")}
+                            handleClick={() => { onSaveCompra(carritoProductos) }}
                             carritoProductos={carritoProductos}
                             total={total()}
                         />

@@ -51,13 +51,13 @@ const AlmacenProducto = () => {
     const [openModalHomologar, setOpenModalHomologar] = useState(false)
     /*TABLE  */
     const [tableColumnExtensions] = useState([
-        { columnName: 'almacenid', wordWrapEnabled: true, align: 'left' },
+        { columnName: 'nombreproductomaestro', wordWrapEnabled: true, align: 'left' },
         { columnName: 'nombreProducto', wordWrapEnabled: true, align: 'left' },
         { columnName: 'cantidad', wordWrapEnabled: true, align: 'left' },
         { columnName: 'productoid', width: 180, wordWrapEnabled: true, align: 'left' }
     ]);
     const [columns] = useState([
-        { name: 'almacenid', title: 'Producto maestro' },
+        { name: 'nombreproductomaestro', title: 'Producto maestro' },
         { name: 'nombreProducto', title: 'Producto' },
         { name: 'cantidad', title: 'Stock' },
         { name: 'productoid', title: 'Acciones' },

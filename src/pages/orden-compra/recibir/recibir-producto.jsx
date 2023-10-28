@@ -30,11 +30,6 @@ const RecibirProducto = ({
   onClose,
   onEnviar
 }) => {
-  const navigate = useNavigate();
-  const handlerStoreProceso = async () => {
-    return onClose();
-  }
-
   const formAlmacenProducto = useFormik({
     initialValues: compraAlmacenProducto,
     validationSchema: Yup.object().shape({
@@ -82,6 +77,7 @@ const RecibirProducto = ({
   const [fecha, setFecha] = React.useState(dayjs());
 
   useEffect(() => {
+    console.log(data)
     setValues({
       productos: data.productos,
       ordenCompraId: data.id,
@@ -193,7 +189,8 @@ const RecibirProducto = ({
                                       {
                                         name: `productos[${index}].nombreProducto`,
                                         value: values.productos[index].nombreProducto,
-                                        label: "Producto"
+                                        label: "Producto",
+                                        disabled: data.estadoId == 2 ? true : false
                                       }
                                     }
                                     dataAlmacen={
@@ -221,14 +218,15 @@ const RecibirProducto = ({
                                           id: 0,
                                           nombreAlmacen: ''
                                         },
-                                        disabled: values.estadoId == 2 ? true : false
+                                        disabled: data.estadoId == 2 ? true : false
                                       }
                                     }
                                     dataLote={
                                       {
                                         name: `productos[${index}].lote`,
                                         value: `${values.codigoOrden}-${index + 1}`,
-                                        label: "Lote"
+                                        label: "Lote",
+                                        disabled: data.estadoId == 2 ? true : false
                                       }
                                     }
                                     dataFechaVencimiento={
@@ -239,28 +237,32 @@ const RecibirProducto = ({
                                         handleChange: (value) => {
                                           setFecha(value)
                                           setFieldValue('fechaVencimiento', dayjs(value).format('YYYY-MM-DD'))
-                                        }
+                                        },
+                                        disabled: data.estadoId == 2 ? true : false
                                       }
                                     }
                                     dataCantidad={
                                       {
                                         name: `productos[${index}].cantidad`,
                                         value: values.productos[index].cantidad,
-                                        label: "Cantidad"
+                                        label: "Cantidad",
+                                        disabled: data.estadoId == 2 ? true : false
                                       }
                                     }
                                     dataPrecioCompra={
                                       {
                                         name: `productos[${index}].precioCompra`,
                                         value: values.productos[index].precioCompra,
-                                        label: "Precio compra"
+                                        label: "Precio compra",
+                                        disabled: data.estadoId == 2 ? true : false
                                       }
                                     }
                                     dataPrecioTotal={
                                       {
                                         name: `productos[${index}].precioTotal`,
                                         value: values.productos[index].precioTotal,
-                                        label: "Precio Total"
+                                        label: "Precio Total",
+                                        disabled: data.estadoId == 2 ? true : false
                                       }
                                     }
                                   />
@@ -296,7 +298,7 @@ const RecibirProducto = ({
                 <Button fullWidth variant="outlined" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button fullWidth type="submit" variant="contained">
+                <Button fullWidth type="submit" variant="contained" disabled={data.estadoId == 2 ? true : false}>
                   Registrar
                 </Button>
               </FlexBox>

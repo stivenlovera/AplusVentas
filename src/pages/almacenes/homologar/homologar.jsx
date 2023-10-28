@@ -26,7 +26,7 @@ import { H5, H6 } from 'components/Typography';
 import { UseDetalleAlmacen } from '../hooks/useDetalleAlmacen';
 import { initialProductoAlmacen } from '../utils/almacen';
 import FormDetalleSerie from './form';
-
+import moment from 'moment';
 
 const getRowId = row => row.detallealmacenid;
 
@@ -202,9 +202,9 @@ const Homologar = ({
     };
     const inizializando = async () => {
         const { data, status } = await onGetProductoAlmacen(productoId);
-        console.log(data)
         if (status) {
             setProducto(data.producto)
+            data.productoAlmacen.map((data)=> {return data.fecharegistro= moment().format('DD/MM/yyyy')});
             setRows(data.productoAlmacen)
         }
     }

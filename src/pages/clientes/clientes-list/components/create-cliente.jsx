@@ -1,5 +1,5 @@
 import { Add, KeyboardArrowDown } from "@mui/icons-material";
-import { Button, Grid, IconButton, styled, useMediaQuery } from "@mui/material";
+import { Button, FormControl, FormHelperText, Grid, IconButton, InputLabel, MenuItem, Select, styled, useMediaQuery } from "@mui/material";
 
 import AppModal from "components/AppModal";
 import FlexBox from "components/flexbox/FlexBox";
@@ -22,7 +22,18 @@ const StyledAppModal = styled(AppModal)(({
     outline: "none",
     padding: "1.5rem"
 }));
-
+const dataDefault = [{
+    id: 1,
+    codigoClasificador: 1,
+    codigoTipoParametro: 1,
+    descripcion: 'Carnet identidad',
+}, {
+    id: 2,
+    codigoClasificador: 2,
+    codigoTipoParametro: 2,
+    descripcion: 'Pasaporte',
+},
+]
 const CreateClienteModal = ({
     open,
     data,
@@ -42,9 +53,9 @@ const CreateClienteModal = ({
         dirrecion: Yup.string().required("dirrecion es requerido"),
         telefono: Yup.string().required("Telefono es requerido"),
         codigoTipoDocumentoIdentidad: Yup.number().required("Selecione un tipo de documento"),
-        complemento: Yup.string().nullable().required("Describa un complemento"),
+        complemento: Yup.string().nullable(),
         tipoDocumentoIdentidad: Yup.object().shape({
-            id: Yup.string().required("requerido"),
+            id: Yup.string().nullable(),
             codigoClasificador: Yup.string().nullable(),
             codigoTipoParametro: Yup.string().nullable(),
             descripcion: Yup.string().nullable(),
@@ -99,23 +110,41 @@ const CreateClienteModal = ({
                                         error={Boolean(touched.numeroDocumento && errors.numeroDocumento)}
                                         helperText={touched.numeroDocumento && errors.numeroDocumento} />
                                 </Grid>
-
                                 <Grid item sm={6} xs={12}>
-                                    <H6 mb={1}>Tipo Documento</H6>
-                                    <AppTextField
-                                        fullWidth
+                                    <H6 mb={1}>Tipo documento</H6>
+                                    <FormControl
                                         size="small"
-                                        name="codigoTipoDocumentoIdentidad"
-                                        placeholder="Tipo de Documento"
-                                        value={values.codigoTipoDocumentoIdentidad}
-                                        onChange={handleChange}
-                                        error={Boolean(touched.codigoTipoDocumentoIdentidad && errors.codigoTipoDocumentoIdentidad)}
-                                        helperText={touched.codigoTipoDocumentoIdentidad && errors.codigoTipoDocumentoIdentidad} />
+                                        fullWidth
+                                    >
+                                        <InputLabel>Selecione tipo documento</InputLabel>
+                                        <Select
+                                            value={values.codigoTipoDocumentoIdentidad}
+                                            defaultValue={values.codigoTipoDocumentoIdentidad}
+                                            name="codigoTipoDocumentoIdentidad"
+                                            label="Selecione tipo documento"
+                                            placeholder="Selecione tipo documento"
+                                            onChange={(e) => {
+                                                handleChange(e)
+                                            }}
+                                            error={Boolean(touched.codigoTipoDocumentoIdentidad && errors.codigoTipoDocumentoIdentidad)}
+                                        >
+                                            {dataDefault.map((data) => {
+                                                return (
+                                                    <MenuItem value={data.id} key={data.id}>{data.descripcion}</MenuItem>
+                                                )
+                                            })}
+                                        </Select>
+                                        <FormHelperText
+                                            error={Boolean(touched.codigoTipoDocumentoIdentidad && errors.codigoTipoDocumentoIdentidad)} >
+                                            {touched.codigoTipoDocumentoIdentidad && errors.codigoTipoDocumentoIdentidad}
+                                        </FormHelperText>
+                                    </FormControl>
                                 </Grid>
 
                                 <Grid item sm={6} xs={12}>
                                     <H6 mb={1}>Codigo</H6>
                                     <AppTextField
+                                        disabled={true}
                                         fullWidth
                                         size="small"
                                         name="codigoCliente"

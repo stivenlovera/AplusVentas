@@ -42,6 +42,7 @@ const RecibirProductoAlmacen = ({
                     label={dataProducto.label}
                     value={dataProducto.value}
                     onChange={dataProducto.handleChange}
+                    disabled={dataFechaVencimiento.disabled}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -59,6 +60,7 @@ const RecibirProductoAlmacen = ({
                                     fullWidth
                                     {...params}
                                 />}
+                        disabled={dataFechaVencimiento.disabled}
                     />
                 </LocalizationProvider>
             </BodyTableCell>
@@ -90,6 +92,7 @@ const RecibirProductoAlmacen = ({
                     label={dataLote.label}
                     value={dataLote.value}
                     onChange={dataLote.handleChange}
+                    disabled={dataAlmacen.disabled}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -101,6 +104,7 @@ const RecibirProductoAlmacen = ({
                     label={dataCantidad.label}
                     value={dataCantidad.value}
                     onChange={dataCantidad.handleChange}
+                    disabled={dataFechaVencimiento.disabled}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -112,6 +116,7 @@ const RecibirProductoAlmacen = ({
                     label={dataPrecioCompra.label}
                     value={dataPrecioCompra.value}
                     onChange={dataPrecioCompra.handleChange}
+                    disabled={dataFechaVencimiento.disabled}
                 />
             </BodyTableCell>
             <BodyTableCell>
@@ -123,6 +128,7 @@ const RecibirProductoAlmacen = ({
                     label={dataPrecioTotal.label}
                     value={dataPrecioTotal.value}
                     onChange={dataPrecioTotal.handleChange}
+                    disabled={dataFechaVencimiento.disabled}
                 />
             </BodyTableCell>
         </TableRow>

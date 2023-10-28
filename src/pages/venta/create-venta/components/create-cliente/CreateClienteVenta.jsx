@@ -11,12 +11,11 @@ const CreateClienteVenta = ({
 }) => {
     const [actualizarTable, setActualizarTableContext] = useState(true);
     const [create, setCreate] = useState(initialStateCliente)
-    const { onList, onCreate, onStore } = UseCliente()
+    const { onCreate, onStore } = UseCliente()
     const ApiCreate = async () => {
         const { data, status } = await onCreate()
         if (status) {
             setCreate({ ...create, codigoCliente: data.codigoCliente });
-            console.log('open cliente ', create, data.codigoCliente)
         }
         else {
             onClose()

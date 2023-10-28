@@ -69,6 +69,11 @@ export const navigations = [
     label: 'Ventas'
   },
   {
+    name: 'Tienda',
+    path: '/dashboard/tienda',
+    icon: duotone.AddShoppingCartIcon,
+  },
+  {
     name: 'Cotizacion',
     path: '/dashboard/venta',
     icon: duotone.TodoList,

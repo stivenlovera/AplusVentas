@@ -39,6 +39,7 @@ const ClientesList = () => {
 
   const onOpenStore = async (values) => {
     await ApiStore(values);
+    await ApiClientes()
     setOpenModal(false);
   }
 
@@ -88,7 +89,8 @@ const ClientesList = () => {
           open={openModal}
           onSubmit={onOpenStore}
           editCliente={false}
-          onClose={() => setOpenModal(false)} data={create}
+          onClose={() => setOpenModal(false)}
+          data={create}
         />
       </Box>
     </Context.Provider>

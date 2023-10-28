@@ -115,7 +115,7 @@ export const UseOrdenCompra = () => {
             initialValues: [],
             method: 'get',
             showError: true,
-            showSuccess: true
+            showSuccess: false
         });
         return {
             compra: data,

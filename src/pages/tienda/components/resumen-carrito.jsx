@@ -18,7 +18,6 @@ const ResumenCarrito = ({
     const Total = () => {
         let total = 0;
         carritoProductos.map((item) => { total += item.precioVentaMax*item.cantidad })
-        console.log(total)
         return total;
     }
     return <Card sx={{

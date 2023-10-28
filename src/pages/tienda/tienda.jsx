@@ -15,6 +15,8 @@ import { initialStateDetalleProducto, initialStateSort } from "./utils/initialSt
 import ModalCarritoLista from "./components/modal-carrito-lista";
 import { useCarritoCompra } from "./hooks/useCarritoCompra";
 import { decrementaProducto, deleteProducto, incrementaProducto, verificarProductoRepetido } from "./utils/funciones";
+import { UseCotizacion } from "pages/venta/create-venta/hooks/useCotizacion";
+import { initialCotizacion } from "pages/venta/create-venta/utils/fakeVenta";
 
 const Alert = forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -38,7 +40,28 @@ const Tienda = () => {
 
   const { List, Get } = UseProducto();
   const { onList } = UseClasificacion();
-  const { GetGroupProducto } = useCarritoCompra()
+  const { Create, Store, PreviewPago, ProcesarPago, Editar, Update } = UseCotizacion()
+
+  const StoreCotizacion = async (productos) => {
+
+    const nuevosProductos = productos.map((producto) => {
+      return {
+        productoId: producto.productoId,
+        cantidad: producto.cantidad,
+        stock: producto.stock,
+        codigoProducto: producto.codigoProducto,
+        precioUnitario: producto.precioVentaMax,
+        precioTotal: producto.precioVentaMax * producto.cantidad
+      }
+    })
+    let nueva_cotizacion = initialCotizacion;
+    nueva_cotizacion.productos = nuevosProductos;
+    console.log(nueva_cotizacion)
+    /* const { status, store } = await Store(values);
+    if (status) {
+        console.log(store)
+    } */
+  }
 
   const inizialize = async () => {
     const { lista, status } = await List();
@@ -150,7 +173,8 @@ const Tienda = () => {
     <ModalCarritoLista
       openModalCarritoCompra={openModalCarritoCompra}
       carritoProductos={carritoProductos}
-      onCloseModalCarritoCompra={() => { setOpenModalCarritoCompra(false); console.log(carritoProductos) }}
+      onSaveCompra={StoreCotizacion}
+      onCloseModalCarritoCompra={() => { setOpenModalCarritoCompra(false) }}
       onIncrement={(producto, stockActual) => { console.log(producto, stockActual, 'incrementar'); incrementar(carritoProductos, producto, stockActual) }}
       onDecrement={(producto) => { console.log(producto, 'decrementar'); decrementar(carritoProductos, producto) }}
       onDelete={(producto) => { deleteLista(carritoProductos, producto) }}

@@ -25,12 +25,12 @@ export const initialStateCliente = {
     dirrecion: "",
     telefono: '',
     correoElectronico: "",
-    codigoTipoDocumentoIdentidad: 1110,
-    complemento: '',
+    codigoTipoDocumentoIdentidad: '',
+    complemento: ' ',
     tipoDocumentoIdentidad: {
-        id: 0,
-        codigoClasificador: '',
-        codigoTipoParametro: '',
-        descripcion: ''
+        id: 1,
+        codigoClasificador: '1',
+        codigoTipoParametro: '1',
+        descripcion: 'Carnet identidad',
     }
 };

@@ -5,7 +5,7 @@ export const UseProducto = () => {
 
   const List = async () => {
     const { data, message, status } = await Request({
-      endPoint: `${process.env.REACT_APP_API}api/Producto`,
+      endPoint: `${process.env.REACT_APP_API}api/Producto/tienda`,
       initialValues: [],
       method: 'get',
       showError: true,
