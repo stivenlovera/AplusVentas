@@ -1,7 +1,8 @@
-import { DataTypeProvider, IntegratedFiltering, IntegratedPaging, IntegratedSorting, PagingState, SearchState, SortingState } from "@devexpress/dx-react-grid";
+import { DataTypeProvider, IntegratedFiltering, IntegratedPaging, IntegratedSorting, PagingState, SearchState, SortingState, TableSummaryRow } from "@devexpress/dx-react-grid";
 import { Grid, PagingPanel, SearchPanel, Table, TableHeaderRow, Toolbar } from "@devexpress/dx-react-grid-material-ui";
 import { IconButton, Paper } from "@mui/material";
 import { useState } from "react";
+import React from "react";
 
 export const CurrencyFormatter = ({ value, row, column, onClicks }) => {
     return (
@@ -25,6 +26,10 @@ export const CurrencyFormatter = ({ value, row, column, onClicks }) => {
 
 export const DataTablaCustomize = ({ rows, columns, tableColumnExtensions = null, onClicks = null, AccionColumn = null, children }) => {
     // const { rows, columns, tableColumnExtensions, onClicks, AccionColumn, children } = props
+    const addNewRow = () => {
+        const newRow = { id: rows.length + 1, name: '', city: '', age: '', action: '' };
+        rows.push(newRow);
+    };
     const CurrencyTypeProvider = props => (
         <DataTypeProvider
             formatterComponent={({ value, row, column }) => CurrencyFormatter({ value, row, column, onClicks })}
@@ -38,6 +43,7 @@ export const DataTablaCustomize = ({ rows, columns, tableColumnExtensions = null
             <Grid
                 rows={rows}
                 columns={columns}
+
             >
                 {children}
                 {/* data format */}
@@ -67,6 +73,7 @@ export const DataTablaCustomize = ({ rows, columns, tableColumnExtensions = null
                 {/* table */}
                 <Table columnExtensions={tableColumnExtensions == null ? [] : tableColumnExtensions} />
                 <TableHeaderRow showSortingControls />
+
             </Grid>
         </Paper>
     )

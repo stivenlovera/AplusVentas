@@ -1,11 +1,11 @@
 import { DataTypeProvider } from "@devexpress/dx-react-grid";
-import { Add } from "@mui/icons-material";
-import { Autocomplete, Button, TextField } from "@mui/material";
+import { Add, Delete, Rowing } from "@mui/icons-material";
+import { Autocomplete, Button, IconButton, TextField } from "@mui/material";
 import AutocompleteAsync from "components/AutocompleteAsync";
 import { DataTablaCustomize } from "components/data-table/data-table-cuztomize"
 import { useEffect, useRef, useState } from "react";
 import React from 'react';
-import { UseProducto } from "pages/productos/hooks/useProducto";
+import { UseProducto } from "pages/recetas/hooks/useProducto";
 
 /**
  * 
@@ -14,7 +14,7 @@ import { UseProducto } from "pages/productos/hooks/useProducto";
  * @param {() => Promise<Object>} props.getList 
  * @returns 
  */
-export const IngredientesList = ({ data, getList }) => {
+export const IngredienteList = ({ data, getList }) => {
     const [options, setOptions] = data;
     //son los nombres de las columnas
     const [columns] = useState([
@@ -22,6 +22,7 @@ export const IngredientesList = ({ data, getList }) => {
         { name: 'cantidad', title: 'Cantidad' },
         { name: 'unidad', title: 'Unidad' },
         { name: 'stock', title: 'stock' },
+        { name: 'acciones', title: 'acciones' },
     ]);
     const openRef = useRef(false);
     //son los datos
@@ -29,7 +30,17 @@ export const IngredientesList = ({ data, getList }) => {
         {
             ingrediente: 0,
             cantidad: 0,
-            unidad: 0
+            unidad: 'kg'
+        },
+        {
+            ingrediente: 0,
+            cantidad: 0,
+            unidad: 'kg'
+        },
+        {
+            ingrediente: 0,
+            cantidad: 0,
+            unidad: 'kg'
         }
     ])
     const load = async () => {
@@ -37,16 +48,19 @@ export const IngredientesList = ({ data, getList }) => {
         setOptions(lista.lista);
         openRef.current = true;
     }
+    const handleDeleteItem = (index) => {
+        const newRows = [...rows]; // Create a copy of the rows array
+        newRows.splice(index, 1); // Remove the item at the specified index
+        setRows(newRows); // Update the rows state with the new array
+    };
     useEffect(() => {
         load()
     }, [])
     const handleAddItem = () => {
-        rows.push({
-            ingrediente: 0,
-            cantidad: 0,
-            unidad: 0
-        });
-        setRows({ ...rows })
+        const newRows = [...rows]; // Create a copy of the rows array
+        newRows.push({ cantidad: 0, ingrediente: 0, unidad: 'kg' }); // Remove the item at the specified index
+        setRows(newRows); // Update the rows state with the new array
+
     };
     return (
         <>
@@ -56,7 +70,7 @@ export const IngredientesList = ({ data, getList }) => {
                 color='success'
                 onClick={handleAddItem}
             >
-                Añadir item
+                Añadir ingrediente
             </Button>
 
             <DataTablaCustomize
@@ -64,16 +78,20 @@ export const IngredientesList = ({ data, getList }) => {
                 columns={columns}
             >
                 <DataTypeProvider
-                    for={['usuarioId']}
+                    for={['cantidad']}
                     formatterComponent={({ value, row, column }) => {
+                        const rowIndex = rows.findIndex((r) => r === row);
                         return (<>
-
+                            <span>
+                                {rowIndex}
+                            </span>
                         </>)
                     }}
                 />
                 <DataTypeProvider
                     for={['ingrediente']}
                     formatterComponent={({ value, row, column }) => {
+                        const rowIndex = rows.findIndex((r) => r === row);
                         return (<>
                             <Autocomplete
                                 options={options}
@@ -85,17 +103,22 @@ export const IngredientesList = ({ data, getList }) => {
                                     />
                                 )}
                                 getOptionLabel={(option) => option.nombreProducto}
+                                value={rows[rowIndex]}
                             />
                         </>)
                     }}
                 />
                 <DataTypeProvider
-                    for={['unidad']}
+                    for={['acciones']}
                     formatterComponent={({ value, row, column }) => {
+                        const rowIndex = rows.findIndex((r) => r === row);
                         return (<>
-
+                            <IconButton onClick={() => { handleDeleteItem(rowIndex) }}>
+                                <Delete />
+                            </IconButton>
                         </>)
                     }}
+
                 />
             </DataTablaCustomize>
         </>

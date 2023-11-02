@@ -3,6 +3,7 @@ import { styled, TextField, TextFieldProps } from "@mui/material";
 import { H1, H6 } from "components/Typography";
 import { useFormikContext } from "formik";
 import React from "react";
+import { ExtendedTextFieldProps } from "interfaces/AppTextFieldInput2";
 const StyledTextField = styled(TextField)(({
   theme
 }) => ({
@@ -31,8 +32,10 @@ const StyledTextField = styled(TextField)(({
     color: "red",
   },
 }));
+
 /**
- * @param {TextFieldProps} props 
+ * @property {boolean} hideTitle - Whether to hide the title
+ * @param {ExtendedTextFieldProps} props - The props for the component
  * @returns 
  * @example
 *  <AppTextField2

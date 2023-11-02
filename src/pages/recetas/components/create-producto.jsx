@@ -14,23 +14,23 @@ import { useContext, useEffect, useState } from "react";
 import { readUploadedFileAsText } from "utils/convertoToBase64";
 import * as Yup from "yup"; // component props interface
 import { Request } from "utils/http";
-import { IngredientesList } from "./ingredientes/ingredientes-list";
-import { UseProducto } from "pages/productos/hooks/useProducto";
-import AppTextField2 from "components/input-fields/AppTextField2";
-import { AutocompleteId } from "components/AutoCompleteId";
+import { IngredienteList } from "./ingredientes/ingredientes-list";
+import { UseProducto } from "pages/recetas/hooks/useProducto";
+import AppTextField2 from "components/formikComponents/AppTextField2";
+import { AutocompleteId } from "components/formikComponents/AutoCompleteId";
 import React from 'react';
-import { AutocompleteObject } from "components/AutoCompleteObject";
+import { AutocompleteObject } from "components/formikComponents/AutoCompleteObject";
+import { InputTable } from "components/formikComponents/InputTable";
 const { List } = UseProducto();
 
 const listadoIngredientes = async () => {
     return await List();
-
 }
 // styled components
 const StyledAppModal = styled(AppModal)(({
     theme
 }) => ({
-    maxWidth: 700,
+    maxWidth: '90vw',
     minWidth: 300,
     outline: "none",
     padding: "1.5rem"
@@ -66,9 +66,10 @@ const CreateProductoModal = ({
     const downXl = useMediaQuery(theme => theme.breakpoints.down("xl"));
     const [selectProductoMaestro, setSelectProductoMaestro] = useState(null)
     const ingredientevalue = useState([])
-
+    const [ingredientes, setingredientes] = useState()
     const validationSchema = Yup.object().shape({
         productoId: Yup.number().nullable(),
+        prueba: Yup.array().nullable(),
         codigoProducto: Yup.string().min(3, "Es muy corto").required("Codigo es requerido!"),
         codigoBarra: Yup.string().min(3, "Es muy corto").required("Codigo barra es requerido!"),
         productoMaestro: Yup.object().shape({
@@ -79,12 +80,12 @@ const CreateProductoModal = ({
         productoMaestroNombre: Yup.string().nullable(),
         nombreProducto: Yup.string().min(3, "Es muy corto").required("Nombre es requerido!"),
         stockActual: Yup.string().nullable(),
-        precioCompra: Yup.number('debe ser un numero').required("Precio compra es requerido!"),
-        utilidadMin: Yup.number('debe ser un numero').required("Utilidad max es requerido!"),
-        precioVentaMin: Yup.number('debe ser un numero').required("Precio venta min es requerido!"),
-        utilidadMax: Yup.number('debe ser un numero').required("Utilidad min es requerido!"),
-        precioVentaMax: Yup.number('debe ser un numero').required("Precio venta max es requerido!"),
-        tipoProductoId: Yup.number('').required("tipo de producto es requerido!"),
+        precioCompra: Yup.number().required("Precio compra es requerido!"),
+        utilidadMin: Yup.number().required("Utilidad max es requerido!"),
+        precioVentaMin: Yup.number().required("Precio venta min es requerido!"),
+        utilidadMax: Yup.number().required("Utilidad min es requerido!"),
+        precioVentaMax: Yup.number().required("Precio venta max es requerido!"),
+        tipoProductoId: Yup.number().required("tipo de producto es requerido!"),
         categoria: Yup.object().shape({
             categoriaId: Yup.number(),
             nombre: Yup.string().min(3, "debe ser mayor a 3 caracteres"),
@@ -96,7 +97,8 @@ const CreateProductoModal = ({
             .of(Yup.object().shape({
                 atributoId: Yup.string(),
                 valor: Yup.string().min(3, "debe ser mayor a 3 caracteres"),
-            }))
+            })),
+
     });
     const formik = useFormik({
         initialValues: initialState,
@@ -175,6 +177,16 @@ const CreateProductoModal = ({
         }
         return categoria
     }
+    function fetchListadoIngredientes() {
+        listadoIngredientes().then((ingredientes) => {
+            // Use the ingredientes array here
+            setingredientes(ingredientes.lista)
+            console.log(ingredientes.lista)
+        }).catch((error) => {
+            // Handle any errors that occurred during the fetch
+            console.error(error);
+        });
+    }
 
     const ApiObtenerAtributo = async (categoriaId) => {
         const { data, message, status } = await Request({
@@ -199,6 +211,8 @@ const CreateProductoModal = ({
     }
     useEffect(() => {
         setValues({ ...initialState, productoMaestroNombre: initialState.productoMaestro.nombre })
+        fetchListadoIngredientes();
+
     }, [open])
 
     return <StyledAppModal open={open} handleClose={onClose}>
@@ -220,6 +234,7 @@ const CreateProductoModal = ({
                             <AppTextField2
                                 name="codigoProducto"
                                 placeholder="Codigo producto"
+
                             />
                         </Grid>
                         <Grid item sm={6} xs={12}>
@@ -252,22 +267,6 @@ const CreateProductoModal = ({
                             <AppTextField2
                                 name="nombreProducto"
                                 placeholder="Nombre producto"
-                            />
-                        </Grid>
-                        <Grid item sm={12} xs={12}>
-                            <H6 mb={1}>Seleccione un tipo</H6>
-                            <AutocompleteId
-                                name='tipoProductoId'
-                                options={tiposProducto}
-                                labelName='nombre'
-                                defaultValue={() => {
-                                    if (!editProduct) {
-                                        return tiposProducto[0]
-                                    }
-                                    else {
-                                        return tiposProducto.find(x => x.tipoProductoId === initialState.tipoProductoId)
-                                    }
-                                }}
                             />
                         </Grid>
                         <Grid item sm={4} xs={12}>
@@ -338,16 +337,24 @@ const CreateProductoModal = ({
                                 }
                             />
                         </Grid>
-                        {values.tipoProductoId === 1 ? (<Grid item sm={12} xs={12}>
-                            <IngredientesList
+                        {/* <Grid item sm={12} xs={12}>
+                            <IngredienteList
                                 data={ingredientevalue}
                                 getList={listadoIngredientes}
                             />
-                        </Grid>) : null
-                        }
+                        </Grid> */}
+                        <Grid item sm={12} xs={12}>
+                            <InputTable
+                                columns={[
+                                    { name: 'col1', title: 'coltitle1', mode: 'autocomplete', listName: 'productoid', list: ingredientes, label: 'ingrediente', labelName: 'nombreProducto', labelUndefined: 'no' },
+                                    { name: 'col2', title: 'coltitle2', mode: 'input' }]}
+                                name="prueba"
+                            />
+                        </Grid>
                         <Grid item sm={12} xs={12}>
                             <AutocompleteObject
                                 label='seleccione categoria'
+                                labelUndefined='elija la categoria'
                                 labelName='nombre'
                                 name="categoria"
                                 options={categorias}

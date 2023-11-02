@@ -1,4 +1,4 @@
-import { UseProducto } from "pages/productos/hooks/useProducto";
+import { UseProducto } from "./useProducto";
 import { useState } from "react";
 
 export const useAutocompleteProducto = () => {

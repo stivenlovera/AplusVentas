@@ -14,6 +14,8 @@ import { searchByProductos } from "./utils/utils-productos";
 import { Context } from "contexts/ContextDataTable";
 import { Request } from "utils/http";
 import { initialStateProducto } from "./utils/utils-productos";
+import { TipoProducto } from "enums/TipoProducto";
+import { UseProducto } from "pages/recetas/hooks/useProducto";
 export const HeadingWrapper = styled(FlexBox)(({
     theme
 }) => ({
@@ -30,7 +32,8 @@ export const HeadingWrapper = styled(FlexBox)(({
     }
 }));
 
-const ProductosList = () => {
+const RecetasList = () => {
+    const { List } = UseProducto();
     const {
         t
     } = useTranslation();
@@ -60,16 +63,10 @@ const ProductosList = () => {
     }, [searchValue, actualizarTable, listaProductos]);
 
     const onListProducto = async () => {
-        const { data, message, status } = await Request({
-            endPoint: `${process.env.REACT_APP_API}api/Producto`,
-            initialValues: [],
-            method: 'get',
-            showError: true,
-            showSuccess: false
-        });
+        const { lista, status } = await List();
         if (!!status) {
-            setListaProductos(data);
-            setFilteredItem(data);
+            setListaProductos(lista);
+            setFilteredItem(lista);
         }
     }
     const onCreateProducto = async () => {
@@ -95,7 +92,7 @@ const ProductosList = () => {
                                 color: "primary.main"
                             }} />
                         </IconWrapper>
-                        <H5>Productos</H5>
+                        <H5>Recetas</H5>
                     </FlexBox>
                     <SearchInput bordered={'true'} placeholder="Buscar productos" onChange={e => setSearchValue(e.target.value)} />
                     <Button variant="contained" endIcon={<Add />} onClick={onCreateProducto}>
@@ -108,7 +105,7 @@ const ProductosList = () => {
                     onClose={() => setOpenModal(false)}
                     data={{
                         ...create,
-                        initialState: { ...initialStateProducto, codigoProducto: create.codigoProducto }
+                        initialState: { ...initialStateProducto, codigoProducto: create.codigoProducto, tipoProductoId: TipoProducto.RECETA, prueba: [{ col1: 'hola', col2: 'hola' }] }
                     }} />
 
             </Box>
@@ -116,4 +113,4 @@ const ProductosList = () => {
     );
 };
 
-export default ProductosList;
+export default RecetasList;

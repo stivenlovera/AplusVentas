@@ -36,8 +36,13 @@ export const navigations = (user) => {
       icon: duotone.DataTable,
     },
     {
-      name: 'Productos',
-      path: '/dashboard/productos-list',
+      name: 'Ingredientes',
+      path: '/dashboard/ingredientes-list',
+      icon: duotone.Invoice,
+    },
+    {
+      name: 'Recetas',
+      path: '/dashboard/recetas-list',
       icon: duotone.Invoice,
     },
     {

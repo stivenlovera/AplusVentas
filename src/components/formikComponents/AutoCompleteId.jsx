@@ -5,8 +5,12 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { values } from 'lodash';
 import { useFormikContext } from 'formik';
 import { useState } from 'react';
-import { H6 } from './Typography';
-
+import { H6 } from '../Typography';
+/**
+ * 
+ * @param {*} param0 
+ * @returns 
+ */
 export const AutocompleteId = ({
     label,
     options,

@@ -8,12 +8,13 @@ import { Navigate } from "react-router-dom";
 import { ProtectedRoute } from "components/ProtectedRoute";
 import { useTabContext } from "@mui/lab";
 import { getAllRutas } from "utils/utils";
+import IngredientesList from "pages/ingredientes/ingredientes";
 const Loadable = Component => props => {
   return <Suspense fallback={<LoadingScreen />}>
     <Component {...props} />
   </Suspense>;
 }; // dashboards
-const ProductosList = Loadable(lazy(() => import("./pages/productos/productos-list/productos-list")));
+const RecetasList = Loadable(lazy(() => import("./pages/recetas/recetas-list")));
 const CategoriaList = Loadable(lazy(() => import("./pages/categorias/categorias-list/categoria-list")));
 const UsuarioList = Loadable(lazy(() => import("./pages/usuarios/usuario-list/usuario-list")));
 const ProveedorList = Loadable(lazy(() => import("./pages/proveedores/proveedores-list/proveedores-list")));
@@ -118,8 +119,12 @@ const dashboardRoutes = (user) => {
       element: <Almacenes />
     },
     {
-      path: "productos-list",
-      element: <ProductosList />
+      path: "ingredientes-list",
+      element: <IngredientesList />
+    },
+    {
+      path: "recetas-list",
+      element: <RecetasList />
     },
     {
       path: "categoria-list",
